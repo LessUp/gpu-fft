@@ -1,0 +1,51 @@
+# Source files
+src/
+
+# Tests
+tests/
+*.test.ts
+vitest.config.ts
+
+# Development configuration
+.eslintrc.json
+.prettierrc.json
+.prettierignore
+.lintstagedrc.json
+.husky/
+.vscode/
+.kiro/
+
+# Documentation source
+typedoc.json
+docs/
+
+# Examples and demos
+examples/
+demo/
+benchmarks/
+
+# GitHub
+.github/
+
+# Build artifacts
+*.tsbuildinfo
+
+# Development files
+*.log
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# IDE
+*.swp
+*.swo
+.idea/
+
+# Misc
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+SECURITY.md
+PROJECT_QUALITY_ASSESSMENT.md
