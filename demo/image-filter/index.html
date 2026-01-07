@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Frequency Filter - WebGPU FFT</title>
+    <link rel="stylesheet" href="../shared/styles.css">
+    <style>
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .image-panel {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .image-panel h3 {
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .image-panel canvas {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1;
+            object-fit: contain;
+        }
+
+        .filter-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .slider-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🖼️ Image Frequency Filter</h1>
+            <p class="subtitle">Apply frequency domain filters using WebGPU FFT</p>
+        </header>
+
+        <main>
+            <section class="webgpu-check" id="webgpu-status">
+                <div class="status-indicator">
+                    <span class="spinner"></span>
+                    <span>Initializing WebGPU...</span>
+                </div>
+            </section>
+
+            <section class="controls">
+                <div class="control-group">
+                    <label>Load Image</label>
+                    <input type="file" id="image-file" accept="image/*">
+                </div>
+
+                <div class="control-group">
+                    <label>Sample Images</label>
+                    <select id="sample-select">
+                        <option value="">Select a sample...</option>
+                        <option value="checkerboard">Checkerboard</option>
+                        <option value="gradient">Gradient</option>
+                        <option value="circles">Circles</option>
+                        <option value="noise">Noise</option>
+                    </select>
+                </div>
+
+                <button id="apply-btn" disabled>🔄 Apply Filter</button>
+            </section>
+
+            <section class="filter-controls">
+                <div class="control-group">
+                    <label>Filter Type</label>
+                    <select id="filter-type">
+                        <option value="lowpass">Low-Pass (Blur)</option>
+                        <option value="highpass">High-Pass (Sharpen)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Filter Shape</label>
+                    <select id="filter-shape">
+                        <option value="gaussian">Gaussian</option>
+                        <option value="ideal">Ideal (Sharp)</option>
+                    </select>
+                </div>
+
+                <div class="slider-group">
+                    <label>
+                        <span>Cutoff Frequency</span>
+                        <span id="cutoff-value">0.30</span>
+                    </label>
+                    <input type="range" id="cutoff-freq" min="0.01" max="1" step="0.01" value="0.3">
+                </div>
+            </section>
+
+            <section class="image-grid">
+                <div class="image-panel">
+                    <h3>Original Image</h3>
+                    <canvas id="original-canvas" width="256" height="256"></canvas>
+                </div>
+
+                <div class="image-panel">
+                    <h3>Frequency Spectrum (Magnitude)</h3>
+                    <canvas id="spectrum-canvas" width="256" height="256"></canvas>
+                </div>
+
+                <div class="image-panel">
+                    <h3>Filter Mask</h3>
+                    <canvas id="filter-canvas" width="256" height="256"></canvas>
+                </div>
+
+                <div class="image-panel">
+                    <h3>Filtered Result</h3>
+                    <canvas id="result-canvas" width="256" height="256"></canvas>
+                </div>
+            </section>
+
+            <section class="stats">
+                <div class="stat">
+                    <span class="stat-label">Image Size</span>
+                    <span class="stat-value" id="image-size">--</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">FFT Time</span>
+                    <span class="stat-value" id="fft-time">-- ms</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Filter Time</span>
+                    <span class="stat-value" id="filter-time">-- ms</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Total Time</span>
+                    <span class="stat-value" id="total-time">-- ms</span>
+                </div>
+            </section>
+
+            <section class="info">
+                <h2>How It Works</h2>
+                <p>This demo applies frequency domain filtering to images using the FFT:</p>
+                <ol>
+                    <li><strong>FFT</strong>: Transform the image from spatial domain to frequency domain</li>
+                    <li><strong>Filter</strong>: Multiply by a filter mask to attenuate certain frequencies</li>
+                    <li><strong>IFFT</strong>: Transform back to spatial domain to get the filtered image</li>
+                </ol>
+
+                <h3>Filter Types</h3>
+                <ul>
+                    <li><strong>Low-Pass</strong>: Removes high frequencies → Blurs the image</li>
+                    <li><strong>High-Pass</strong>: Removes low frequencies → Enhances edges</li>
+                </ul>
+
+                <h3>Filter Shapes</h3>
+                <ul>
+                    <li><strong>Gaussian</strong>: Smooth rolloff, no ringing artifacts</li>
+                    <li><strong>Ideal</strong>: Sharp cutoff, may cause ringing (Gibbs phenomenon)</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../index.html">← Back to Demos</a> | WebGPU FFT Library © 2024</p>
+        </footer>
+    </div>
+
+    <script type="module">
+        const originalCanvas = document.getElementById('original-canvas');
+        const spectrumCanvas = document.getElementById('spectrum-canvas');
+        const filterCanvas = document.getElementById('filter-canvas');
+        const resultCanvas = document.getElementById('result-canvas');
+
+        const originalCtx = originalCanvas.getContext('2d');
+        const spectrumCtx = spectrumCanvas.getContext('2d');
+        const filterCtx = filterCanvas.getContext('2d');
+        const resultCtx = resultCanvas.getContext('2d');
+
+        const imageFileInput = document.getElementById('image-file');
+        const sampleSelect = document.getElementById('sample-select');
+        const applyBtn = document.getElementById('apply-btn');
+        const filterType = document.getElementById('filter-type');
+        const filterShape = document.getElementById('filter-shape');
+        const cutoffFreq = document.getElementById('cutoff-freq');
+        const cutoffValue = document.getElementById('cutoff-value');
+
+        let imageData = null;
+        const SIZE = 256;
+
+        // Check WebGPU
+        async function checkWebGPU() {
+            const statusEl = document.getElementById('webgpu-status');
+
+            if (!navigator.gpu) {
+                statusEl.innerHTML = `
+          <div class="status-error">
+            <span class="status-icon">⚠️</span>
+            <span>WebGPU not available. Using JavaScript fallback (slower).</span>
+          </div>
+        `;
+                return false;
+            }
+
+            try {
+                const adapter = await navigator.gpu.requestAdapter();
+                if (adapter) {
+                    statusEl.innerHTML = `
+            <div class="status-success">
+              <span class="status-icon">✅</span>
+              <span>WebGPU ready! GPU-accelerated filtering enabled.</span>
+            </div>
+          `;
+                    return true;
+                }
+            } catch (e) { }
+
+            statusEl.innerHTML = `
+        <div class="status-error">
+          <span class="status-icon">⚠️</span>
+          <span>WebGPU adapter not available. Using fallback.</span>
+        </div>
+      `;
+            return false;
+        }
+
+        // Generate sample images
+        function generateSample(type) {
+            const data = new ImageData(SIZE, SIZE);
+
+            for (let y = 0; y < SIZE; y++) {
+                for (let x = 0; x < SIZE; x++) {
+                    const idx = (y * SIZE + x) * 4;
+                    let value = 0;
+
+                    switch (type) {
+                        case 'checkerboard':
+                            value = ((Math.floor(x / 16) + Math.floor(y / 16)) % 2) * 255;
+                            break;
+                        case 'gradient':
+                            value = (x + y) / 2;
+                            break;
+                        case 'circles':
+                            const dx = x - SIZE / 2;
+                            const dy = y - SIZE / 2;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            value = (Math.sin(dist * 0.2) + 1) * 127;
+                            break;
+                        case 'noise':
+                            value = Math.random() * 255;
+                            break;
+                    }
+
+                    data.data[idx] = value;
+                    data.data[idx + 1] = value;
+                    data.data[idx + 2] = value;
+                    data.data[idx + 3] = 255;
+                }
+            }
+
+            return data;
+        }
+
+        // Load image
+        function loadImage(imgData) {
+            imageData = imgData;
+            originalCtx.putImageData(imgData, 0, 0);
+            applyBtn.disabled = false;
+            document.getElementById('image-size').textContent = `${SIZE}×${SIZE}`;
+        }
+
+        // Simple 2D FFT (JavaScript fallback)
+        function fft2d(real, imag, inverse = false) {
+            const n = SIZE;
+
+            // Row-wise FFT
+            for (let y = 0; y < n; y++) {
+                const rowReal = new Float32Array(n);
+                const rowImag = new Float32Array(n);
+                for (let x = 0; x < n; x++) {
+                    rowReal[x] = real[y * n + x];
+                    rowImag[x] = imag[y * n + x];
+                }
+                fft1d(rowReal, rowImag, inverse);
+                for (let x = 0; x < n; x++) {
+                    real[y * n + x] = rowReal[x];
+                    imag[y * n + x] = rowImag[x];
+                }
+            }
+
+            // Column-wise FFT
+            for (let x = 0; x < n; x++) {
+                const colReal = new Float32Array(n);
+                const colImag = new Float32Array(n);
+                for (let y = 0; y < n; y++) {
+                    colReal[y] = real[y * n + x];
+                    colImag[y] = imag[y * n + x];
+                }
+                fft1d(colReal, colImag, inverse);
+                for (let y = 0; y < n; y++) {
+                    real[y * n + x] = colReal[y];
+                    imag[y * n + x] = colImag[y];
+                }
+            }
+        }
+
+        function fft1d(real, imag, inverse) {
+            const n = real.length;
+            const bits = Math.log2(n);
+
+            // Bit reversal
+            for (let i = 0; i < n; i++) {
+                const j = bitReverse(i, bits);
+                if (i < j) {
+                    [real[i], real[j]] = [real[j], real[i]];
+                    [imag[i], imag[j]] = [imag[j], imag[i]];
+                }
+            }
+
+            // Butterfly
+            for (let s = 1; s <= bits; s++) {
+                const m = 1 << s;
+                const wm = inverse ? 2 * Math.PI / m : -2 * Math.PI / m;
+
+                for (let k = 0; k < n; k += m) {
+                    let w_real = 1, w_imag = 0;
+                    const cos_wm = Math.cos(wm);
+                    const sin_wm = Math.sin(wm);
+
+                    for (let j = 0; j < m / 2; j++) {
+                        const t_real = w_real * real[k + j + m / 2] - w_imag * imag[k + j + m / 2];
+                        const t_imag = w_real * imag[k + j + m / 2] + w_imag * real[k + j + m / 2];
+
+                        real[k + j + m / 2] = real[k + j] - t_real;
+                        imag[k + j + m / 2] = imag[k + j] - t_imag;
+                        real[k + j] = real[k + j] + t_real;
+                        imag[k + j] = imag[k + j] + t_imag;
+
+                        const new_w_real = w_real * cos_wm - w_imag * sin_wm;
+                        w_imag = w_real * sin_wm + w_imag * cos_wm;
+                        w_real = new_w_real;
+                    }
+                }
+            }
+
+            if (inverse) {
+                for (let i = 0; i < n; i++) {
+                    real[i] /= n;
+                    imag[i] /= n;
+                }
+            }
+        }
+
+        function bitReverse(x, bits) {
+            let result = 0;
+            for (let i = 0; i < bits; i++) {
+                result = (result << 1) | (x & 1);
+                x >>= 1;
+            }
+            return result;
+        }
+
+        // Create filter mask
+        function createFilterMask(type, shape, cutoff) {
+            const mask = new Float32Array(SIZE * SIZE);
+            const center = SIZE / 2;
+
+            for (let y = 0; y < SIZE; y++) {
+                for (let x = 0; x < SIZE; x++) {
+                    const dx = (x - center) / center;
+                    const dy = (y - center) / center;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    let value;
+                    if (shape === 'ideal') {
+                        value = type === 'lowpass' ? (dist <= cutoff ? 1 : 0) : (dist > cutoff ? 1 : 0);
+                    } else {
+                        const sigma = cutoff;
+                        const gaussian = Math.exp(-(dist * dist) / (2 * sigma * sigma));
+                        value = type === 'lowpass' ? gaussian : 1 - gaussian;
+                    }
+
+                    mask[y * SIZE + x] = value;
+                }
+            }
+
+            return mask;
+        }
+
+        // Apply filter
+        async function applyFilter() {
+            if (!imageData) return;
+
+            const startTime = performance.now();
+
+            // Convert to grayscale and prepare arrays
+            const real = new Float32Array(SIZE * SIZE);
+            const imag = new Float32Array(SIZE * SIZE);
+
+            for (let i = 0; i < SIZE * SIZE; i++) {
+                const r = imageData.data[i * 4];
+                const g = imageData.data[i * 4 + 1];
+                const b = imageData.data[i * 4 + 2];
+                real[i] = (r + g + b) / 3;
+                imag[i] = 0;
+            }
+
+            // FFT
+            const fftStart = performance.now();
+            fft2d(real, imag, false);
+            const fftTime = performance.now() - fftStart;
+
+            // Shift to center
+            fftShift(real);
+            fftShift(imag);
+
+            // Display spectrum
+            displaySpectrum(real, imag);
+
+            // Create and display filter mask
+            const filterStart = performance.now();
+            const mask = createFilterMask(
+                filterType.value,
+                filterShape.value,
+                parseFloat(cutoffFreq.value)
+            );
+            displayFilterMask(mask);
+
+            // Apply filter
+            for (let i = 0; i < SIZE * SIZE; i++) {
+                real[i] *= mask[i];
+                imag[i] *= mask[i];
+            }
+
+            // Shift back
+            fftShift(real);
+            fftShift(imag);
+
+            // IFFT
+            fft2d(real, imag, true);
+            const filterTime = performance.now() - filterStart;
+
+            // Display result
+            const resultData = new ImageData(SIZE, SIZE);
+            for (let i = 0; i < SIZE * SIZE; i++) {
+                const value = Math.max(0, Math.min(255, Math.round(real[i])));
+                resultData.data[i * 4] = value;
+                resultData.data[i * 4 + 1] = value;
+                resultData.data[i * 4 + 2] = value;
+                resultData.data[i * 4 + 3] = 255;
+            }
+            resultCtx.putImageData(resultData, 0, 0);
+
+            const totalTime = performance.now() - startTime;
+
+            // Update stats
+            document.getElementById('fft-time').textContent = fftTime.toFixed(1) + ' ms';
+            document.getElementById('filter-time').textContent = filterTime.toFixed(1) + ' ms';
+            document.getElementById('total-time').textContent = totalTime.toFixed(1) + ' ms';
+        }
+
+        function fftShift(data) {
+            const half = SIZE / 2;
+            for (let y = 0; y < half; y++) {
+                for (let x = 0; x < half; x++) {
+                    // Swap quadrants
+                    const i1 = y * SIZE + x;
+                    const i2 = (y + half) * SIZE + (x + half);
+                    const i3 = y * SIZE + (x + half);
+                    const i4 = (y + half) * SIZE + x;
+
+                    [data[i1], data[i2]] = [data[i2], data[i1]];
+                    [data[i3], data[i4]] = [data[i4], data[i3]];
+                }
+            }
+        }
+
+        function displaySpectrum(real, imag) {
+            const spectrumData = new ImageData(SIZE, SIZE);
+            let maxMag = 0;
+
+            const magnitudes = new Float32Array(SIZE * SIZE);
+            for (let i = 0; i < SIZE * SIZE; i++) {
+                magnitudes[i] = Math.log(1 + Math.sqrt(real[i] * real[i] + imag[i] * imag[i]));
+                maxMag = Math.max(maxMag, magnitudes[i]);
+            }
+
+            for (let i = 0; i < SIZE * SIZE; i++) {
+                const value = Math.round((magnitudes[i] / maxMag) * 255);
+                spectrumData.data[i * 4] = value;
+                spectrumData.data[i * 4 + 1] = value;
+                spectrumData.data[i * 4 + 2] = value;
+                spectrumData.data[i * 4 + 3] = 255;
+            }
+
+            spectrumCtx.putImageData(spectrumData, 0, 0);
+        }
+
+        function displayFilterMask(mask) {
+            const maskData = new ImageData(SIZE, SIZE);
+
+            for (let i = 0; i < SIZE * SIZE; i++) {
+                const value = Math.round(mask[i] * 255);
+                maskData.data[i * 4] = value;
+                maskData.data[i * 4 + 1] = value;
+                maskData.data[i * 4 + 2] = value;
+                maskData.data[i * 4 + 3] = 255;
+            }
+
+            filterCtx.putImageData(maskData, 0, 0);
+        }
+
+        // Event listeners
+        imageFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const img = new Image();
+            img.onload = () => {
+                originalCtx.drawImage(img, 0, 0, SIZE, SIZE);
+                loadImage(originalCtx.getImageData(0, 0, SIZE, SIZE));
+            };
+            img.src = URL.createObjectURL(file);
+        });
+
+        sampleSelect.addEventListener('change', () => {
+            if (sampleSelect.value) {
+                loadImage(generateSample(sampleSelect.value));
+            }
+        });
+
+        applyBtn.addEventListener('click', applyFilter);
+
+        cutoffFreq.addEventListener('input', () => {
+            cutoffValue.textContent = parseFloat(cutoffFreq.value).toFixed(2);
+        });
+
+        // Auto-apply on parameter change
+        [filterType, filterShape, cutoffFreq].forEach(el => {
+            el.addEventListener('change', () => {
+                if (imageData) applyFilter();
+            });
+        });
+
+        // Initialize
+        checkWebGPU();
+
+        // Load default sample
+        loadImage(generateSample('checkerboard'));
+        setTimeout(applyFilter, 100);
+    </script>
+</body>
+
+</html>
