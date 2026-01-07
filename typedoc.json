@@ -1,0 +1,31 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": [
+        "src/index.ts"
+    ],
+    "out": "docs/api",
+    "name": "WebGPU FFT Library",
+    "readme": "README.md",
+    "includeVersion": true,
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "excludeInternal": true,
+    "navigationLinks": {
+        "GitHub": "https://github.com/user/webgpu-fft",
+        "npm": "https://www.npmjs.com/package/webgpu-fft"
+    },
+    "plugin": [],
+    "theme": "default",
+    "hideGenerator": true,
+    "searchInComments": true,
+    "categorizeByGroup": true,
+    "sort": [
+        "source-order"
+    ],
+    "visibilityFilters": {
+        "protected": false,
+        "private": false,
+        "inherited": true,
+        "external": false
+    }
+}
