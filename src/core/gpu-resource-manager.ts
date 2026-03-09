@@ -68,7 +68,7 @@ export class GPUResourceManager {
   }
 
   uploadData(buffer: GPUBuffer, data: Float32Array): void {
-    this.device.queue.writeBuffer(buffer, 0, data);
+    this.device.queue.writeBuffer(buffer, 0, data as unknown as ArrayBuffer);
   }
 
   async downloadData(buffer: GPUBuffer, size: number): Promise<Float32Array> {

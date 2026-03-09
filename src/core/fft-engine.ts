@@ -153,14 +153,14 @@ export class FFTEngine {
     const workgroups = Math.ceil(n / this.config.workgroupSize);
 
     // Upload input data
-    device.queue.writeBuffer(cache.inputBuffer, 0, input);
+    device.queue.writeBuffer(cache.inputBuffer, 0, input as unknown as ArrayBuffer);
 
     // --- Batch all GPU work into a single command encoder ---
     const commandEncoder = device.createCommandEncoder();
 
     // Step 1: Bit-reversal permutation
     const bitReversalParams = new Uint32Array([n, numStages]);
-    device.queue.writeBuffer(cache.bitReversalParamsBuffer, 0, bitReversalParams);
+    device.queue.writeBuffer(cache.bitReversalParamsBuffer, 0, bitReversalParams as unknown as ArrayBuffer);
 
     const bitReversalBindGroup = device.createBindGroup({
       layout: this.bitReversalPipeline.getBindGroupLayout(0),
@@ -194,7 +194,7 @@ export class FFTEngine {
         inverse ? 1 : 0,
         this.config.enableBankConflictOptimization ? 1 : 0,
       ]);
-      device.queue.writeBuffer(stageParamBuffer, 0, butterflyParams);
+      device.queue.writeBuffer(stageParamBuffer, 0, butterflyParams as unknown as ArrayBuffer);
       stageParamBuffers.push(stageParamBuffer);
 
       const bindGroup = device.createBindGroup({
@@ -224,7 +224,7 @@ export class FFTEngine {
       const scaleParams = new ArrayBuffer(8);
       new Uint32Array(scaleParams, 0, 1)[0] = n;
       new Float32Array(scaleParams, 4, 1)[0] = 1 / n;
-      device.queue.writeBuffer(cache.scaleParamsBuffer, 0, new Uint8Array(scaleParams));
+      device.queue.writeBuffer(cache.scaleParamsBuffer, 0, new Uint8Array(scaleParams) as unknown as ArrayBuffer);
 
       const scaleBindGroup = device.createBindGroup({
         layout: this.scalePipeline.getBindGroupLayout(0),

@@ -55,21 +55,38 @@ export class ImageFilter {
   }
 
   private idealFilter(dist: number): number {
+    const cutoff = this.config.cutoffFrequency;
     if (this.config.type === 'lowpass') {
-      return dist <= this.config.cutoffFrequency ? 1 : 0;
+      return dist <= cutoff ? 1 : 0;
+    } else if (this.config.type === 'highpass') {
+      return dist <= cutoff ? 0 : 1;
     } else {
-      return dist <= this.config.cutoffFrequency ? 0 : 1;
+      // bandpass
+      const bw = this.config.bandwidth ?? 0.1;
+      const low = cutoff - bw / 2;
+      const high = cutoff + bw / 2;
+      return dist >= low && dist <= high ? 1 : 0;
     }
   }
 
   private gaussianFilter(dist: number): number {
-    const sigma = this.config.cutoffFrequency / 2;
-    const gaussian = Math.exp(-(dist * dist) / (2 * sigma * sigma));
-    
+    const cutoff = this.config.cutoffFrequency;
+    const sigma = cutoff / 2;
+
     if (this.config.type === 'lowpass') {
-      return gaussian;
+      return Math.exp(-(dist * dist) / (2 * sigma * sigma));
+    } else if (this.config.type === 'highpass') {
+      return 1 - Math.exp(-(dist * dist) / (2 * sigma * sigma));
     } else {
-      return 1 - gaussian;
+      // bandpass: product of lowpass at upper edge and highpass at lower edge
+      const bw = this.config.bandwidth ?? 0.1;
+      const low = cutoff - bw / 2;
+      const high = cutoff + bw / 2;
+      const sigmaLow = low / 2 || 0.01;
+      const sigmaHigh = high / 2 || 0.01;
+      const hp = 1 - Math.exp(-(dist * dist) / (2 * sigmaLow * sigmaLow));
+      const lp = Math.exp(-(dist * dist) / (2 * sigmaHigh * sigmaHigh));
+      return hp * lp;
     }
   }
 

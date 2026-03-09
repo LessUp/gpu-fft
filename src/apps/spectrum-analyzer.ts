@@ -2,12 +2,20 @@
 import type { SpectrumAnalyzerConfig } from '../types';
 import { cpuFFT } from '../utils/cpu-fft';
 import { hannWindow, applyWindowComplex } from '../utils/window-functions';
+import { isPowerOf2 } from '../utils/bit-reversal';
+import { FFTError, FFTErrorCode } from '../core/errors';
 
 export class SpectrumAnalyzer {
   private config: SpectrumAnalyzerConfig;
   private window: Float32Array;
 
   constructor(config: SpectrumAnalyzerConfig) {
+    if (!isPowerOf2(config.fftSize) || config.fftSize < 2) {
+      throw new FFTError(
+        `fftSize must be a power of 2 and at least 2, got ${config.fftSize}`,
+        FFTErrorCode.INVALID_INPUT_SIZE
+      );
+    }
     this.config = config;
     this.window = hannWindow(config.fftSize);
   }
@@ -17,7 +25,10 @@ export class SpectrumAnalyzer {
     
     // Validate input size
     if (audioData.length !== fftSize) {
-      throw new Error(`Audio data length ${audioData.length} does not match FFT size ${fftSize}`);
+      throw new FFTError(
+        `Audio data length ${audioData.length} does not match FFT size ${fftSize}`,
+        FFTErrorCode.DIMENSION_MISMATCH
+      );
     }
     
     // Convert real audio data to complex format (interleaved)
