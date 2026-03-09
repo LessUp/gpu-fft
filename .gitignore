@@ -86,3 +86,9 @@ temp/
 # WebGPU specific
 *.spv
 *.spirv
+
+# Generated documentation
+docs/api/
+
+# Assembled site output
+_site/

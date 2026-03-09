@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGPU FFT Library — 文档站</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --accent-green: #22c55e;
+            --accent-blue: #3b82f6;
+            --accent-purple: #a78bfa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 0 48px;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-purple));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        /* Cards Grid */
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 48px;
+        }
+
+        .card {
+            display: block;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary-light);
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.15);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .card-tag {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .tag-api {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-blue);
+        }
+
+        .tag-demo {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--accent-green);
+        }
+
+        .tag-code {
+            background: rgba(167, 139, 250, 0.15);
+            color: var(--accent-purple);
+        }
+
+        /* Features */
+        .features {
+            margin-bottom: 48px;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 10px 16px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+        }
+
+        /* Quick Start */
+        .quickstart {
+            margin-bottom: 48px;
+        }
+
+        pre {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+            color: #e6edf3;
+        }
+
+        .kw { color: #ff7b72; }
+        .fn { color: #d2a8ff; }
+        .str { color: #a5d6ff; }
+        .cmt { color: #8b949e; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+
+        footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <h1>WebGPU FFT Library</h1>
+            <p>高性能 GPU 加速快速傅里叶变换库，基于 WebGPU 计算着色器，支持 1D/2D FFT、频域滤波与实时频谱分析。</p>
+            <div class="badges">
+                <span class="badge">TypeScript</span>
+                <span class="badge">WebGPU</span>
+                <span class="badge">MIT License</span>
+                <span class="badge">CPU Fallback</span>
+            </div>
+        </section>
+
+        <!-- Navigation Cards -->
+        <h2 class="section-title">文档导航</h2>
+        <div class="card-grid">
+            <a class="card" href="api/index.html">
+                <div class="card-icon">📖</div>
+                <h3>API 参考文档</h3>
+                <p>TypeDoc 生成的完整 API 文档，包含所有导出函数、类型和接口说明。</p>
+                <span class="card-tag tag-api">API Reference</span>
+            </a>
+            <a class="card" href="demo/index.html">
+                <div class="card-icon">🎮</div>
+                <h3>在线 Demo</h3>
+                <p>交互式演示：实时音频频谱分析器和图像频域滤波器，直接在浏览器中体验。</p>
+                <span class="card-tag tag-demo">Interactive</span>
+            </a>
+            <a class="card" href="https://github.com/user/webgpu-fft" target="_blank">
+                <div class="card-icon">💻</div>
+                <h3>GitHub 仓库</h3>
+                <p>查看源码、提交 Issue 或 Pull Request，获取最新开发进展。</p>
+                <span class="card-tag tag-code">Source Code</span>
+            </a>
+            <a class="card" href="https://www.npmjs.com/package/webgpu-fft" target="_blank">
+                <div class="card-icon">📦</div>
+                <h3>npm 包</h3>
+                <p>通过 npm install webgpu-fft 安装，支持 ESM 和 CommonJS 两种导入方式。</p>
+                <span class="card-tag tag-code">Package</span>
+            </a>
+        </div>
+
+        <!-- Features -->
+        <section class="features">
+            <h2 class="section-title">核心特性</h2>
+            <ul class="feature-list">
+                <li>✅ 1D FFT/IFFT — 支持 2 到 65,536 个元素</li>
+                <li>✅ 2D FFT/IFFT — 最大 2048×2048</li>
+                <li>✅ Bank Conflict 优化 — 消除 Shared Memory 访问冲突</li>
+                <li>✅ 频域滤波 — 低通/高通/带通（Ideal + Gaussian）</li>
+                <li>✅ 实时频谱分析 — 支持麦克风/音频文件输入</li>
+                <li>✅ 窗函数 — Hann、Hamming、Blackman、Flat-top</li>
+                <li>✅ CPU 回退 — 无需 GPU 也可使用完整 FFT</li>
+                <li>✅ 属性测试 — fast-check 全面正确性验证</li>
+            </ul>
+        </section>
+
+        <!-- Quick Start -->
+        <section class="quickstart">
+            <h2 class="section-title">快速开始</h2>
+            <pre><code><span class="cmt">// 安装</span>
+npm install webgpu-fft
+
+<span class="cmt">// GPU 路径</span>
+<span class="kw">import</span> { <span class="fn">createFFTEngine</span>, <span class="fn">isWebGPUAvailable</span> } <span class="kw">from</span> <span class="str">'webgpu-fft'</span>;
+
+<span class="kw">if</span> (<span class="kw">await</span> <span class="fn">isWebGPUAvailable</span>()) {
+  <span class="kw">const</span> engine = <span class="kw">await</span> <span class="fn">createFFTEngine</span>();
+  <span class="kw">const</span> result = <span class="kw">await</span> engine.<span class="fn">fft</span>(inputData);
+  engine.<span class="fn">dispose</span>();
+}
+
+<span class="cmt">// CPU 回退路径</span>
+<span class="kw">import</span> { <span class="fn">cpuFFT</span>, <span class="fn">cpuIFFT</span> } <span class="kw">from</span> <span class="str">'webgpu-fft'</span>;
+<span class="kw">const</span> spectrum = <span class="fn">cpuFFT</span>(signal);</code></pre>
+        </section>
+
+        <footer>
+            <p>WebGPU FFT Library &copy; 2024 &mdash; <a href="https://opensource.org/licenses/MIT">MIT License</a></p>
+        </footer>
+    </div>
+</body>
+
+</html>

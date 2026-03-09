@@ -3,6 +3,12 @@ name: Deploy Documentation
 on:
   push:
     branches: [main]
+    paths:
+      - 'docs/**'
+      - 'demo/**'
+      - 'src/**'
+      - 'typedoc.json'
+      - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
 
 permissions:
@@ -11,12 +17,12 @@ permissions:
   id-token: write
 
 concurrency:
-  group: 'pages'
-  cancel-in-progress: true
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
-    name: Build Documentation
+    name: Build Documentation Site
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -34,13 +40,23 @@ jobs:
       - name: Build API documentation
         run: npm run docs:build
 
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          # Landing page
+          cp docs/index.html _site/index.html
+          # API docs (TypeDoc output)
+          cp -r docs/api _site/api
+          # Interactive demos
+          cp -r demo _site/demo
+
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './docs/api'
+          path: './_site'
 
   deploy:
     name: Deploy to GitHub Pages

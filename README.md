@@ -314,7 +314,17 @@ tests/                 # 测试文件
 3. **DFT 对比** - 小规模输入与朴素 DFT 实现对比
 4. **已知值测试** - 验证特殊输入（常数、脉冲、正弦波）的输出
 
-## 📚 参考资料
+## � 在线文档
+
+项目文档已通过 GitHub Pages 发布：
+
+> **https://\<your-account\>.github.io/gpu-fft/**
+
+包含：
+- [API 参考文档](https://user.github.io/gpu-fft/api) — TypeDoc 生成的完整 API 文档
+- [在线 Demo](https://user.github.io/gpu-fft/demo) — 音频频谱分析器、图像频域滤波器
+
+## �📚 参考资料
 
 - [Cooley-Tukey FFT 算法](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm)
 - [WebGPU 规范](https://www.w3.org/TR/webgpu/)
