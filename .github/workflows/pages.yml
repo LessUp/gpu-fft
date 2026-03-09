@@ -8,7 +8,7 @@ on:
       - 'demo/**'
       - 'src/**'
       - 'typedoc.json'
-      - '.github/workflows/deploy-docs.yml'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -27,11 +27,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            docs
+            demo
+            src
+            typedoc.json
+            package.json
+            package-lock.json
+            tsconfig.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
