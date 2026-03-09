@@ -4,6 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
 [![WebGPU](https://img.shields.io/badge/WebGPU-Enabled-green.svg)](https://www.w3.org/TR/webgpu/)
+[![Docs](https://img.shields.io/badge/Docs-GitHub%20Pages-blue?logo=github)](https://lessup.github.io/gpu-fft/)
 
 中文 | [English](README.en.md)
 
@@ -318,11 +319,11 @@ tests/                 # 测试文件
 
 项目文档已通过 GitHub Pages 发布：
 
-> **https://\<your-account\>.github.io/gpu-fft/**
+> **https://lessup.github.io/gpu-fft/**
 
 包含：
-- [API 参考文档](https://user.github.io/gpu-fft/api) — TypeDoc 生成的完整 API 文档
-- [在线 Demo](https://user.github.io/gpu-fft/demo) — 音频频谱分析器、图像频域滤波器
+- [API 参考文档](https://lessup.github.io/gpu-fft/api) — TypeDoc 生成的完整 API 文档
+- [在线 Demo](https://lessup.github.io/gpu-fft/demo) — 音频频谱分析器、图像频域滤波器
 
 ## �📚 参考资料
 
