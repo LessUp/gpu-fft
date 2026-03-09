@@ -1,53 +1,81 @@
-/**
- * WebGPU FFT Library
- *
- * High-performance Fast Fourier Transform library using WebGPU compute shaders
- * for GPU-accelerated signal and image processing.
- *
- * @packageDocumentation
- * @module webgpu-fft
- *
- * @example
- * Basic FFT usage:
- * ```typescript
- * import { createFFTEngine } from 'webgpu-fft';
- *
- * const engine = await createFFTEngine();
- * const input = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]); // 4 complex numbers
- * const result = await engine.fft(input);
- * engine.dispose();
- * ```
- *
- * @example
- * Spectrum analysis:
- * ```typescript
- * import { createSpectrumAnalyzer } from 'webgpu-fft';
- *
- * const analyzer = await createSpectrumAnalyzer({ fftSize: 1024, sampleRate: 44100 });
- * const spectrum = await analyzer.analyze(audioData);
- * analyzer.dispose();
- * ```
- */
+// webgpu-fft - WebGPU-accelerated FFT library
+//
+// Usage:
+//   import { createFFTEngine, cpuFFT, cpuIFFT } from 'webgpu-fft';
+//
+//   // GPU path (requires WebGPU)
+//   const engine = await createFFTEngine();
+//   const spectrum = await engine.fft(signal);
+//
+//   // CPU path (works everywhere)
+//   const result = cpuFFT(signal);
 
-// Core FFT Engine
-export { createFFTEngine, FFTEngine } from './core/fft-engine';
-
-// GPU Resource Management
+// Core GPU engine
+export { FFTEngine, createFFTEngine } from './core/fft-engine';
 export { GPUResourceManager } from './core/gpu-resource-manager';
 
-// Application APIs
-export { createSpectrumAnalyzer, SpectrumAnalyzer } from './apps/spectrum-analyzer';
-export { createImageFilter, ImageFilter } from './apps/image-filter';
+// CPU FFT implementations
+export {
+  cpuFFT,
+  cpuIFFT,
+  cpuFFT2D,
+  cpuIFFT2D,
+  validateFFTInput,
+} from './utils/cpu-fft';
 
-// Error Handling
+// Application-level APIs
+export { SpectrumAnalyzer, createSpectrumAnalyzer } from './apps/spectrum-analyzer';
+export { ImageFilter, createImageFilter } from './apps/image-filter';
+
+// Error handling
 export { FFTError, FFTErrorCode } from './core/errors';
 
-// Type Definitions
+// GPU detection
+export { isWebGPUAvailable, hasWebGPUSupport } from './utils/gpu-detect';
+
+// Complex number utilities
+export {
+  complexAdd,
+  complexSub,
+  complexMul,
+  complexMagnitude,
+  complexConj,
+  complexScale,
+  twiddleFactor,
+  twiddleFactorInverse,
+  interleavedToComplex,
+  complexToInterleaved,
+  complexApproxEqual,
+  naiveDFT,
+  naiveIDFT,
+} from './utils/complex';
+
+// Bit-reversal utilities
+export {
+  bitReverse,
+  log2,
+  isPowerOf2,
+  bitReversalPermutation,
+  bitReversalPermutationInPlace,
+} from './utils/bit-reversal';
+
+// Window functions
+export {
+  hannWindow,
+  hammingWindow,
+  blackmanWindow,
+  flatTopWindow,
+  rectangularWindow,
+  applyWindow,
+  applyWindowComplex,
+} from './utils/window-functions';
+
+// Types
 export type {
+  Complex,
   FFTEngineConfig,
   SpectrumAnalyzerConfig,
-  ImageFilterConfig,
   FilterType,
   FilterShape,
-  Complex,
+  ImageFilterConfig,
 } from './types';

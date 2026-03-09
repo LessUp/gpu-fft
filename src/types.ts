@@ -60,9 +60,9 @@ export interface FFTEngineConfig {
 export interface SpectrumAnalyzerConfig {
   /**
    * The FFT size for spectrum analysis.
-   * Must be one of: 256, 512, 1024, 2048, or 4096.
+   * Must be a power of 2 (e.g. 256, 512, 1024, 2048, 4096).
    */
-  fftSize: 256 | 512 | 1024 | 2048 | 4096;
+  fftSize: number;
 
   /**
    * The sample rate of the audio data in Hz.
@@ -75,8 +75,9 @@ export interface SpectrumAnalyzerConfig {
  * Type of frequency domain filter.
  * - `'lowpass'`: Attenuates frequencies above the cutoff
  * - `'highpass'`: Attenuates frequencies below the cutoff
+ * - `'bandpass'`: Passes frequencies within a band around the cutoff
  */
-export type FilterType = 'lowpass' | 'highpass';
+export type FilterType = 'lowpass' | 'highpass' | 'bandpass';
 
 /**
  * Shape of the filter response.
@@ -113,6 +114,13 @@ export interface ImageFilterConfig {
    * Range: 0.0 to 1.0, where 1.0 represents the Nyquist frequency.
    */
   cutoffFrequency: number;
+
+  /**
+   * Bandwidth for bandpass filter (fraction of max frequency).
+   * Only used when type is 'bandpass'.
+   * @default 0.1
+   */
+  bandwidth?: number;
 }
 
 /**

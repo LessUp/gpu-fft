@@ -5,8 +5,16 @@ export default defineConfig({
     lib: {
       entry: 'src/index.ts',
       name: 'WebGPUFFT',
-      fileName: 'webgpu-fft'
-    }
+      fileName: 'webgpu-fft',
+      formats: ['es', 'cjs'],
+    },
+    rollupOptions: {
+      output: {
+        exports: 'named',
+      },
+    },
+    target: 'es2022',
+    sourcemap: true,
   },
-  assetsInclude: ['**/*.wgsl']
+  assetsInclude: ['**/*.wgsl'],
 });
