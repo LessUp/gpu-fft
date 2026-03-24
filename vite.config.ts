@@ -5,9 +5,10 @@ export default defineConfig({
     lib: {
       entry: 'src/index.ts',
       name: 'WebGPUFFT',
-      fileName: 'webgpu-fft',
+      fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
       formats: ['es', 'cjs'],
     },
+    emptyOutDir: false,
     rollupOptions: {
       output: {
         exports: 'named',

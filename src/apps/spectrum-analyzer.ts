@@ -1,13 +1,17 @@
 // Spectrum Analyzer - Real-time audio frequency spectrum analysis
 import type { SpectrumAnalyzerConfig } from '../types';
 import { cpuFFT } from '../utils/cpu-fft';
-import { hannWindow, applyWindowComplex } from '../utils/window-functions';
+import { hannWindow } from '../utils/window-functions';
 import { isPowerOf2 } from '../utils/bit-reversal';
 import { FFTError, FFTErrorCode } from '../core/errors';
+
+const DB_FLOOR = -100;
+const MIN_MAGNITUDE = 1e-10;
 
 export class SpectrumAnalyzer {
   private config: SpectrumAnalyzerConfig;
   private window: Float32Array;
+  private complexInput: Float32Array;
 
   constructor(config: SpectrumAnalyzerConfig) {
     if (!isPowerOf2(config.fftSize) || config.fftSize < 2) {
@@ -16,14 +20,20 @@ export class SpectrumAnalyzer {
         FFTErrorCode.INVALID_INPUT_SIZE
       );
     }
+    if (!Number.isFinite(config.sampleRate) || config.sampleRate <= 0) {
+      throw new FFTError(
+        `sampleRate must be a finite number greater than 0, got ${config.sampleRate}`,
+        FFTErrorCode.INVALID_INPUT_SIZE
+      );
+    }
     this.config = config;
     this.window = hannWindow(config.fftSize);
+    this.complexInput = new Float32Array(config.fftSize * 2);
   }
 
   async analyze(audioData: Float32Array): Promise<Float32Array> {
     const fftSize = this.config.fftSize;
 
-    // Validate input size
     if (audioData.length !== fftSize) {
       throw new FFTError(
         `Audio data length ${audioData.length} does not match FFT size ${fftSize}`,
@@ -31,21 +41,12 @@ export class SpectrumAnalyzer {
       );
     }
 
-    // Convert real audio data to complex format (interleaved)
-    const complexInput = new Float32Array(fftSize * 2);
     for (let i = 0; i < fftSize; i++) {
-      complexInput[i * 2] = audioData[i];
-      complexInput[i * 2 + 1] = 0;
+      this.complexInput[i * 2] = audioData[i] * this.window[i];
+      this.complexInput[i * 2 + 1] = 0;
     }
 
-    // Apply Hann window
-    const windowed = applyWindowComplex(complexInput, this.window);
-
-    // Compute FFT
-    const fftResult = cpuFFT(windowed);
-
-    // Extract magnitude spectrum and convert to dB
-    // Return only positive frequencies (0 to Nyquist)
+    const fftResult = cpuFFT(this.complexInput);
     const numBins = Math.floor(fftSize / 2) + 1;
     const spectrum = new Float32Array(numBins);
 
@@ -53,13 +54,7 @@ export class SpectrumAnalyzer {
       const real = fftResult[i * 2];
       const imag = fftResult[i * 2 + 1];
       const magnitude = Math.sqrt(real * real + imag * imag);
-
-      // Convert to dB with floor at -100 dB
-      if (magnitude > 1e-10) {
-        spectrum[i] = 20 * Math.log10(magnitude);
-      } else {
-        spectrum[i] = -100;
-      }
+      spectrum[i] = magnitude > MIN_MAGNITUDE ? 20 * Math.log10(magnitude) : DB_FLOOR;
     }
 
     return spectrum;
@@ -67,6 +62,13 @@ export class SpectrumAnalyzer {
 
   // Get frequency for a given bin index
   getFrequency(binIndex: number): number {
+    const maxBin = Math.floor(this.config.fftSize / 2);
+    if (!Number.isInteger(binIndex) || binIndex < 0 || binIndex > maxBin) {
+      throw new FFTError(
+        `binIndex must be an integer in [0, ${maxBin}], got ${binIndex}`,
+        FFTErrorCode.INVALID_INPUT_SIZE
+      );
+    }
     return (binIndex * this.config.sampleRate) / this.config.fftSize;
   }
 

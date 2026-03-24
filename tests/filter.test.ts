@@ -1,8 +1,16 @@
 // Feature: webgpu-fft-library, Property 10-11: Filter Operations
 // Validates: Requirements 7.1, 7.2
 import { describe, it, expect } from 'vitest';
+import { FFTError, FFTErrorCode } from '../src/core/errors';
 import { createImageFilter } from '../src/apps/image-filter';
 import { cpuFFT2D } from '../src/utils/cpu-fft';
+
+async function expectFFTError(promise: Promise<unknown>, code: FFTErrorCode): Promise<void> {
+  await expect(promise).rejects.toMatchObject<Partial<FFTError>>({
+    name: 'FFTError',
+    code,
+  });
+}
 
 describe('Filter Operations', () => {
   // Property 10: Low-Pass Filter Attenuates High Frequencies
@@ -231,6 +239,106 @@ describe('Filter Operations', () => {
 
   // Additional filter tests
   describe('Filter Correctness', () => {
+    it('low-pass preserves DC while high-pass suppresses it', async () => {
+      const width = 8;
+      const height = 8;
+      const constant = new Float32Array(width * height * 2);
+      for (let i = 0; i < constant.length; i += 2) {
+        constant[i] = 5;
+      }
+
+      const lowpass = await createImageFilter({
+        type: 'lowpass',
+        shape: 'ideal',
+        cutoffFrequency: 0.2,
+      });
+      const highpass = await createImageFilter({
+        type: 'highpass',
+        shape: 'ideal',
+        cutoffFrequency: 0.2,
+      });
+
+      const lowpassResult = await lowpass.apply(constant, width, height);
+      const highpassResult = await highpass.apply(constant, width, height);
+      const lowpassFreq = cpuFFT2D(lowpassResult, width, height);
+      const highpassFreq = cpuFFT2D(highpassResult, width, height);
+
+      const lowpassDc = Math.hypot(lowpassFreq[0], lowpassFreq[1]);
+      const highpassDc = Math.hypot(highpassFreq[0], highpassFreq[1]);
+
+      expect(lowpassDc).toBeGreaterThan(1);
+      expect(highpassDc).toBeLessThan(1e-3);
+
+      lowpass.dispose();
+      highpass.dispose();
+    });
+
+    it('rejects invalid cutoff and bandwidth values', async () => {
+      await expectFFTError(
+        createImageFilter({
+          type: 'lowpass',
+          shape: 'ideal',
+          cutoffFrequency: -0.1,
+        }),
+        FFTErrorCode.INVALID_INPUT_SIZE
+      );
+
+      await expectFFTError(
+        createImageFilter({
+          type: 'bandpass',
+          shape: 'gaussian',
+          cutoffFrequency: 0.5,
+          bandwidth: 0,
+        }),
+        FFTErrorCode.INVALID_INPUT_SIZE
+      );
+    });
+
+    it('rejects non power-of-two image dimensions through shared FFT validation', async () => {
+      const filter = await createImageFilter({
+        type: 'lowpass',
+        shape: 'ideal',
+        cutoffFrequency: 0.5,
+      });
+
+      await expectFFTError(
+        filter.apply(new Float32Array(3 * 4 * 2), 3, 4),
+        FFTErrorCode.INVALID_INPUT_SIZE
+      );
+
+      filter.dispose();
+    });
+
+    it('band-pass keeps target mid-band energy better than DC and Nyquist bins', async () => {
+      const width = 8;
+      const height = 8;
+      const input = new Float32Array(width * height * 2);
+
+      for (let x = 0; x < width; x++) {
+        const idx = x * 2;
+        input[idx] = Math.cos((2 * Math.PI * 2 * x) / width);
+      }
+
+      const filter = await createImageFilter({
+        type: 'bandpass',
+        shape: 'ideal',
+        cutoffFrequency: 0.5,
+        bandwidth: 0.25,
+      });
+
+      const output = await filter.apply(input, width, height);
+      const spectrum = cpuFFT2D(output, width, height);
+      const targetBand =
+        Math.hypot(spectrum[4], spectrum[5]) + Math.hypot(spectrum[12], spectrum[13]);
+      const dcBand = Math.hypot(spectrum[0], spectrum[1]);
+      const nyquistBand = Math.hypot(spectrum[8], spectrum[9]);
+
+      expect(targetBand).toBeGreaterThan(dcBand);
+      expect(targetBand).toBeGreaterThan(nyquistBand);
+
+      filter.dispose();
+    });
+
     it('filter preserves image dimensions', async () => {
       const width = 8;
       const height = 8;

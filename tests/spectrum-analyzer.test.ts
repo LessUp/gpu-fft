@@ -1,8 +1,16 @@
 // Feature: webgpu-fft-library, Property 12-15: Spectrum Analyzer
 // Validates: Requirements 8.1, 8.3, 8.4, 8.5
 import { describe, it, expect } from 'vitest';
+import { FFTError, FFTErrorCode } from '../src/core/errors';
 import { createSpectrumAnalyzer } from '../src/apps/spectrum-analyzer';
 import { hannWindow } from '../src/utils/window-functions';
+
+async function expectFFTError(promise: Promise<unknown>, code: FFTErrorCode): Promise<void> {
+  await expect(promise).rejects.toMatchObject<Partial<FFTError>>({
+    name: 'FFTError',
+    code,
+  });
+}
 
 describe('Spectrum Analyzer', () => {
   // Property 12: Spectrum Magnitude is Non-Negative
@@ -265,6 +273,62 @@ describe('Spectrum Analyzer', () => {
 
       // Peak should be near 1000 Hz
       expect(Math.abs(peakFrequency - frequency)).toBeLessThan(100);
+
+      analyzer.dispose();
+    });
+
+    it('rejects invalid sample rates', async () => {
+      await expectFFTError(
+        createSpectrumAnalyzer({
+          fftSize: 256,
+          sampleRate: 0,
+        }),
+        FFTErrorCode.INVALID_INPUT_SIZE
+      );
+
+      await expectFFTError(
+        createSpectrumAnalyzer({
+          fftSize: 256,
+          sampleRate: Number.NaN,
+        }),
+        FFTErrorCode.INVALID_INPUT_SIZE
+      );
+    });
+
+    it('rejects invalid frequency bin indices', async () => {
+      const analyzer = await createSpectrumAnalyzer({
+        fftSize: 256,
+        sampleRate: 44100,
+      });
+
+      expect(() => analyzer.getFrequency(-1)).toThrowError(FFTError);
+      expect(() => analyzer.getFrequency(129)).toThrowError(FFTError);
+      expect(() => analyzer.getFrequency(1.5)).toThrowError(FFTError);
+
+      analyzer.dispose();
+    });
+
+    it('reuses internal buffers without leaking stale values between calls', async () => {
+      const analyzer = await createSpectrumAnalyzer({
+        fftSize: 256,
+        sampleRate: 44100,
+      });
+
+      const silence = new Float32Array(256);
+      const tone = new Float32Array(256);
+      for (let i = 0; i < tone.length; i++) {
+        tone[i] = Math.sin((2 * Math.PI * 440 * i) / 44100);
+      }
+
+      const silenceSpectrum = await analyzer.analyze(silence);
+      const toneSpectrum = await analyzer.analyze(tone);
+      const silenceSpectrumAgain = await analyzer.analyze(silence);
+
+      for (let i = 0; i < silenceSpectrum.length; i++) {
+        expect(silenceSpectrum[i]).toBe(-100);
+        expect(silenceSpectrumAgain[i]).toBe(-100);
+      }
+      expect(Math.max(...Array.from(toneSpectrum))).toBeGreaterThan(-50);
 
       analyzer.dispose();
     });

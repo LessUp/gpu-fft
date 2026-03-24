@@ -45,7 +45,7 @@ struct ButterflyParams {
     n: u32,
     stage: u32,
     inverse: u32,
-    _unused_enable_padding: u32,
+    enable_padding: u32,
 }
 
 @group(0) @binding(0) var<uniform> params: ButterflyParams;

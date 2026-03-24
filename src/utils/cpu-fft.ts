@@ -153,16 +153,17 @@ function transform2D(
   validateFFT2DInput(input, width, height);
 
   const data = new Float32Array(input);
+  const rowData = new Float32Array(width * 2);
+  const colData = new Float32Array(height * 2);
 
   for (let row = 0; row < height; row++) {
     const rowStart = row * width * 2;
-    const rowData = data.slice(rowStart, rowStart + width * 2);
+    rowData.set(data.subarray(rowStart, rowStart + width * 2));
     const rowResult = transform(rowData);
     data.set(rowResult, rowStart);
   }
 
   for (let col = 0; col < width; col++) {
-    const colData = new Float32Array(height * 2);
     for (let row = 0; row < height; row++) {
       colData[row * 2] = data[(row * width + col) * 2];
       colData[row * 2 + 1] = data[(row * width + col) * 2 + 1];
