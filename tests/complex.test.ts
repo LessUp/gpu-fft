@@ -7,14 +7,14 @@ import {
   complexMul,
   complexMagnitude,
   twiddleFactor,
-  complexApproxEqual
+  complexApproxEqual,
 } from '../src/utils/complex';
 import type { Complex } from '../src/types';
 
 // Arbitrary for complex numbers
 const complexArb = fc.record({
   real: fc.float({ min: -1000, max: 1000, noNaN: true }),
-  imag: fc.float({ min: -1000, max: 1000, noNaN: true })
+  imag: fc.float({ min: -1000, max: 1000, noNaN: true }),
 });
 
 describe('Complex Number Operations', () => {
@@ -27,7 +27,7 @@ describe('Complex Number Operations', () => {
           const result = complexAdd(a, b);
           const expected: Complex = {
             real: a.real + b.real,
-            imag: a.imag + b.imag
+            imag: a.imag + b.imag,
           };
           return complexApproxEqual(result, expected, 1e-6);
         }),
@@ -67,7 +67,7 @@ describe('Complex Number Operations', () => {
           const result = complexMul(a, b);
           const expected: Complex = {
             real: a.real * b.real - a.imag * b.imag,
-            imag: a.real * b.imag + a.imag * b.real
+            imag: a.real * b.imag + a.imag * b.real,
           };
           return complexApproxEqual(result, expected, 1e-4);
         }),
@@ -131,11 +131,11 @@ describe('Complex Number Operations', () => {
   // For any valid k and N, twiddle_factor(k, N) should equal (cos(-2πk/N), sin(-2πk/N))
   describe('Property 8: Twiddle Factor Correctness', () => {
     // Generate (N, k) pairs where N is power of 2 and 0 <= k < N
-    const twiddleArgsArb = fc.integer({ min: 1, max: 10 }).chain(exp => {
+    const twiddleArgsArb = fc.integer({ min: 1, max: 10 }).chain((exp) => {
       const N = Math.pow(2, exp);
-      return fc.integer({ min: 0, max: N - 1 }).map(k => ({ N, k }));
+      return fc.integer({ min: 0, max: N - 1 }).map((k) => ({ N, k }));
     });
-    
+
     it('should correctly compute twiddle factor', () => {
       fc.assert(
         fc.property(twiddleArgsArb, ({ N, k }) => {
@@ -143,7 +143,7 @@ describe('Complex Number Operations', () => {
           const angle = (-2 * Math.PI * k) / N;
           const expected: Complex = {
             real: Math.cos(angle),
-            imag: Math.sin(angle)
+            imag: Math.sin(angle),
           };
           return complexApproxEqual(result, expected, 1e-6);
         }),
@@ -163,7 +163,7 @@ describe('Complex Number Operations', () => {
     });
 
     it('twiddle(0, N) should be (1, 0)', () => {
-      const powerOf2Arb = fc.integer({ min: 1, max: 10 }).map(n => Math.pow(2, n));
+      const powerOf2Arb = fc.integer({ min: 1, max: 10 }).map((n) => Math.pow(2, n));
       fc.assert(
         fc.property(powerOf2Arb, (N: number) => {
           const result = twiddleFactor(0, N);

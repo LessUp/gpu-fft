@@ -7,16 +7,16 @@
 
 English | [简体中文](README.zh-CN.md)
 
-High-performance Fast Fourier Transform library using WebGPU compute shaders for GPU-accelerated signal and image processing.
+High-performance Fast Fourier Transform library with a WebGPU-accelerated core engine plus CPU-based signal and image processing utilities.
 
 ## ✨ Features
 
 - **1D FFT/IFFT** - Support for 2 to 65,536 elements
 - **2D FFT/IFFT** - Image processing with 2D transforms up to 2048×2048
-- **Bank Conflict Optimization** - Eliminates GPU shared memory access conflicts
+- **WebGPU Core FFT Engine** - GPU-backed 1D/2D FFT primitives for WebGPU-capable browsers
 - **Bit-Reversal Permutation** - Efficient parallel bit-reversal implementation
-- **Frequency Domain Filtering** - Low-pass/high-pass filters (Ideal and Gaussian)
-- **Audio Spectrum Analysis** - Real-time spectrum analysis with Hann window
+- **Frequency Domain Filtering** - CPU-based low-pass/high-pass filters (Ideal and Gaussian)
+- **Audio Spectrum Analysis** - CPU-based real-time spectrum analysis with Hann window
 - **TypeScript** - Full type definitions included
 - **Property-Based Testing** - Comprehensive correctness verification with fast-check
 
@@ -62,6 +62,7 @@ engine.dispose();
 const engine = await createFFTEngine();
 
 // Create with custom options
+// Note: the current shader implementation only supports workgroupSize = 256.
 const engine = await createFFTEngine({
   enableBankConflictOptimization: true,
   workgroupSize: 256
@@ -79,7 +80,7 @@ const inverse2d = await engine.ifft2d(result2d, width, height);
 engine.dispose();
 ```
 
-### Spectrum Analyzer
+### Spectrum Analyzer (CPU utility)
 
 ```typescript
 import { createSpectrumAnalyzer } from 'webgpu-fft';
@@ -98,7 +99,7 @@ const frequencies = analyzer.getFrequencies();
 analyzer.dispose();
 ```
 
-### Image Filter
+### Image Filter (CPU utility)
 
 ```typescript
 import { createImageFilter } from 'webgpu-fft';
@@ -145,19 +146,11 @@ This library implements the classic Cooley-Tukey Radix-2 Decimation-In-Time algo
 2. **Butterfly Operations** - log₂(N) stages of parallel butterfly computations
 3. **Twiddle Factors** - Pre-computed complex exponentials
 
-### Bank Conflict Optimization
+### Notes on GPU execution
 
-GPU shared memory typically has 32 banks. When multiple threads access the same bank simultaneously, conflicts occur. This library eliminates conflicts through padding:
-
-```
-Standard Layout (with conflicts):
-Index:  0   1   2  ... 31  32  33 ...
-Bank:   0   1   2  ... 31   0   1 ...  ← Conflict!
-
-Padded Layout (no conflicts):
-Index:  0   1   2  ... 31  PAD  32  33 ...
-Bank:   0   1   2  ... 31   X    1   2 ...  ← No conflict!
-```
+- The current WebGPU kernel path supports `workgroupSize: 256`.
+- `enableBankConflictOptimization` is reserved for a future shader fast path and is not active in the current multi-stage kernel.
+- `createSpectrumAnalyzer()` and `createImageFilter()` are currently CPU utilities built on the CPU FFT implementation.
 
 ## 🧪 Testing
 
@@ -198,17 +191,17 @@ Test coverage includes:
 ### Performance Issues
 
 **Tips**:
-1. Enable bank conflict optimization (default)
+1. Use `workgroupSize: 256` with the current WebGPU engine
 2. Use appropriate FFT sizes for your use case
 3. Reuse the FFT engine instance instead of creating new ones
 4. Call `dispose()` when done to free GPU resources
 
 ## 📊 Performance
 
-- **Bank Conflict Optimization**: Eliminates shared memory conflicts through padding
-- **Parallel Execution**: Fully utilizes GPU parallel computing capabilities
+- **Parallel Execution**: Uses GPU compute pipelines for the core FFT engine
 - **Pipeline Caching**: Reuses compute pipelines to reduce overhead
-- **Buffer Pooling**: Minimizes GPU memory allocation
+- **Buffer Reuse**: Reuses cached GPU buffers for repeated transforms of the same size
+- **Batched Submission**: Submits each transform as a single command buffer
 
 ## 🗺️ Roadmap
 
@@ -217,15 +210,16 @@ Test coverage includes:
 - [ ] 3D FFT support
 - [ ] Real-valued FFT optimization (RFFT)
 - [ ] Convolution operations
-- [ ] Windowing functions (Hamming, Blackman, etc.)
+- [ ] GPU-native image filtering pipeline
 - [ ] WebGPU fallback to WebGL
 - [ ] WASM fallback for unsupported browsers
 
 ### Known Limitations
 
-- Maximum FFT size: 65,536 elements
-- Maximum 2D size: 2048×2048 pixels
-- Requires WebGPU-capable browser and GPU
+- The current WebGPU shader path only supports `workgroupSize: 256`
+- The spectrum analyzer and image filter helpers currently use the CPU FFT implementation
+- The demo pages are illustrative and do not fully mirror the packaged runtime
+- Requires WebGPU-capable browser and GPU for the GPU engine
 
 ## 📚 References
 

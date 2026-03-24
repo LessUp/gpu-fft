@@ -64,7 +64,7 @@
     <div class="container">
         <header>
             <h1>🖼️ Image Frequency Filter</h1>
-            <p class="subtitle">Apply frequency domain filters using WebGPU FFT</p>
+            <p class="subtitle">Apply frequency-domain filters in an interactive FFT demo</p>
         </header>
 
         <main>
@@ -164,7 +164,7 @@
 
             <section class="info">
                 <h2>How It Works</h2>
-                <p>This demo applies frequency domain filtering to images using the FFT:</p>
+                <p>This demo applies frequency-domain filtering to images using an in-page FFT implementation. It is an interactive showcase and does not fully mirror the packaged library runtime:</p>
                 <ol>
                     <li><strong>FFT</strong>: Transform the image from spatial domain to frequency domain</li>
                     <li><strong>Filter</strong>: Multiply by a filter mask to attenuate certain frequencies</li>
@@ -232,7 +232,7 @@
                     statusEl.innerHTML = `
             <div class="status-success">
               <span class="status-icon">✅</span>
-              <span>WebGPU ready! GPU-accelerated filtering enabled.</span>
+              <span>WebGPU is available in this browser. This demo still uses its in-page fallback implementation.</span>
             </div>
           `;
                     return true;

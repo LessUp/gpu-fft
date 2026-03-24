@@ -12,13 +12,13 @@ export class ImageFilter {
   async apply(imageData: Float32Array, width: number, height: number): Promise<Float32Array> {
     // Step 1: FFT
     const freqData = cpuFFT2D(imageData, width, height);
-    
+
     // Step 2: Apply filter mask
     const filtered = this.applyFilterMask(freqData, width, height);
-    
+
     // Step 3: IFFT
     const result = cpuIFFT2D(filtered, width, height);
-    
+
     return result;
   }
 
@@ -27,16 +27,16 @@ export class ImageFilter {
     const cx = width / 2;
     const cy = height / 2;
     const maxDist = Math.sqrt(cx * cx + cy * cy);
-    
+
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const idx = (y * width + x) * 2;
-        
+
         // Compute distance from center (normalized)
         const dx = x < cx ? x : x - width;
         const dy = y < cy ? y : y - height;
         const dist = Math.sqrt(dx * dx + dy * dy) / maxDist;
-        
+
         // Compute filter mask
         let mask: number;
         if (this.config.shape === 'ideal') {
@@ -44,13 +44,13 @@ export class ImageFilter {
         } else {
           mask = this.gaussianFilter(dist);
         }
-        
+
         // Apply mask
         result[idx] = freqData[idx] * mask;
         result[idx + 1] = freqData[idx + 1] * mask;
       }
     }
-    
+
     return result;
   }
 

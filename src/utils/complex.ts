@@ -17,7 +17,7 @@ export function complexSub(a: Complex, b: Complex): Complex {
 export function complexMul(a: Complex, b: Complex): Complex {
   return {
     real: a.real * b.real - a.imag * b.imag,
-    imag: a.real * b.imag + a.imag * b.real
+    imag: a.real * b.imag + a.imag * b.real,
   };
 }
 
@@ -76,7 +76,7 @@ export function complexApproxEqual(a: Complex, b: Complex, tolerance = 1e-5): bo
 export function naiveDFT(input: Complex[]): Complex[] {
   const N = input.length;
   const output: Complex[] = [];
-  
+
   for (let k = 0; k < N; k++) {
     let sum: Complex = { real: 0, imag: 0 };
     for (let n = 0; n < N; n++) {
@@ -85,7 +85,7 @@ export function naiveDFT(input: Complex[]): Complex[] {
     }
     output.push(sum);
   }
-  
+
   return output;
 }
 
@@ -93,7 +93,7 @@ export function naiveDFT(input: Complex[]): Complex[] {
 export function naiveIDFT(input: Complex[]): Complex[] {
   const N = input.length;
   const output: Complex[] = [];
-  
+
   for (let n = 0; n < N; n++) {
     let sum: Complex = { real: 0, imag: 0 };
     for (let k = 0; k < N; k++) {
@@ -102,6 +102,6 @@ export function naiveIDFT(input: Complex[]): Complex[] {
     }
     output.push(complexScale(sum, 1 / N));
   }
-  
+
   return output;
 }

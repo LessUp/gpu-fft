@@ -9,8 +9,8 @@ describe('FFT/IFFT Round-Trip', () => {
   // For any complex array x of size N (where N is a power of 2),
   // applying FFT followed by IFFT should return the original array within floating-point tolerance
   describe('Property 1: 1D FFT/IFFT Round-Trip', () => {
-    const sizeArb = fc.integer({ min: 1, max: 10 }).map(n => Math.pow(2, n)); // 2 to 1024
-    
+    const sizeArb = fc.integer({ min: 1, max: 10 }).map((n) => Math.pow(2, n)); // 2 to 1024
+
     it('IFFT(FFT(x)) ≈ x for any input', () => {
       fc.assert(
         fc.property(sizeArb, (size: number) => {
@@ -19,11 +19,11 @@ describe('FFT/IFFT Round-Trip', () => {
           for (let i = 0; i < input.length; i++) {
             input[i] = Math.random() * 100 - 50; // Random values in [-50, 50]
           }
-          
+
           // FFT then IFFT
           const fftResult = cpuFFT(input);
           const ifftResult = cpuIFFT(fftResult);
-          
+
           // Compare with original
           for (let i = 0; i < input.length; i++) {
             if (Math.abs(ifftResult[i] - input[i]) > 1e-4) {
@@ -40,14 +40,14 @@ describe('FFT/IFFT Round-Trip', () => {
       const testCases = [
         { size: 4, values: [1, 0, 2, 0, 3, 0, 4, 0] },
         { size: 8, values: [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8] },
-        { size: 16, values: Array.from({ length: 32 }, (_, i) => i % 2 === 0 ? i / 2 : 0) }
+        { size: 16, values: Array.from({ length: 32 }, (_, i) => (i % 2 === 0 ? i / 2 : 0)) },
       ];
-      
-      for (const { size, values } of testCases) {
+
+      for (const { values } of testCases) {
         const input = new Float32Array(values);
         const fftResult = cpuFFT(input);
         const ifftResult = cpuIFFT(fftResult);
-        
+
         for (let i = 0; i < input.length; i++) {
           expect(Math.abs(ifftResult[i] - input[i])).toBeLessThan(1e-5);
         }
@@ -60,7 +60,7 @@ describe('FFT/IFFT Round-Trip', () => {
           const input = new Float32Array(size * 2); // All zeros
           const fftResult = cpuFFT(input);
           const ifftResult = cpuIFFT(fftResult);
-          
+
           for (let i = 0; i < input.length; i++) {
             if (Math.abs(ifftResult[i]) > 1e-10) {
               return false;
@@ -80,10 +80,10 @@ describe('FFT/IFFT Round-Trip', () => {
             input[i * 2] = Math.random() * 10; // Real part
             input[i * 2 + 1] = 0; // Imaginary part = 0
           }
-          
+
           const fftResult = cpuFFT(input);
           const ifftResult = cpuIFFT(fftResult);
-          
+
           for (let i = 0; i < input.length; i++) {
             if (Math.abs(ifftResult[i] - input[i]) > 1e-4) {
               return false;
@@ -103,10 +103,10 @@ describe('FFT/IFFT Round-Trip', () => {
             input[i * 2] = 0; // Real part = 0
             input[i * 2 + 1] = Math.random() * 10; // Imaginary part
           }
-          
+
           const fftResult = cpuFFT(input);
           const ifftResult = cpuIFFT(fftResult);
-          
+
           for (let i = 0; i < input.length; i++) {
             if (Math.abs(ifftResult[i] - input[i]) > 1e-4) {
               return false;
@@ -124,15 +124,15 @@ describe('FFT/IFFT Round-Trip', () => {
       for (let i = 0; i < input.length; i++) {
         input[i] = Math.random() * 10;
       }
-      
+
       let current = new Float32Array(input);
-      
+
       // Perform 5 round-trips
       for (let trip = 0; trip < 5; trip++) {
         current = cpuFFT(current);
         current = cpuIFFT(current);
       }
-      
+
       // Should still match original
       for (let i = 0; i < input.length; i++) {
         expect(Math.abs(current[i] - input[i])).toBeLessThan(1e-3);
@@ -146,10 +146,10 @@ describe('FFT/IFFT Round-Trip', () => {
   describe('Property 9: 2D FFT/IFFT Round-Trip', () => {
     // Generate (width, height) pairs where both are powers of 2
     const size2DArb = fc.record({
-      width: fc.integer({ min: 1, max: 6 }).map(n => Math.pow(2, n)),
-      height: fc.integer({ min: 1, max: 6 }).map(n => Math.pow(2, n))
+      width: fc.integer({ min: 1, max: 6 }).map((n) => Math.pow(2, n)),
+      height: fc.integer({ min: 1, max: 6 }).map((n) => Math.pow(2, n)),
     });
-    
+
     it('IFFT2D(FFT2D(x)) ≈ x for any 2D input', () => {
       fc.assert(
         fc.property(size2DArb, ({ width, height }) => {
@@ -158,11 +158,11 @@ describe('FFT/IFFT Round-Trip', () => {
           for (let i = 0; i < input.length; i++) {
             input[i] = Math.random() * 100 - 50;
           }
-          
+
           // FFT2D then IFFT2D
           const fft2dResult = cpuFFT2D(input, width, height);
           const ifft2dResult = cpuIFFT2D(fft2dResult, width, height);
-          
+
           // Compare with original
           for (let i = 0; i < input.length; i++) {
             if (Math.abs(ifft2dResult[i] - input[i]) > 1e-3) {
@@ -177,16 +177,16 @@ describe('FFT/IFFT Round-Trip', () => {
 
     it('2D round-trip for square images', () => {
       const sizes = [2, 4, 8, 16];
-      
+
       for (const size of sizes) {
         const input = new Float32Array(size * size * 2);
         for (let i = 0; i < input.length; i++) {
           input[i] = Math.random() * 10;
         }
-        
+
         const fft2dResult = cpuFFT2D(input, size, size);
         const ifft2dResult = cpuIFFT2D(fft2dResult, size, size);
-        
+
         for (let i = 0; i < input.length; i++) {
           expect(Math.abs(ifft2dResult[i] - input[i])).toBeLessThan(1e-3);
         }
@@ -198,18 +198,18 @@ describe('FFT/IFFT Round-Trip', () => {
         { width: 4, height: 8 },
         { width: 8, height: 4 },
         { width: 16, height: 8 },
-        { width: 8, height: 16 }
+        { width: 8, height: 16 },
       ];
-      
+
       for (const { width, height } of testCases) {
         const input = new Float32Array(width * height * 2);
         for (let i = 0; i < input.length; i++) {
           input[i] = Math.random() * 10;
         }
-        
+
         const fft2dResult = cpuFFT2D(input, width, height);
         const ifft2dResult = cpuIFFT2D(fft2dResult, width, height);
-        
+
         for (let i = 0; i < input.length; i++) {
           expect(Math.abs(ifft2dResult[i] - input[i])).toBeLessThan(1e-3);
         }
@@ -222,7 +222,7 @@ describe('FFT/IFFT Round-Trip', () => {
           const input = new Float32Array(width * height * 2); // All zeros
           const fft2dResult = cpuFFT2D(input, width, height);
           const ifft2dResult = cpuIFFT2D(fft2dResult, width, height);
-          
+
           for (let i = 0; i < input.length; i++) {
             if (Math.abs(ifft2dResult[i]) > 1e-8) {
               return false;
@@ -246,10 +246,10 @@ describe('FFT/IFFT Round-Trip', () => {
         input[i * 2] = i;
         input[i * 2 + 1] = i + 0.5;
       }
-      
+
       const fftResult = cpuFFT(input);
       const ifftResult = cpuIFFT(fftResult);
-      
+
       for (let i = 0; i < input.length; i++) {
         expect(Math.abs(ifftResult[i] - input[i])).toBeLessThan(1e-5);
       }
@@ -261,15 +261,15 @@ describe('FFT/IFFT Round-Trip', () => {
       const size = 8;
       const input = new Float32Array(size * 2);
       input[0] = 1; // Impulse
-      
+
       const fftResult = cpuFFT(input);
-      
+
       // All frequency bins should be 1
       for (let i = 0; i < size; i++) {
         expect(Math.abs(fftResult[i * 2] - 1)).toBeLessThan(1e-5);
         expect(Math.abs(fftResult[i * 2 + 1])).toBeLessThan(1e-5);
       }
-      
+
       // IFFT should recover the impulse
       const ifftResult = cpuIFFT(fftResult);
       expect(Math.abs(ifftResult[0] - 1)).toBeLessThan(1e-5);

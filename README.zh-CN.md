@@ -8,16 +8,16 @@
 
 [English](README.md) | 简体中文
 
-高性能的快速傅里叶变换库，利用 WebGPU 计算着色器在 GPU 上实现 FFT 算法。
+高性能的快速傅里叶变换库，提供 WebGPU 加速的核心 FFT 引擎，以及基于 CPU 的信号与图像处理工具。
 
 ## ✨ 特性
 
 - **1D FFT/IFFT** - 支持 2 到 65536 个元素的快速傅里叶变换
 - **2D FFT/IFFT** - 图像处理的二维傅里叶变换（最大 2048×2048）
-- **Bank Conflict 优化** - 消除 GPU Shared Memory 访问冲突
+- **WebGPU 核心 FFT 引擎** - 为支持 WebGPU 的浏览器提供 GPU 路径的 1D/2D FFT 原语
 - **位反转置换** - 高效的并行位反转实现
-- **频域滤波** - 低通/高通/带通滤波器（Ideal 和 Gaussian）
-- **音频频谱分析** - 实时音频频谱分析
+- **频域滤波** - 基于 CPU 的低通/高通/带通滤波器（Ideal 和 Gaussian）
+- **音频频谱分析** - 基于 CPU 的实时频谱分析
 - **窗函数** - Hann、Hamming、Blackman、Flat-top、矩形窗
 - **CPU 回退** - 完整的 CPU FFT 实现，无需 GPU 也可使用
 - **GPU 检测** - `isWebGPUAvailable()` 自动检测 GPU 支持
@@ -105,7 +105,7 @@ const freq2d = cpuFFT2D(input, width, height);
 const spatial2d = cpuIFFT2D(freq2d, width, height);
 ```
 
-### 频谱分析器
+### 频谱分析器（CPU 工具）
 
 ```typescript
 import { createSpectrumAnalyzer } from 'webgpu-fft';
@@ -124,7 +124,7 @@ const frequencies = analyzer.getFrequencies();
 analyzer.dispose();
 ```
 
-### 图像滤波器
+### 图像滤波器（CPU 工具）
 
 ```typescript
 import { createImageFilter } from 'webgpu-fft';
@@ -203,19 +203,11 @@ import {
 2. **蝴蝶操作** - log₂(N) 个阶段的并行蝴蝶运算
 3. **旋转因子** - 使用预计算的复数指数
 
-### Bank Conflict 优化
+### 当前 GPU 执行说明
 
-GPU Shared Memory 通常有 32 个 bank。当多个线程同时访问同一 bank 时会发生冲突。本库通过添加 padding 来消除冲突：
-
-```
-标准布局（有冲突）:
-Index:  0   1   2  ... 31  32  33 ...
-Bank:   0   1   2  ... 31   0   1 ...  ← 冲突！
-
-Padded 布局（无冲突）:
-Index:  0   1   2  ... 31  PAD  32  33 ...
-Bank:   0   1   2  ... 31   X    1   2 ...  ← 无冲突
-```
+- 当前 WebGPU shader 路径只支持 `workgroupSize: 256`。
+- `enableBankConflictOptimization` 预留给未来 shader fast path，当前多阶段 kernel 并不会启用它。
+- `createSpectrumAnalyzer()` 与 `createImageFilter()` 当前都是基于 CPU FFT 的工具。
 
 ## 🧪 测试
 
@@ -241,7 +233,6 @@ npm test
 - **批量命令提交** - 所有 GPU 计算阶段合并为单次命令提交
 - **Buffer 复用** - 相同大小的 FFT 调用复用 GPU Buffer，避免重复分配/销毁
 - **Pipeline 缓存** - 着色器编译结果缓存，消除重复编译开销
-- **Bank Conflict 优化** - Shared Memory padding 消除访问冲突
 - **并行执行** - 充分利用 GPU 并行计算能力
 
 ## 📁 项目结构
@@ -301,7 +292,7 @@ tests/                 # 测试文件
 ### 性能问题
 
 **优化建议**:
-1. 启用 Bank Conflict 优化（默认开启）
+1. 当前 WebGPU 引擎请使用 `workgroupSize: 256`
 2. 复用 FFT 引擎实例，避免重复创建（`SizeCache` 自动复用同尺寸 Buffer）
 3. 使用完毕后调用 `dispose()` 释放 GPU 资源
 4. 对于不需要 GPU 的场景，直接使用 `cpuFFT` 避免 GPU 开销
@@ -323,7 +314,7 @@ tests/                 # 测试文件
 
 包含：
 - [API 参考文档](https://lessup.github.io/gpu-fft/api) — TypeDoc 生成的完整 API 文档
-- [在线 Demo](https://lessup.github.io/gpu-fft/demo) — 音频频谱分析器、图像频域滤波器
+- [在线 Demo](https://lessup.github.io/gpu-fft/demo) — 演示频谱分析与图像频域滤波的交互效果
 
 ## �📚 参考资料
 

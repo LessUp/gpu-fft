@@ -33,14 +33,14 @@ export function bitReversalPermutation(data: Float32Array): Float32Array {
   const n = data.length / 2; // Number of complex elements
   const bits = log2(n);
   const result = new Float32Array(data.length);
-  
+
   for (let i = 0; i < n; i++) {
     const j = bitReverse(i, bits);
     // Copy complex number (2 floats) from position i to position j
     result[j * 2] = data[i * 2];
     result[j * 2 + 1] = data[i * 2 + 1];
   }
-  
+
   return result;
 }
 
@@ -48,7 +48,7 @@ export function bitReversalPermutation(data: Float32Array): Float32Array {
 export function bitReversalPermutationInPlace(data: Float32Array): void {
   const n = data.length / 2;
   const bits = log2(n);
-  
+
   for (let i = 0; i < n; i++) {
     const j = bitReverse(i, bits);
     if (i < j) {

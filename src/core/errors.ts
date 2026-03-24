@@ -13,7 +13,10 @@ export enum FFTErrorCode {
 }
 
 export class FFTError extends Error {
-  constructor(message: string, public code: FFTErrorCode) {
+  constructor(
+    message: string,
+    public code: FFTErrorCode
+  ) {
     super(message);
     this.name = 'FFTError';
   }

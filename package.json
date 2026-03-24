@@ -1,7 +1,7 @@
 {
   "name": "webgpu-fft",
   "version": "1.0.0",
-  "description": "High-performance FFT library using WebGPU compute shaders for GPU-accelerated signal and image processing",
+  "description": "FFT library with a WebGPU-accelerated core engine plus CPU-based signal and image processing utilities",
   "author": "WebGPU FFT Library Contributors",
   "license": "MIT",
   "type": "module",
@@ -23,12 +23,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/user/webgpu-fft.git"
+    "url": "https://github.com/LessUp/gpu-fft.git"
   },
   "bugs": {
-    "url": "https://github.com/user/webgpu-fft/issues"
+    "url": "https://github.com/LessUp/gpu-fft/issues"
   },
-  "homepage": "https://github.com/user/webgpu-fft#readme",
+  "homepage": "https://github.com/LessUp/gpu-fft#readme",
   "keywords": [
     "webgpu",
     "fft",
@@ -47,10 +47,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint src tests --ext .ts",
-    "lint:fix": "eslint src tests --ext .ts --fix",
-    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "lint": "eslint src tests benchmarks --ext .ts",
+    "lint:fix": "eslint src tests benchmarks --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\" \"benchmarks/**/*.ts\" \"*.json\" \"*.md\" \".github/workflows/*.yml\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\" \"benchmarks/**/*.ts\" \"*.json\" \"*.md\" \".github/workflows/*.yml\"",
     "typecheck": "tsc --noEmit",
     "docs:build": "typedoc",
     "docs:serve": "npx serve docs/api",

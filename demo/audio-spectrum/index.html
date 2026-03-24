@@ -12,7 +12,7 @@
     <div class="container">
         <header>
             <h1>🎤 Audio Spectrum Analyzer</h1>
-            <p class="subtitle">Real-time frequency visualization using WebGPU FFT</p>
+            <p class="subtitle">Real-time frequency visualization demo for the FFT toolkit</p>
         </header>
 
         <main>
@@ -83,9 +83,7 @@
 
             <section class="info">
                 <h2>How It Works</h2>
-                <p>This demo captures audio from your microphone or an audio file, then uses WebGPU-accelerated FFT to
-                    compute the frequency spectrum in real-time. The spectrum is displayed as a bar graph showing the
-                    magnitude (in dB) of each frequency bin.</p>
+                <p>This demo captures audio from your microphone or an audio file, then visualizes its frequency content in real time. The current demo page uses the Web Audio API for visualization rather than the packaged FFT runtime, so treat it as an interactive showcase instead of a direct runtime mirror.</p>
 
                 <h3>Controls</h3>
                 <ul>
@@ -150,7 +148,7 @@
                     statusEl.innerHTML = `
             <div class="status-success">
               <span class="status-icon">✅</span>
-              <span>WebGPU ready! GPU-accelerated FFT enabled.</span>
+              <span>WebGPU is available in this browser. This demo still uses the Web Audio API visualization path.</span>
             </div>
           `;
                     return true;

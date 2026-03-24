@@ -21,6 +21,7 @@ export {
   cpuFFT2D,
   cpuIFFT2D,
   validateFFTInput,
+  validateFFT2DInput,
 } from './utils/cpu-fft';
 
 // Application-level APIs

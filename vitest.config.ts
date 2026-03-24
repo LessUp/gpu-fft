@@ -7,7 +7,15 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html']
-    }
-  }
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'benchmarks/**',
+        'coverage/**',
+        'dist/**',
+        'docs/**',
+        'examples/**',
+        'tests/**',
+      ],
+    },
+  },
 });

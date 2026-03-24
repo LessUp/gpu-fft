@@ -1,13 +1,22 @@
 // GPU Resource Manager - handles WebGPU device, buffers, and pipelines
 import { FFTError, FFTErrorCode } from './errors';
 
+type ResourceManagerState = 'active' | 'lost' | 'disposed';
+
 export class GPUResourceManager {
-  device!: GPUDevice;
+  private _device!: GPUDevice;
   private adapter!: GPUAdapter;
-  private bufferPool: Map<number, GPUBuffer[]> = new Map();
+  private bufferPool: Map<string, GPUBuffer[]> = new Map();
   private pipelineCache: Map<string, GPUComputePipeline> = new Map();
+  private state: ResourceManagerState = 'active';
+  private lossMessage = 'WebGPU device was lost';
 
   private constructor() {}
+
+  get device(): GPUDevice {
+    this.assertOperational();
+    return this._device;
+  }
 
   static async create(): Promise<GPUResourceManager> {
     const manager = new GPUResourceManager();
@@ -25,41 +34,65 @@ export class GPUResourceManager {
 
     const adapter = await navigator.gpu.requestAdapter();
     if (!adapter) {
-      throw new FFTError(
-        'Failed to get WebGPU adapter',
-        FFTErrorCode.WEBGPU_NOT_AVAILABLE
-      );
+      throw new FFTError('Failed to get WebGPU adapter', FFTErrorCode.WEBGPU_NOT_AVAILABLE);
     }
     this.adapter = adapter;
 
     const device = await adapter.requestDevice();
     if (!device) {
-      throw new FFTError(
-        'Failed to get WebGPU device',
-        FFTErrorCode.WEBGPU_NOT_AVAILABLE
-      );
+      throw new FFTError('Failed to get WebGPU device', FFTErrorCode.WEBGPU_NOT_AVAILABLE);
     }
-    this.device = device;
+    this._device = device;
 
-    // Handle device lost
     device.lost.then((info) => {
-      console.error('WebGPU device lost:', info.message);
+      if (this.state === 'disposed') {
+        return;
+      }
+
+      this.state = 'lost';
+      this.lossMessage = info.message
+        ? `WebGPU device lost: ${info.message}`
+        : 'WebGPU device lost';
+      this.destroyPooledBuffers();
+      this.pipelineCache.clear();
     });
   }
 
-  createBuffer(size: number, usage: GPUBufferUsageFlags): GPUBuffer {
-    // Try to reuse from pool
-    const poolKey = size;
-    const pool = this.bufferPool.get(poolKey);
-    if (pool && pool.length > 0) {
-      const buffer = pool.pop()!;
-      return buffer;
+  private assertOperational(): void {
+    if (this.state === 'lost') {
+      throw new FFTError(this.lossMessage, FFTErrorCode.DEVICE_LOST);
     }
 
-    // Create new buffer
+    if (this.state === 'disposed') {
+      throw new FFTError('GPU resources have been disposed', FFTErrorCode.ENGINE_DISPOSED);
+    }
+  }
+
+  private getPoolKey(size: number, usage: GPUBufferUsageFlags): string {
+    return `${size}:${usage}`;
+  }
+
+  private destroyPooledBuffers(): void {
+    for (const pool of this.bufferPool.values()) {
+      for (const buffer of pool) {
+        buffer.destroy();
+      }
+    }
+    this.bufferPool.clear();
+  }
+
+  createBuffer(size: number, usage: GPUBufferUsageFlags): GPUBuffer {
+    this.assertOperational();
+
+    const poolKey = this.getPoolKey(size, usage);
+    const pool = this.bufferPool.get(poolKey);
+    if (pool && pool.length > 0) {
+      return pool.pop()!;
+    }
+
     try {
-      return this.device.createBuffer({ size, usage });
-    } catch (e) {
+      return this._device.createBuffer({ size, usage });
+    } catch {
       throw new FFTError(
         `Failed to allocate GPU buffer of size ${size}`,
         FFTErrorCode.BUFFER_ALLOCATION_FAILED
@@ -67,50 +100,58 @@ export class GPUResourceManager {
     }
   }
 
-  uploadData(buffer: GPUBuffer, data: Float32Array): void {
-    this.device.queue.writeBuffer(buffer, 0, data as unknown as ArrayBuffer);
+  uploadData(buffer: GPUBuffer, data: Float32Array | Uint32Array | Uint8Array): void {
+    this.assertOperational();
+    this._device.queue.writeBuffer(buffer, 0, data);
   }
 
   async downloadData(buffer: GPUBuffer, size: number): Promise<Float32Array> {
-    // Create staging buffer for readback
-    const stagingBuffer = this.device.createBuffer({
+    this.assertOperational();
+
+    const stagingBuffer = this._device.createBuffer({
       size,
-      usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST
+      usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     });
 
-    // Copy from source to staging
-    const commandEncoder = this.device.createCommandEncoder();
-    commandEncoder.copyBufferToBuffer(buffer, 0, stagingBuffer, 0, size);
-    this.device.queue.submit([commandEncoder.finish()]);
+    try {
+      const commandEncoder = this._device.createCommandEncoder();
+      commandEncoder.copyBufferToBuffer(buffer, 0, stagingBuffer, 0, size);
+      this._device.queue.submit([commandEncoder.finish()]);
 
-    // Map and read
-    await stagingBuffer.mapAsync(GPUMapMode.READ);
-    const arrayBuffer = stagingBuffer.getMappedRange();
-    const result = new Float32Array(arrayBuffer.slice(0));
-    stagingBuffer.unmap();
-    stagingBuffer.destroy();
-
-    return result;
+      await stagingBuffer.mapAsync(GPUMapMode.READ);
+      const arrayBuffer = stagingBuffer.getMappedRange();
+      const result = new Float32Array(arrayBuffer.slice(0));
+      stagingBuffer.unmap();
+      return result;
+    } catch (error) {
+      if (this.state === 'lost') {
+        throw new FFTError(this.lossMessage, FFTErrorCode.DEVICE_LOST);
+      }
+      throw error;
+    } finally {
+      stagingBuffer.destroy();
+    }
   }
 
   createComputePipeline(shader: string, entryPoint: string): GPUComputePipeline {
+    this.assertOperational();
+
     const cacheKey = `${shader}:${entryPoint}`;
     const cached = this.pipelineCache.get(cacheKey);
-    if (cached) return cached;
+    if (cached) {
+      return cached;
+    }
 
     let shaderModule: GPUShaderModule;
     try {
-      shaderModule = this.device.createShaderModule({ code: shader });
+      shaderModule = this._device.createShaderModule({ code: shader });
     } catch (e) {
-      throw new FFTError(
-        `Failed to compile shader: ${e}`,
-        FFTErrorCode.SHADER_COMPILATION_FAILED
-      );
+      throw new FFTError(`Failed to compile shader: ${e}`, FFTErrorCode.SHADER_COMPILATION_FAILED);
     }
 
-    const pipeline = this.device.createComputePipeline({
+    const pipeline = this._device.createComputePipeline({
       layout: 'auto',
-      compute: { module: shaderModule, entryPoint }
+      compute: { module: shaderModule, entryPoint },
     });
 
     this.pipelineCache.set(cacheKey, pipeline);
@@ -118,13 +159,18 @@ export class GPUResourceManager {
   }
 
   releaseBuffer(buffer: GPUBuffer): void {
-    const size = buffer.size;
-    let pool = this.bufferPool.get(size);
+    if (this.state !== 'active') {
+      buffer.destroy();
+      return;
+    }
+
+    const poolKey = this.getPoolKey(buffer.size, buffer.usage);
+    let pool = this.bufferPool.get(poolKey);
     if (!pool) {
       pool = [];
-      this.bufferPool.set(size, pool);
+      this.bufferPool.set(poolKey, pool);
     }
-    // Limit pool size to prevent memory bloat
+
     if (pool.length < 4) {
       pool.push(buffer);
     } else {
@@ -133,13 +179,12 @@ export class GPUResourceManager {
   }
 
   dispose(): void {
-    // Destroy all pooled buffers
-    for (const pool of this.bufferPool.values()) {
-      for (const buffer of pool) {
-        buffer.destroy();
-      }
+    if (this.state === 'disposed') {
+      return;
     }
-    this.bufferPool.clear();
+
+    this.destroyPooledBuffers();
     this.pipelineCache.clear();
+    this.state = 'disposed';
   }
 }

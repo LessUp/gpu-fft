@@ -32,15 +32,15 @@ export interface Complex {
  */
 export interface FFTEngineConfig {
   /**
-   * Enable bank conflict optimization for GPU shared memory.
-   * When enabled, adds padding to eliminate memory bank conflicts.
+   * Reserved for future shader fast paths.
+   * The current multi-stage GPU kernel does not use this option.
    * @default true
    */
   enableBankConflictOptimization: boolean;
 
   /**
    * The workgroup size for GPU compute shaders.
-   * Must be a power of 2, typically 64, 128, or 256.
+   * The current shader implementation only supports 256.
    * @default 256
    */
   workgroupSize: number;

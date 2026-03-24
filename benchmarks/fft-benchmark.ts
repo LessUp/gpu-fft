@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * FFT Performance Benchmark
  *
@@ -9,157 +10,135 @@
 // import { createFFTEngine, FFTEngineConfig } from 'webgpu-fft';
 
 interface BenchmarkResult {
-    size: number;
-    iterations: number;
-    mean: number;
-    median: number;
-    min: number;
-    max: number;
-    stdDev: number;
-}
-
-interface ComparisonResult {
-    size: number;
-    withOptimization: BenchmarkResult;
-    withoutOptimization: BenchmarkResult;
-    speedup: number;
+  size: number;
+  iterations: number;
+  mean: number;
+  median: number;
+  min: number;
+  max: number;
+  stdDev: number;
 }
 
 /**
  * Calculate statistics from an array of measurements
  */
 function calculateStats(measurements: number[]): Omit<BenchmarkResult, 'size' | 'iterations'> {
-    const sorted = [...measurements].sort((a, b) => a - b);
-    const n = sorted.length;
+  const sorted = [...measurements].sort((a, b) => a - b);
+  const n = sorted.length;
 
-    const mean = sorted.reduce((a, b) => a + b, 0) / n;
-    const median = n % 2 === 0
-        ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2
-        : sorted[Math.floor(n / 2)];
-    const min = sorted[0];
-    const max = sorted[n - 1];
+  const mean = sorted.reduce((a, b) => a + b, 0) / n;
+  const median = n % 2 === 0 ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2 : sorted[Math.floor(n / 2)];
+  const min = sorted[0];
+  const max = sorted[n - 1];
 
-    const variance = sorted.reduce((sum, x) => sum + (x - mean) ** 2, 0) / n;
-    const stdDev = Math.sqrt(variance);
+  const variance = sorted.reduce((sum, x) => sum + (x - mean) ** 2, 0) / n;
+  const stdDev = Math.sqrt(variance);
 
-    return { mean, median, min, max, stdDev };
+  return { mean, median, min, max, stdDev };
 }
 
 /**
  * Format a number with appropriate precision
  */
 function formatNumber(n: number, decimals: number = 2): string {
-    if (n < 0.01) {
-        return n.toExponential(decimals);
-    }
-    return n.toFixed(decimals);
-}
-
-/**
- * Generate random complex data
- */
-function generateRandomData(size: number): Float32Array {
-    const data = new Float32Array(size * 2);
-    for (let i = 0; i < data.length; i++) {
-        data[i] = Math.random() * 2 - 1;
-    }
-    return data;
+  if (n < 0.01) {
+    return n.toExponential(decimals);
+  }
+  return n.toFixed(decimals);
 }
 
 /**
  * Simple CPU FFT for comparison (Cooley-Tukey)
  */
 function cpuFFT(real: Float32Array, imag: Float32Array): void {
-    const n = real.length;
-    const bits = Math.log2(n);
+  const n = real.length;
+  const bits = Math.log2(n);
 
-    // Bit reversal
-    for (let i = 0; i < n; i++) {
-        let j = 0;
-        let x = i;
-        for (let k = 0; k < bits; k++) {
-            j = (j << 1) | (x & 1);
-            x >>= 1;
-        }
-        if (i < j) {
-            [real[i], real[j]] = [real[j], real[i]];
-            [imag[i], imag[j]] = [imag[j], imag[i]];
-        }
+  // Bit reversal
+  for (let i = 0; i < n; i++) {
+    let j = 0;
+    let x = i;
+    for (let k = 0; k < bits; k++) {
+      j = (j << 1) | (x & 1);
+      x >>= 1;
     }
-
-    // Butterfly stages
-    for (let s = 1; s <= bits; s++) {
-        const m = 1 << s;
-        const wm = -2 * Math.PI / m;
-
-        for (let k = 0; k < n; k += m) {
-            let w_real = 1, w_imag = 0;
-            const cos_wm = Math.cos(wm);
-            const sin_wm = Math.sin(wm);
-
-            for (let j = 0; j < m / 2; j++) {
-                const t_real = w_real * real[k + j + m / 2] - w_imag * imag[k + j + m / 2];
-                const t_imag = w_real * imag[k + j + m / 2] + w_imag * real[k + j + m / 2];
-
-                real[k + j + m / 2] = real[k + j] - t_real;
-                imag[k + j + m / 2] = imag[k + j] - t_imag;
-                real[k + j] = real[k + j] + t_real;
-                imag[k + j] = imag[k + j] + t_imag;
-
-                const new_w_real = w_real * cos_wm - w_imag * sin_wm;
-                w_imag = w_real * sin_wm + w_imag * cos_wm;
-                w_real = new_w_real;
-            }
-        }
+    if (i < j) {
+      [real[i], real[j]] = [real[j], real[i]];
+      [imag[i], imag[j]] = [imag[j], imag[i]];
     }
+  }
+
+  // Butterfly stages
+  for (let s = 1; s <= bits; s++) {
+    const m = 1 << s;
+    const wm = (-2 * Math.PI) / m;
+
+    for (let k = 0; k < n; k += m) {
+      let w_real = 1,
+        w_imag = 0;
+      const cos_wm = Math.cos(wm);
+      const sin_wm = Math.sin(wm);
+
+      for (let j = 0; j < m / 2; j++) {
+        const t_real = w_real * real[k + j + m / 2] - w_imag * imag[k + j + m / 2];
+        const t_imag = w_real * imag[k + j + m / 2] + w_imag * real[k + j + m / 2];
+
+        real[k + j + m / 2] = real[k + j] - t_real;
+        imag[k + j + m / 2] = imag[k + j] - t_imag;
+        real[k + j] = real[k + j] + t_real;
+        imag[k + j] = imag[k + j] + t_imag;
+
+        const new_w_real = w_real * cos_wm - w_imag * sin_wm;
+        w_imag = w_real * sin_wm + w_imag * cos_wm;
+        w_real = new_w_real;
+      }
+    }
+  }
 }
 
 /**
  * Benchmark CPU FFT
  */
 function benchmarkCPU(size: number, iterations: number): BenchmarkResult {
-    const measurements: number[] = [];
+  const measurements: number[] = [];
 
-    // Warm-up
-    for (let i = 0; i < 5; i++) {
-        const real = new Float32Array(size);
-        const imag = new Float32Array(size);
-        for (let j = 0; j < size; j++) {
-            real[j] = Math.random();
-        }
-        cpuFFT(real, imag);
+  // Warm-up
+  for (let i = 0; i < 5; i++) {
+    const real = new Float32Array(size);
+    const imag = new Float32Array(size);
+    for (let j = 0; j < size; j++) {
+      real[j] = Math.random();
+    }
+    cpuFFT(real, imag);
+  }
+
+  // Benchmark
+  for (let i = 0; i < iterations; i++) {
+    const real = new Float32Array(size);
+    const imag = new Float32Array(size);
+    for (let j = 0; j < size; j++) {
+      real[j] = Math.random();
     }
 
-    // Benchmark
-    for (let i = 0; i < iterations; i++) {
-        const real = new Float32Array(size);
-        const imag = new Float32Array(size);
-        for (let j = 0; j < size; j++) {
-            real[j] = Math.random();
-        }
+    const start = performance.now();
+    cpuFFT(real, imag);
+    const end = performance.now();
 
-        const start = performance.now();
-        cpuFFT(real, imag);
-        const end = performance.now();
+    measurements.push(end - start);
+  }
 
-        measurements.push(end - start);
-    }
-
-    return {
-        size,
-        iterations,
-        ...calculateStats(measurements),
-    };
+  return {
+    size,
+    iterations,
+    ...calculateStats(measurements),
+  };
 }
 
 /**
  * Generate markdown report
  */
-function generateReport(
-    cpuResults: BenchmarkResult[],
-    sizes: number[]
-): string {
-    let report = `# FFT Benchmark Results
+function generateReport(cpuResults: BenchmarkResult[]): string {
+  let report = `# FFT Benchmark Results
 
 Generated: ${new Date().toISOString()}
 
@@ -174,11 +153,11 @@ Generated: ${new Date().toISOString()}
 |------|-----------|-------------|----------|----------|---------|
 `;
 
-    for (const result of cpuResults) {
-        report += `| ${result.size} | ${formatNumber(result.mean)} | ${formatNumber(result.median)} | ${formatNumber(result.min)} | ${formatNumber(result.max)} | ${formatNumber(result.stdDev)} |\n`;
-    }
+  for (const result of cpuResults) {
+    report += `| ${result.size} | ${formatNumber(result.mean)} | ${formatNumber(result.median)} | ${formatNumber(result.min)} | ${formatNumber(result.max)} | ${formatNumber(result.stdDev)} |\n`;
+  }
 
-    report += `
+  report += `
 ## Notes
 
 - All times are in milliseconds
@@ -206,47 +185,49 @@ Based on typical GPU performance, WebGPU FFT should be:
 4. Results exclude data transfer time (GPU only)
 `;
 
-    return report;
+  return report;
 }
 
 /**
  * Main benchmark function
  */
 async function main(): Promise<void> {
-    console.log('=== WebGPU FFT Library - Performance Benchmark ===\n');
+  console.log('=== WebGPU FFT Library - Performance Benchmark ===\n');
 
-    const sizes = [256, 512, 1024, 2048, 4096, 8192, 16384];
-    const iterations = 100;
+  const sizes = [256, 512, 1024, 2048, 4096, 8192, 16384];
+  const iterations = 100;
 
-    console.log(`Running CPU benchmarks (${iterations} iterations each)...\n`);
+  console.log(`Running CPU benchmarks (${iterations} iterations each)...\n`);
 
-    const cpuResults: BenchmarkResult[] = [];
+  const cpuResults: BenchmarkResult[] = [];
 
-    for (const size of sizes) {
-        console.log(`  Benchmarking size ${size}...`);
-        const result = benchmarkCPU(size, iterations);
-        cpuResults.push(result);
-        console.log(`    Mean: ${formatNumber(result.mean)} ms, Median: ${formatNumber(result.median)} ms`);
-    }
+  for (const size of sizes) {
+    console.log(`  Benchmarking size ${size}...`);
+    const result = benchmarkCPU(size, iterations);
+    cpuResults.push(result);
+    console.log(
+      `    Mean: ${formatNumber(result.mean)} ms, Median: ${formatNumber(result.median)} ms`
+    );
+  }
 
-    console.log('\n--- CPU FFT Results ---\n');
-    console.log('Size\t\tMean (ms)\tMedian (ms)\tMin (ms)\tMax (ms)');
-    console.log('----\t\t---------\t-----------\t--------\t--------');
+  console.log('\n--- CPU FFT Results ---\n');
+  console.log('Size\t\tMean (ms)\tMedian (ms)\tMin (ms)\tMax (ms)');
+  console.log('----\t\t---------\t-----------\t--------\t--------');
 
-    for (const result of cpuResults) {
-        console.log(
-            `${result.size}\t\t${formatNumber(result.mean)}\t\t${formatNumber(result.median)}\t\t${formatNumber(result.min)}\t\t${formatNumber(result.max)}`
-        );
-    }
+  for (const result of cpuResults) {
+    console.log(
+      `${result.size}\t\t${formatNumber(result.mean)}\t\t${formatNumber(result.median)}\t\t${formatNumber(result.min)}\t\t${formatNumber(result.max)}`
+    );
+  }
 
-    // Generate report
-    const report = generateReport(cpuResults, sizes);
+  // Generate report
+  const report = generateReport(cpuResults);
 
-    // In a real implementation, you would write this to a file
-    console.log('\n--- Benchmark Report ---\n');
-    console.log(report);
+  // In a real implementation, you would write this to a file
+  console.log('\n--- Benchmark Report ---\n');
+  console.log(report);
 
-    console.log('\nBenchmark complete!');
+  console.log('\nBenchmark complete!');
 }
 
 // Run benchmarks
