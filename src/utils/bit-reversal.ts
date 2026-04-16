@@ -1,6 +1,29 @@
-// CPU-side bit-reversal operations for testing and validation
+/**
+ * CPU-side bit-reversal operations for testing and validation
+ * @module webgpu-fft/bit-reversal
+ */
 
-// Compute bit-reversed index
+/**
+ * Compute the bit-reversed index of a number.
+ *
+ * Used in the first stage of Cooley-Tukey FFT to reorder input data.
+ *
+ * @param x - The index to reverse (0 to 2^bits - 1)
+ * @param bits - Number of bits to reverse (log2 of FFT size)
+ * @returns The bit-reversed index
+ *
+ * @example
+ * ```typescript
+ * bitReverse(0, 3);  // 0  (000 → 000)
+ * bitReverse(1, 3);  // 4  (001 → 100)
+ * bitReverse(2, 3);  // 2  (010 → 010)
+ * bitReverse(3, 3);  // 6  (011 → 110)
+ * bitReverse(4, 3);  // 1  (100 → 001)
+ * bitReverse(5, 3);  // 5  (101 → 101)
+ * bitReverse(6, 3);  // 3  (110 → 011)
+ * bitReverse(7, 3);  // 7  (111 → 111)
+ * ```
+ */
 export function bitReverse(x: number, bits: number): number {
   let result = 0;
   let val = x;
@@ -11,7 +34,21 @@ export function bitReverse(x: number, bits: number): number {
   return result;
 }
 
-// Compute log2 of a power of 2
+/**
+ * Compute log2 of a power of 2.
+ *
+ * @param n - A power of 2 (must be > 0)
+ * @returns The base-2 logarithm
+ * @throws Error if n is 0 or negative
+ *
+ * @example
+ * ```typescript
+ * log2(2);   // 1
+ * log2(4);   // 2
+ * log2(8);   // 3
+ * log2(16);  // 4
+ * ```
+ */
 export function log2(n: number): number {
   let bits = 0;
   let val = n;
@@ -22,13 +59,43 @@ export function log2(n: number): number {
   return bits;
 }
 
-// Check if n is a power of 2
+/**
+ * Check if a number is a power of 2.
+ *
+ * @param n - The number to check
+ * @returns `true` if n is a positive power of 2
+ *
+ * @example
+ * ```typescript
+ * isPowerOf2(1);   // true  (2^0)
+ * isPowerOf2(2);   // true  (2^1)
+ * isPowerOf2(3);   // false
+ * isPowerOf2(4);   // true  (2^2)
+ * isPowerOf2(0);   // false
+ * isPowerOf2(-4);  // false
+ * ```
+ */
 export function isPowerOf2(n: number): boolean {
   return n > 0 && (n & (n - 1)) === 0;
 }
 
-// Perform bit-reversal permutation on a complex array (interleaved format)
-// Returns a new array with elements reordered
+/**
+ * Perform bit-reversal permutation on a complex array.
+ *
+ * Creates a new array with elements reordered according to bit-reversal.
+ * Input format: interleaved complex [real0, imag0, real1, imag1, ...]
+ *
+ * @param data - Interleaved complex array (length must be 2 * power of 2)
+ * @returns New array with bit-reversed order
+ *
+ * @example
+ * ```typescript
+ * // Input: 4 complex numbers [r0,i0, r1,i1, r2,i2, r3,i3]
+ * const input = new Float32Array([0,0, 1,0, 2,0, 3,0]);
+ * const reversed = bitReversalPermutation(input);
+ * // Output: [r0,i0, r2,i2, r1,i1, r3,i3] (indices 0,2,1,3)
+ * ```
+ */
 export function bitReversalPermutation(data: Float32Array): Float32Array {
   const n = data.length / 2; // Number of complex elements
   const bits = log2(n);
@@ -44,7 +111,21 @@ export function bitReversalPermutation(data: Float32Array): Float32Array {
   return result;
 }
 
-// In-place bit-reversal permutation
+/**
+ * Perform in-place bit-reversal permutation.
+ *
+ * Modifies the input array directly, swapping elements to achieve
+ * bit-reversed order. More memory efficient than {@link bitReversalPermutation}.
+ *
+ * @param data - Interleaved complex array to permute in-place
+ *
+ * @example
+ * ```typescript
+ * const data = new Float32Array([0,0, 1,0, 2,0, 3,0]);
+ * bitReversalPermutationInPlace(data);
+ * // data is now bit-reversed
+ * ```
+ */
 export function bitReversalPermutationInPlace(data: Float32Array): void {
   const n = data.length / 2;
   const bits = log2(n);

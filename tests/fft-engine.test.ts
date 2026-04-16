@@ -215,7 +215,7 @@ describe('FFTEngine contract', () => {
     const engine = await FFTEngine.create(createEngineManager(), defaultConfig);
 
     await expect(engine.ifft2d(new Float32Array(10), 2, 2)).rejects.toMatchObject({
-      code: FFTErrorCode.INVALID_INPUT_SIZE,
+      code: FFTErrorCode.DIMENSION_MISMATCH,
     });
   });
 

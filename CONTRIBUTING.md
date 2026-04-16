@@ -23,7 +23,7 @@ This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDU
 
 - Node.js 18.x or higher
 - npm 9.x or higher
-- A browser with WebGPU support (Chrome 113+, Edge 113+, or Firefox Nightly with flags)
+- A browser with WebGPU support (Chrome 113+, Edge 113+, or Firefox 128+)
 
 ### Setting Up the Development Environment
 
@@ -31,8 +31,8 @@ This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDU
 
 2. **Clone your fork**:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/webgpu-fft.git
-   cd webgpu-fft
+   git clone https://github.com/YOUR_USERNAME/gpu-fft.git
+   cd gpu-fft
    ```
 
 3. **Install dependencies**:
@@ -254,7 +254,7 @@ When requesting a feature, please include:
 
 If you have questions about contributing, feel free to:
 
-- Open a [Discussion](https://github.com/YOUR_USERNAME/webgpu-fft/discussions)
+- Open a [Discussion](https://github.com/LessUp/gpu-fft/discussions)
 - Ask in an existing issue
 - Reach out to the maintainers
 

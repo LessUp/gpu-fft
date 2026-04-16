@@ -19,9 +19,9 @@ We take the security of WebGPU FFT Library seriously. If you believe you have fo
 
 Instead, please report them via one of the following methods:
 
-1. **GitHub Security Advisories**: Use the [Security tab](https://github.com/user/webgpu-fft/security/advisories/new) to privately report a vulnerability.
+1. **GitHub Security Advisories**: Use the [Security tab](https://github.com/LessUp/gpu-fft/security/advisories/new) to privately report a vulnerability.
 
-2. **Email**: Send an email to [security@example.com] with the following information:
+2. **Email**: Send an email to the project maintainers via GitHub with the following information:
    - Type of vulnerability
    - Full paths of source file(s) related to the vulnerability
    - Location of the affected source code (tag/branch/commit or direct URL)

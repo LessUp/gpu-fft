@@ -59,8 +59,10 @@ representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-[INSERT CONTACT METHOD].
+reported to the community leaders responsible for enforcement by:
+
+1. Opening an issue on GitHub using the "bug report" template
+2. Creating a private [GitHub Security Advisory](https://github.com/LessUp/gpu-fft/security/advisories/new)
 
 All complaints will be reviewed and investigated promptly and fairly.
 

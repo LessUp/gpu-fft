@@ -8,14 +8,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: [
-        'benchmarks/**',
-        'coverage/**',
-        'dist/**',
-        'docs/**',
-        'examples/**',
-        'tests/**',
-      ],
+      exclude: ['benchmarks/**', 'coverage/**', 'dist/**', 'docs/**', 'examples/**', 'tests/**'],
     },
   },
 });

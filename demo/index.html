@@ -1,125 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebGPU FFT Library - Demos</title>
-    <link rel="stylesheet" href="shared/styles.css">
-</head>
+    <link rel="stylesheet" href="shared/styles.css" />
+  </head>
 
-<body>
+  <body>
     <div class="container">
-        <header>
-            <h1>🎵 WebGPU FFT Library</h1>
-            <p class="subtitle">High-performance GPU-accelerated Fast Fourier Transform</p>
-        </header>
+      <header>
+        <h1>🎵 WebGPU FFT Library</h1>
+        <p class="subtitle">High-performance GPU-accelerated Fast Fourier Transform</p>
+      </header>
 
-        <main>
-            <section class="webgpu-check" id="webgpu-status">
-                <div class="status-indicator">
-                    <span class="spinner"></span>
-                    <span>Checking WebGPU support...</span>
-                </div>
-            </section>
+      <main>
+        <section class="webgpu-check" id="webgpu-status">
+          <div class="status-indicator">
+            <span class="spinner"></span>
+            <span>Checking WebGPU support...</span>
+          </div>
+        </section>
 
-            <section class="demos">
-                <h2>Interactive Demos</h2>
+        <section class="demos">
+          <h2>Interactive Demos</h2>
 
-                <div class="demo-grid">
-                    <a href="audio-spectrum/index.html" class="demo-card">
-                        <div class="demo-icon">🎤</div>
-                        <h3>Audio Spectrum Analyzer</h3>
-                        <p>Real-time audio visualization using microphone input or audio files. See frequency content in
-                            real-time.</p>
-                        <span class="demo-tag">Audio</span>
-                    </a>
+          <div class="demo-grid">
+            <a href="audio-spectrum/index.html" class="demo-card">
+              <div class="demo-icon">🎤</div>
+              <h3>Audio Spectrum Analyzer</h3>
+              <p>
+                Real-time audio visualization using microphone input or audio files. See frequency
+                content in real-time.
+              </p>
+              <span class="demo-tag">Audio</span>
+            </a>
 
-                    <a href="image-filter/index.html" class="demo-card">
-                        <div class="demo-icon">🖼️</div>
-                        <h3>Image Frequency Filter</h3>
-                        <p>Apply low-pass and high-pass filters to images in the frequency domain. Blur or sharpen
-                            images.</p>
-                        <span class="demo-tag">Image</span>
-                    </a>
-                </div>
-            </section>
+            <a href="image-filter/index.html" class="demo-card">
+              <div class="demo-icon">🖼️</div>
+              <h3>Image Frequency Filter</h3>
+              <p>
+                Apply low-pass and high-pass filters to images in the frequency domain. Blur or
+                sharpen images.
+              </p>
+              <span class="demo-tag">Image</span>
+            </a>
+          </div>
+        </section>
 
-            <section class="features">
-                <h2>Features</h2>
-                <ul class="feature-list">
-                    <li>✅ 1D FFT/IFFT (2 to 65,536 elements)</li>
-                    <li>✅ 2D FFT/IFFT (up to 2048×2048)</li>
-                    <li>✅ Bank conflict optimization</li>
-                    <li>✅ Low-pass & high-pass filters</li>
-                    <li>✅ Real-time spectrum analysis</li>
-                    <li>✅ TypeScript support</li>
-                </ul>
-            </section>
+        <section class="features">
+          <h2>Features</h2>
+          <ul class="feature-list">
+            <li>✅ 1D FFT/IFFT (2 to 65,536 elements)</li>
+            <li>✅ 2D FFT/IFFT (up to 2048×2048)</li>
+            <li>✅ Bank conflict optimization</li>
+            <li>✅ Low-pass & high-pass filters</li>
+            <li>✅ Real-time spectrum analysis</li>
+            <li>✅ TypeScript support</li>
+          </ul>
+        </section>
 
-            <section class="links">
-                <h2>Resources</h2>
-                <div class="link-grid">
-                    <a href="https://github.com/LessUp/gpu-fft" class="link-card" target="_blank">
-                        <span class="link-icon">📦</span>
-                        <span>GitHub Repository</span>
-                    </a>
-                    <a href="https://www.npmjs.com/package/webgpu-fft" class="link-card" target="_blank">
-                        <span class="link-icon">📚</span>
-                        <span>npm Package</span>
-                    </a>
-                    <a href="https://lessup.github.io/gpu-fft/api" class="link-card" target="_blank">
-                        <span class="link-icon">📖</span>
-                        <span>API Documentation</span>
-                    </a>
-                </div>
-            </section>
-        </main>
+        <section class="links">
+          <h2>Resources</h2>
+          <div class="link-grid">
+            <a href="https://github.com/LessUp/gpu-fft" class="link-card" target="_blank">
+              <span class="link-icon">📦</span>
+              <span>GitHub Repository</span>
+            </a>
+            <a href="https://www.npmjs.com/package/webgpu-fft" class="link-card" target="_blank">
+              <span class="link-icon">📚</span>
+              <span>npm Package</span>
+            </a>
+            <a href="https://lessup.github.io/gpu-fft/api" class="link-card" target="_blank">
+              <span class="link-icon">📖</span>
+              <span>API Documentation</span>
+            </a>
+          </div>
+        </section>
+      </main>
 
-        <footer>
-            <p>WebGPU FFT Library © 2024 | MIT License</p>
-        </footer>
+      <footer>
+        <p>WebGPU FFT Library © 2024 | MIT License</p>
+      </footer>
     </div>
 
     <script>
-        async function checkWebGPU() {
-            const statusEl = document.getElementById('webgpu-status');
+      async function checkWebGPU() {
+        const statusEl = document.getElementById('webgpu-status');
 
-            if (!navigator.gpu) {
-                statusEl.innerHTML = `
+        if (!navigator.gpu) {
+          statusEl.innerHTML = `
           <div class="status-error">
             <span class="status-icon">❌</span>
             <span>WebGPU is not supported in this browser. Please use Chrome 113+, Edge 113+, or Safari 17+.</span>
           </div>
         `;
-                return;
-            }
+          return;
+        }
 
-            try {
-                const adapter = await navigator.gpu.requestAdapter();
-                if (!adapter) {
-                    throw new Error('No adapter');
-                }
+        try {
+          const adapter = await navigator.gpu.requestAdapter();
+          if (!adapter) {
+            throw new Error('No adapter');
+          }
 
-                const info = await adapter.requestAdapterInfo();
-                statusEl.innerHTML = `
+          const info = await adapter.requestAdapterInfo();
+          statusEl.innerHTML = `
           <div class="status-success">
             <span class="status-icon">✅</span>
             <span>WebGPU is supported! GPU: ${info.device || info.description || 'Unknown'}</span>
           </div>
         `;
-            } catch (e) {
-                statusEl.innerHTML = `
+        } catch (e) {
+          statusEl.innerHTML = `
           <div class="status-error">
             <span class="status-icon">⚠️</span>
             <span>WebGPU adapter not available. Your GPU may not support WebGPU.</span>
           </div>
         `;
-            }
         }
+      }
 
-        checkWebGPU();
+      checkWebGPU();
     </script>
-</body>
-
+  </body>
 </html>

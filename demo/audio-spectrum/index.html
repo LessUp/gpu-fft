@@ -1,326 +1,332 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Audio Spectrum Analyzer - WebGPU FFT</title>
-    <link rel="stylesheet" href="../shared/styles.css">
-</head>
+    <link rel="stylesheet" href="../shared/styles.css" />
+  </head>
 
-<body>
+  <body>
     <div class="container">
-        <header>
-            <h1>🎤 Audio Spectrum Analyzer</h1>
-            <p class="subtitle">Real-time frequency visualization demo for the FFT toolkit</p>
-        </header>
+      <header>
+        <h1>🎤 Audio Spectrum Analyzer</h1>
+        <p class="subtitle">Real-time frequency visualization demo for the FFT toolkit</p>
+      </header>
 
-        <main>
-            <section class="webgpu-check" id="webgpu-status">
-                <div class="status-indicator">
-                    <span class="spinner"></span>
-                    <span>Initializing WebGPU...</span>
-                </div>
-            </section>
+      <main>
+        <section class="webgpu-check" id="webgpu-status">
+          <div class="status-indicator">
+            <span class="spinner"></span>
+            <span>Initializing WebGPU...</span>
+          </div>
+        </section>
 
-            <section class="controls">
-                <div class="control-group">
-                    <label>Audio Source</label>
-                    <select id="source-select">
-                        <option value="microphone">🎤 Microphone</option>
-                        <option value="file">📁 Audio File</option>
-                        <option value="oscillator">🎵 Test Tone</option>
-                    </select>
-                </div>
+        <section class="controls">
+          <div class="control-group">
+            <label>Audio Source</label>
+            <select id="source-select">
+              <option value="microphone">🎤 Microphone</option>
+              <option value="file">📁 Audio File</option>
+              <option value="oscillator">🎵 Test Tone</option>
+            </select>
+          </div>
 
-                <div class="control-group" id="file-input-group" style="display: none;">
-                    <label>Select Audio File</label>
-                    <input type="file" id="audio-file" accept="audio/*">
-                </div>
+          <div class="control-group" id="file-input-group" style="display: none">
+            <label>Select Audio File</label>
+            <input type="file" id="audio-file" accept="audio/*" />
+          </div>
 
-                <div class="control-group" id="oscillator-group" style="display: none;">
-                    <label>Frequency: <span id="freq-value">440</span> Hz</label>
-                    <input type="range" id="oscillator-freq" min="20" max="2000" value="440">
-                </div>
+          <div class="control-group" id="oscillator-group" style="display: none">
+            <label>Frequency: <span id="freq-value">440</span> Hz</label>
+            <input type="range" id="oscillator-freq" min="20" max="2000" value="440" />
+          </div>
 
-                <div class="control-group">
-                    <label>FFT Size</label>
-                    <select id="fft-size">
-                        <option value="256">256</option>
-                        <option value="512">512</option>
-                        <option value="1024" selected>1024</option>
-                        <option value="2048">2048</option>
-                        <option value="4096">4096</option>
-                    </select>
-                </div>
+          <div class="control-group">
+            <label>FFT Size</label>
+            <select id="fft-size">
+              <option value="256">256</option>
+              <option value="512">512</option>
+              <option value="1024" selected>1024</option>
+              <option value="2048">2048</option>
+              <option value="4096">4096</option>
+            </select>
+          </div>
 
-                <button id="start-btn">▶️ Start</button>
-                <button id="stop-btn" disabled>⏹️ Stop</button>
-            </section>
+          <button id="start-btn">▶️ Start</button>
+          <button id="stop-btn" disabled>⏹️ Stop</button>
+        </section>
 
-            <section class="visualization">
-                <canvas id="spectrum-canvas" width="800" height="300"></canvas>
+        <section class="visualization">
+          <canvas id="spectrum-canvas" width="800" height="300"></canvas>
 
-                <div class="stats">
-                    <div class="stat">
-                        <span class="stat-label">Peak Frequency</span>
-                        <span class="stat-value" id="peak-freq">-- Hz</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Peak Level</span>
-                        <span class="stat-value" id="peak-level">-- dB</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">FPS</span>
-                        <span class="stat-value" id="fps">--</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">FFT Time</span>
-                        <span class="stat-value" id="fft-time">-- ms</span>
-                    </div>
-                </div>
-            </section>
+          <div class="stats">
+            <div class="stat">
+              <span class="stat-label">Peak Frequency</span>
+              <span class="stat-value" id="peak-freq">-- Hz</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Peak Level</span>
+              <span class="stat-value" id="peak-level">-- dB</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">FPS</span>
+              <span class="stat-value" id="fps">--</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">FFT Time</span>
+              <span class="stat-value" id="fft-time">-- ms</span>
+            </div>
+          </div>
+        </section>
 
-            <section class="info">
-                <h2>How It Works</h2>
-                <p>This demo captures audio from your microphone or an audio file, then visualizes its frequency content in real time. The current demo page uses the Web Audio API for visualization rather than the packaged FFT runtime, so treat it as an interactive showcase instead of a direct runtime mirror.</p>
+        <section class="info">
+          <h2>How It Works</h2>
+          <p>
+            This demo captures audio from your microphone or an audio file, then visualizes its
+            frequency content in real time. The current demo page uses the Web Audio API for
+            visualization rather than the packaged FFT runtime, so treat it as an interactive
+            showcase instead of a direct runtime mirror.
+          </p>
 
-                <h3>Controls</h3>
-                <ul>
-                    <li><strong>Microphone</strong>: Uses your device's microphone for live audio input</li>
-                    <li><strong>Audio File</strong>: Analyze any audio file from your computer</li>
-                    <li><strong>Test Tone</strong>: Generate a pure sine wave at a specific frequency</li>
-                    <li><strong>FFT Size</strong>: Larger sizes give better frequency resolution but slower updates</li>
-                </ul>
-            </section>
-        </main>
+          <h3>Controls</h3>
+          <ul>
+            <li><strong>Microphone</strong>: Uses your device's microphone for live audio input</li>
+            <li><strong>Audio File</strong>: Analyze any audio file from your computer</li>
+            <li><strong>Test Tone</strong>: Generate a pure sine wave at a specific frequency</li>
+            <li>
+              <strong>FFT Size</strong>: Larger sizes give better frequency resolution but slower
+              updates
+            </li>
+          </ul>
+        </section>
+      </main>
 
-        <footer>
-            <p><a href="../index.html">← Back to Demos</a> | WebGPU FFT Library © 2024</p>
-        </footer>
+      <footer>
+        <p><a href="../index.html">← Back to Demos</a> | WebGPU FFT Library © 2024</p>
+      </footer>
     </div>
 
     <script type="module">
-        // Note: In a real implementation, you would import from the built library
-        // import { createSpectrumAnalyzer } from 'webgpu-fft';
+      // Note: In a real implementation, you would import from the built library
+      // import { createSpectrumAnalyzer } from 'webgpu-fft';
 
-        // For demo purposes, we'll use the Web Audio API's built-in analyzer
-        // as a fallback when the library isn't available
+      // For demo purposes, we'll use the Web Audio API's built-in analyzer
+      // as a fallback when the library isn't available
 
-        let audioContext = null;
-        let analyser = null;
-        let source = null;
-        let animationId = null;
-        let isRunning = false;
+      let audioContext = null;
+      let analyser = null;
+      let source = null;
+      let animationId = null;
+      let isRunning = false;
 
-        const canvas = document.getElementById('spectrum-canvas');
-        const ctx = canvas.getContext('2d');
-        const startBtn = document.getElementById('start-btn');
-        const stopBtn = document.getElementById('stop-btn');
-        const sourceSelect = document.getElementById('source-select');
-        const fftSizeSelect = document.getElementById('fft-size');
-        const fileInputGroup = document.getElementById('file-input-group');
-        const oscillatorGroup = document.getElementById('oscillator-group');
-        const audioFileInput = document.getElementById('audio-file');
-        const oscillatorFreq = document.getElementById('oscillator-freq');
-        const freqValue = document.getElementById('freq-value');
+      const canvas = document.getElementById('spectrum-canvas');
+      const ctx = canvas.getContext('2d');
+      const startBtn = document.getElementById('start-btn');
+      const stopBtn = document.getElementById('stop-btn');
+      const sourceSelect = document.getElementById('source-select');
+      const fftSizeSelect = document.getElementById('fft-size');
+      const fileInputGroup = document.getElementById('file-input-group');
+      const oscillatorGroup = document.getElementById('oscillator-group');
+      const audioFileInput = document.getElementById('audio-file');
+      const oscillatorFreq = document.getElementById('oscillator-freq');
+      const freqValue = document.getElementById('freq-value');
 
-        let frameCount = 0;
-        let lastFpsUpdate = performance.now();
+      let frameCount = 0;
+      let lastFpsUpdate = performance.now();
 
-        // Check WebGPU support
-        async function checkWebGPU() {
-            const statusEl = document.getElementById('webgpu-status');
+      // Check WebGPU support
+      async function checkWebGPU() {
+        const statusEl = document.getElementById('webgpu-status');
 
-            if (!navigator.gpu) {
-                statusEl.innerHTML = `
+        if (!navigator.gpu) {
+          statusEl.innerHTML = `
           <div class="status-error">
             <span class="status-icon">⚠️</span>
             <span>WebGPU not available. Using Web Audio API fallback.</span>
           </div>
         `;
-                return false;
-            }
+          return false;
+        }
 
-            try {
-                const adapter = await navigator.gpu.requestAdapter();
-                if (adapter) {
-                    statusEl.innerHTML = `
+        try {
+          const adapter = await navigator.gpu.requestAdapter();
+          if (adapter) {
+            statusEl.innerHTML = `
             <div class="status-success">
               <span class="status-icon">✅</span>
               <span>WebGPU is available in this browser. This demo still uses the Web Audio API visualization path.</span>
             </div>
           `;
-                    return true;
-                }
-            } catch (e) { }
+            return true;
+          }
+        } catch (e) {}
 
-            statusEl.innerHTML = `
+        statusEl.innerHTML = `
         <div class="status-error">
           <span class="status-icon">⚠️</span>
           <span>WebGPU adapter not available. Using fallback.</span>
         </div>
       `;
-            return false;
+        return false;
+      }
+
+      // Source selection
+      sourceSelect.addEventListener('change', () => {
+        const source = sourceSelect.value;
+        fileInputGroup.style.display = source === 'file' ? 'flex' : 'none';
+        oscillatorGroup.style.display = source === 'oscillator' ? 'flex' : 'none';
+      });
+
+      oscillatorFreq.addEventListener('input', () => {
+        freqValue.textContent = oscillatorFreq.value;
+      });
+
+      // Start/Stop
+      startBtn.addEventListener('click', start);
+      stopBtn.addEventListener('click', stop);
+
+      async function start() {
+        if (isRunning) return;
+
+        try {
+          audioContext = new AudioContext();
+          analyser = audioContext.createAnalyser();
+          analyser.fftSize = parseInt(fftSizeSelect.value);
+          analyser.smoothingTimeConstant = 0.8;
+
+          const sourceType = sourceSelect.value;
+
+          if (sourceType === 'microphone') {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            source = audioContext.createMediaStreamSource(stream);
+          } else if (sourceType === 'file') {
+            const file = audioFileInput.files[0];
+            if (!file) {
+              alert('Please select an audio file');
+              return;
+            }
+            const arrayBuffer = await file.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.loop = true;
+            source.start();
+          } else if (sourceType === 'oscillator') {
+            source = audioContext.createOscillator();
+            source.frequency.value = parseInt(oscillatorFreq.value);
+            source.start();
+          }
+
+          source.connect(analyser);
+
+          isRunning = true;
+          startBtn.disabled = true;
+          stopBtn.disabled = false;
+
+          draw();
+        } catch (error) {
+          console.error('Error starting:', error);
+          alert('Error: ' + error.message);
+        }
+      }
+
+      function stop() {
+        if (!isRunning) return;
+
+        if (animationId) {
+          cancelAnimationFrame(animationId);
         }
 
-        // Source selection
-        sourceSelect.addEventListener('change', () => {
-            const source = sourceSelect.value;
-            fileInputGroup.style.display = source === 'file' ? 'flex' : 'none';
-            oscillatorGroup.style.display = source === 'oscillator' ? 'flex' : 'none';
-        });
-
-        oscillatorFreq.addEventListener('input', () => {
-            freqValue.textContent = oscillatorFreq.value;
-        });
-
-        // Start/Stop
-        startBtn.addEventListener('click', start);
-        stopBtn.addEventListener('click', stop);
-
-        async function start() {
-            if (isRunning) return;
-
-            try {
-                audioContext = new AudioContext();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = parseInt(fftSizeSelect.value);
-                analyser.smoothingTimeConstant = 0.8;
-
-                const sourceType = sourceSelect.value;
-
-                if (sourceType === 'microphone') {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    source = audioContext.createMediaStreamSource(stream);
-                } else if (sourceType === 'file') {
-                    const file = audioFileInput.files[0];
-                    if (!file) {
-                        alert('Please select an audio file');
-                        return;
-                    }
-                    const arrayBuffer = await file.arrayBuffer();
-                    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                    source = audioContext.createBufferSource();
-                    source.buffer = audioBuffer;
-                    source.loop = true;
-                    source.start();
-                } else if (sourceType === 'oscillator') {
-                    source = audioContext.createOscillator();
-                    source.frequency.value = parseInt(oscillatorFreq.value);
-                    source.start();
-                }
-
-                source.connect(analyser);
-
-                isRunning = true;
-                startBtn.disabled = true;
-                stopBtn.disabled = false;
-
-                draw();
-            } catch (error) {
-                console.error('Error starting:', error);
-                alert('Error: ' + error.message);
-            }
+        if (source) {
+          if (source.stop) source.stop();
+          source.disconnect();
         }
 
-        function stop() {
-            if (!isRunning) return;
-
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-            }
-
-            if (source) {
-                if (source.stop) source.stop();
-                source.disconnect();
-            }
-
-            if (audioContext) {
-                audioContext.close();
-            }
-
-            isRunning = false;
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-
-            // Clear canvas
-            ctx.fillStyle = '#1e293b';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (audioContext) {
+          audioContext.close();
         }
 
-        function draw() {
-            if (!isRunning) return;
+        isRunning = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
 
-            const startTime = performance.now();
+        // Clear canvas
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
 
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            analyser.getByteFrequencyData(dataArray);
+      function draw() {
+        if (!isRunning) return;
 
-            const fftTime = performance.now() - startTime;
+        const startTime = performance.now();
 
-            // Clear canvas
-            ctx.fillStyle = '#1e293b';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
 
-            // Draw spectrum
-            const barWidth = canvas.width / bufferLength;
-            let x = 0;
-            let peakIndex = 0;
-            let peakValue = 0;
+        const fftTime = performance.now() - startTime;
 
-            for (let i = 0; i < bufferLength; i++) {
-                const value = dataArray[i];
-                const barHeight = (value / 255) * canvas.height;
+        // Clear canvas
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Gradient color based on frequency
-                const hue = (i / bufferLength) * 240;
-                ctx.fillStyle = `hsl(${hue}, 80%, 50%)`;
+        // Draw spectrum
+        const barWidth = canvas.width / bufferLength;
+        let x = 0;
+        let peakIndex = 0;
+        let peakValue = 0;
 
-                ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
+        for (let i = 0; i < bufferLength; i++) {
+          const value = dataArray[i];
+          const barHeight = (value / 255) * canvas.height;
 
-                if (value > peakValue) {
-                    peakValue = value;
-                    peakIndex = i;
-                }
+          // Gradient color based on frequency
+          const hue = (i / bufferLength) * 240;
+          ctx.fillStyle = `hsl(${hue}, 80%, 50%)`;
 
-                x += barWidth;
-            }
+          ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
 
-            // Update stats
-            const peakFreq = (peakIndex * audioContext.sampleRate) / analyser.fftSize;
-            const peakDb = (peakValue / 255) * 100 - 100;
+          if (value > peakValue) {
+            peakValue = value;
+            peakIndex = i;
+          }
 
-            document.getElementById('peak-freq').textContent = peakFreq.toFixed(0) + ' Hz';
-            document.getElementById('peak-level').textContent = peakDb.toFixed(1) + ' dB';
-            document.getElementById('fft-time').textContent = fftTime.toFixed(2) + ' ms';
-
-            // FPS calculation
-            frameCount++;
-            const now = performance.now();
-            if (now - lastFpsUpdate >= 1000) {
-                document.getElementById('fps').textContent = frameCount;
-                frameCount = 0;
-                lastFpsUpdate = now;
-            }
-
-            animationId = requestAnimationFrame(draw);
+          x += barWidth;
         }
 
-        // Initialize
-        checkWebGPU();
+        // Update stats
+        const peakFreq = (peakIndex * audioContext.sampleRate) / analyser.fftSize;
+        const peakDb = (peakValue / 255) * 100 - 100;
 
-        // Resize canvas
-        function resizeCanvas() {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = Math.min(rect.width, 1200);
-            canvas.height = 300;
+        document.getElementById('peak-freq').textContent = peakFreq.toFixed(0) + ' Hz';
+        document.getElementById('peak-level').textContent = peakDb.toFixed(1) + ' dB';
+        document.getElementById('fft-time').textContent = fftTime.toFixed(2) + ' ms';
+
+        // FPS calculation
+        frameCount++;
+        const now = performance.now();
+        if (now - lastFpsUpdate >= 1000) {
+          document.getElementById('fps').textContent = frameCount;
+          frameCount = 0;
+          lastFpsUpdate = now;
         }
 
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        animationId = requestAnimationFrame(draw);
+      }
+
+      // Initialize
+      checkWebGPU();
+
+      // Resize canvas
+      function resizeCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = Math.min(rect.width, 1200);
+        canvas.height = 300;
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
     </script>
-</body>
-
+  </body>
 </html>

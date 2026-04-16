@@ -102,7 +102,7 @@ export class GPUResourceManager {
 
   uploadData(buffer: GPUBuffer, data: Float32Array | Uint32Array | Uint8Array): void {
     this.assertOperational();
-    this._device.queue.writeBuffer(buffer, 0, data);
+    this._device.queue.writeBuffer(buffer, 0, data as BufferSource);
   }
 
   async downloadData(buffer: GPUBuffer, size: number): Promise<Float32Array> {

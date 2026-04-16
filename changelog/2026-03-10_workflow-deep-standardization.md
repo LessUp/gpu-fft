@@ -1,14 +1,26 @@
-# Workflow 深度标准化
+# Changelog
 
-日期：2026-03-10
+All notable changes to this project are documented in the root [CHANGELOG.md](../CHANGELOG.md).
 
-## 变更内容
+## Historical Entries
 
-- Pages workflow 重命名：`deploy-docs.yml` → `pages.yml`
-- CI workflow 统一 `permissions: contents: read` 与 `concurrency` 配置
-- Pages workflow 补充 `actions/configure-pages@v5` 步骤
-- Pages workflow 添加 `paths` 触发过滤，减少无效构建
+### 2026-03-10: Workflow Deep Standardization
 
-## 背景
+**Changes:**
+- Pages workflow renamed: `deploy-docs.yml` → `pages.yml`
+- CI workflow unified `permissions: contents: read` and `concurrency` configuration
+- Pages workflow added `actions/configure-pages@v5` step
+- Pages workflow added `paths` trigger filter to reduce unnecessary builds
 
-全仓库第二轮 GitHub Actions 深度标准化：统一命名、权限、并发、路径过滤与缓存策略。
+**Background:**
+Second round of GitHub Actions deep standardization across the repository: unified naming, permissions, concurrency, path filtering, and caching strategies.
+
+### 2026-04-16: Dependency Security Update
+
+**Changes:**
+- Major version upgrades to resolve all npm audit vulnerabilities
+- ESLint 9 flat config migration
+- TypeScript-ESLint v8 migration
+- Vite 8 and Vitest 4 upgrades
+
+See [CHANGELOG.md](../CHANGELOG.md) for complete details.

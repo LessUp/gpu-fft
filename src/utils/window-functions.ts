@@ -1,6 +1,29 @@
-// Window functions for signal processing
+/**
+ * Window functions for signal processing
+ * @module webgpu-fft/window-functions
+ *
+ * Window functions are used to reduce spectral leakage in FFT analysis.
+ * Each window has different characteristics in terms of:
+ * - Main lobe width (frequency resolution)
+ * - Side lobe attenuation (dynamic range)
+ * - Amplitude accuracy
+ */
 
-// Hann window: w[n] = 0.5 - 0.5 * cos(2πn/(N-1))
+/**
+ * Hann window: w[n] = 0.5 - 0.5 * cos(2πn/(N-1))
+ *
+ * Good general-purpose window with moderate side lobe attenuation.
+ * Often used for audio spectrum analysis.
+ *
+ * @param size - Number of samples in the window
+ * @returns Window coefficients
+ *
+ * @example
+ * ```typescript
+ * const window = hannWindow(1024);
+ * const windowed = applyWindow(signal, window);
+ * ```
+ */
 export function hannWindow(size: number): Float32Array {
   const window = new Float32Array(size);
   for (let n = 0; n < size; n++) {
@@ -9,7 +32,20 @@ export function hannWindow(size: number): Float32Array {
   return window;
 }
 
-// Hamming window: w[n] = 0.54 - 0.46 * cos(2πn/(N-1))
+/**
+ * Hamming window: w[n] = 0.54 - 0.46 * cos(2πn/(N-1))
+ *
+ * Similar to Hann but with slightly better side lobe suppression.
+ * Named after Richard Hamming.
+ *
+ * @param size - Number of samples in the window
+ * @returns Window coefficients
+ *
+ * @example
+ * ```typescript
+ * const window = hammingWindow(512);
+ * ```
+ */
 export function hammingWindow(size: number): Float32Array {
   const window = new Float32Array(size);
   for (let n = 0; n < size; n++) {
@@ -18,7 +54,20 @@ export function hammingWindow(size: number): Float32Array {
   return window;
 }
 
-// Blackman window: w[n] = 0.42 - 0.5*cos(2πn/(N-1)) + 0.08*cos(4πn/(N-1))
+/**
+ * Blackman window: w[n] = 0.42 - 0.5*cos(2πn/(N-1)) + 0.08*cos(4πn/(N-1))
+ *
+ * Excellent side lobe attenuation at the cost of wider main lobe.
+ * Good for detecting weak signals near strong ones.
+ *
+ * @param size - Number of samples in the window
+ * @returns Window coefficients
+ *
+ * @example
+ * ```typescript
+ * const window = blackmanWindow(1024);
+ * ```
+ */
 export function blackmanWindow(size: number): Float32Array {
   const window = new Float32Array(size);
   for (let n = 0; n < size; n++) {
@@ -28,7 +77,20 @@ export function blackmanWindow(size: number): Float32Array {
   return window;
 }
 
-// Flat-top window: minimizes amplitude error in spectral analysis
+/**
+ * Flat-top window: Minimizes amplitude error in spectral analysis.
+ *
+ * Provides the most accurate amplitude measurements but with the
+ * widest main lobe. Ideal for amplitude-critical applications.
+ *
+ * @param size - Number of samples in the window
+ * @returns Window coefficients
+ *
+ * @example
+ * ```typescript
+ * const window = flatTopWindow(2048);
+ * ```
+ */
 export function flatTopWindow(size: number): Float32Array {
   const a0 = 0.21557895;
   const a1 = 0.41663158;
@@ -48,14 +110,43 @@ export function flatTopWindow(size: number): Float32Array {
   return window;
 }
 
-// Rectangular window (no windowing, all ones)
+/**
+ * Rectangular window (no windowing, all ones).
+ *
+ * Equivalent to not applying any window. Best frequency resolution
+ * but worst side lobe suppression (-13 dB first side lobe).
+ *
+ * @param size - Number of samples in the window
+ * @returns Array of all ones
+ *
+ * @example
+ * ```typescript
+ * const window = rectangularWindow(1024);
+ * // Equivalent to no windowing
+ * ```
+ */
 export function rectangularWindow(size: number): Float32Array {
   const window = new Float32Array(size);
   window.fill(1);
   return window;
 }
 
-// Apply window to real signal
+/**
+ * Apply a window function to a real-valued signal.
+ *
+ * Element-wise multiplication of signal and window.
+ *
+ * @param signal - Real-valued signal samples
+ * @param window - Window coefficients (must match signal length)
+ * @returns Windowed signal
+ *
+ * @example
+ * ```typescript
+ * const signal = new Float32Array(1024);
+ * const window = hannWindow(1024);
+ * const windowed = applyWindow(signal, window);
+ * ```
+ */
 export function applyWindow(signal: Float32Array, window: Float32Array): Float32Array {
   const result = new Float32Array(signal.length);
   for (let i = 0; i < signal.length; i++) {
@@ -64,7 +155,22 @@ export function applyWindow(signal: Float32Array, window: Float32Array): Float32
   return result;
 }
 
-// Apply window to complex signal (interleaved format)
+/**
+ * Apply a window function to a complex signal (interleaved format).
+ *
+ * Applies the window to both real and imaginary parts independently.
+ *
+ * @param signal - Interleaved complex signal [real, imag, real, imag, ...]
+ * @param window - Window coefficients (length should be signal.length / 2)
+ * @returns Windowed complex signal
+ *
+ * @example
+ * ```typescript
+ * const complexSignal = new Float32Array(2048); // 1024 complex numbers
+ * const window = hannWindow(1024);
+ * const windowed = applyWindowComplex(complexSignal, window);
+ * ```
+ */
 export function applyWindowComplex(signal: Float32Array, window: Float32Array): Float32Array {
   const result = new Float32Array(signal.length);
   const n = window.length;

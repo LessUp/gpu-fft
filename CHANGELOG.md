@@ -8,55 +8,117 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Project quality enhancement documentation
-- LICENSE file with MIT license
-- CONTRIBUTING.md with contribution guidelines
-- CODE_OF_CONDUCT.md with community standards
-- SECURITY.md with security policy
-- ESLint and Prettier configuration
-- GitHub Actions CI/CD workflows
-- API documentation generation with TypeDoc
-- Interactive demo applications
-- Performance benchmarks
-- Example code collection
+
+- Professional bilingual documentation (English & 中文)
+- Comprehensive documentation site with 18 pages
+- Restructured changelog directory
 
 ### Changed
-- Enhanced README with badges, quick start, and troubleshooting sections
-- Improved package.json with complete metadata
+
+- Enhanced README with improved layout
+- Updated documentation standards
+
+## [1.1.0] - 2026-04-16
+
+### Added
+
+#### Documentation
+- **Complete documentation overhaul** with bilingual support:
+  - English documentation site (9 guides)
+  - Simplified Chinese documentation (9 guides)
+  - Language selection portal at docs root
+  - Modern dark theme with code syntax highlighting
+- New documentation pages:
+  - API Reference with complete function signatures
+  - Quick Start guides for both languages
+  - Examples and tutorials
+  - Browser compatibility matrix
+  - Troubleshooting guides
+- Restructured changelog directory:
+  - Added `/changelog/README.md` for directory documentation
+  - Individual version changelogs in `/changelog/`
+
+### Changed
+
+- Changelogs now follow [Keep a Changelog](https://keepachangelog.com/) format
+- Improved documentation structure and accessibility
+
+## [1.0.1] - 2026-04-16
+
+### Changed
+
+#### Dependencies
+- **Major version upgrades** to resolve security vulnerabilities:
+  - Vite: 5.0.0 → 8.0.8
+  - Vitest: 1.2.0 → 4.1.4
+  - ESLint: 8.56.0 → 9.32.0
+  - TypeScript-ESLint: 6.0.0 → 8.38.0 (now using `typescript-eslint` package)
+  - TypeScript: 5.3.0 → 5.9.3
+  - Husky: 8.0.0 → 9.1.7
+  - lint-staged: 15.0.0 → 16.4.0
+  - fast-check: 3.15.0 → 4.6.0
+  - TypeDoc: 0.25.0 → 0.28.19
+  - @webgpu/types: 0.1.40 → 0.1.69
+  - @vitest/coverage-v8: 1.2.0 → 4.1.4
+  - Added @eslint/js: ^9.32.0
+
+### Fixed
+
+#### Security
+- Resolved 16 npm audit vulnerabilities (7 moderate, 9 high)
+
+#### TypeScript
+- Fixed type compatibility with newer `@webgpu/types` in `gpu-resource-manager.ts`
+
+### Removed
+
+- `.eslintrc.json` - Replaced with ESLint 9 flat config
 
 ## [1.0.0] - 2024-01-07
 
 ### Added
-- Initial release of WebGPU FFT Library
-- 1D FFT/IFFT implementation using Cooley-Tukey Radix-2 algorithm
-- 2D FFT/IFFT for image processing
-- Bank conflict optimization for GPU shared memory
-- Efficient bit-reversal permutation
-- Frequency domain filtering (low-pass, high-pass)
-  - Ideal (sharp cutoff) filter
-  - Gaussian filter
-- Real-time audio spectrum analyzer
-  - Hann window function
-  - dB conversion
-  - Configurable FFT sizes (256, 512, 1024, 2048, 4096)
-- WebGPU resource management
-  - Automatic adapter/device initialization
-  - Buffer management
-  - Pipeline caching
-- TypeScript type definitions
-- Comprehensive test suite
-  - Unit tests with Vitest
-  - Property-based tests with fast-check
-- Complete specification documents
-  - Requirements document
-  - Design document
-  - Implementation tasks
+
+#### Core Features
+- **1D FFT/IFFT** - Cooley-Tukey Radix-2 DIT algorithm (2 to 65,536 elements)
+- **2D FFT/IFFT** - Image processing support (up to 2048×2048 pixels)
+- **GPU Acceleration** - WebGPU compute shaders
+- **CPU Fallback** - Full CPU implementation without WebGPU
+
+#### Applications
+- **Frequency Domain Filtering** - Low-pass, high-pass, band-pass (Ideal & Gaussian)
+- **Audio Spectrum Analyzer** - Real-time frequency analysis with windowing
+- **Window Functions** - Hann, Hamming, Blackman, Flat-top, Rectangular
+
+#### Utilities
+- Complex number operations
+- Bit-reversal utilities
+- GPU detection (`isWebGPUAvailable`, `hasWebGPUSupport`)
+- Custom error handling with `FFTError`
+
+#### Developer Experience
+- Full TypeScript support with strict mode
+- Zero runtime dependencies
+- ESM and CJS exports
+- Comprehensive test suite (106 tests)
+- Property-based testing with fast-check
 
 ### Technical Details
-- Supports FFT sizes from 2 to 65536 elements
-- Supports 2D FFT up to 2048×2048 pixels
-- Uses WGSL compute shaders for GPU acceleration
-- Implements bank conflict padding for optimal memory access
 
-[Unreleased]: https://github.com/user/webgpu-fft/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/user/webgpu-fft/releases/tag/v1.0.0
+- **Algorithm:** Cooley-Tukey Radix-2 Decimation-In-Time
+- **Shader Language:** WGSL (WebGPU Shading Language)
+- **Workgroup Size:** 256 (fixed for current implementation)
+- **Memory Layout:** Interleaved complex numbers
+
+### Known Limitations
+
+- GPU shader only supports `workgroupSize: 256`
+- Spectrum analyzer uses CPU FFT internally
+- Maximum 1D size: 65,536 elements
+- Maximum 2D size: 2048×2048
+
+---
+
+[Unreleased]: https://github.com/LessUp/gpu-fft/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/LessUp/gpu-fft/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/LessUp/gpu-fft/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/LessUp/gpu-fft/releases/tag/v1.0.0

@@ -1,14 +1,39 @@
-// webgpu-fft - WebGPU-accelerated FFT library
-//
-// Usage:
-//   import { createFFTEngine, cpuFFT, cpuIFFT } from 'webgpu-fft';
-//
-//   // GPU path (requires WebGPU)
-//   const engine = await createFFTEngine();
-//   const spectrum = await engine.fft(signal);
-//
-//   // CPU path (works everywhere)
-//   const result = cpuFFT(signal);
+/**
+ * WebGPU-accelerated FFT Library
+ *
+ * A high-performance Fast Fourier Transform library providing:
+ * - GPU-accelerated 1D/2D FFT via WebGPU compute shaders
+ * - CPU fallback for non-WebGPU environments
+ * - Signal processing utilities (spectrum analysis, filtering)
+ * - Image processing utilities (frequency domain filtering)
+ *
+ * @packageDocumentation
+ *
+ * @example Basic GPU FFT
+ * ```typescript
+ * import { createFFTEngine, isWebGPUAvailable } from 'webgpu-fft';
+ *
+ * if (await isWebGPUAvailable()) {
+ *   const engine = await createFFTEngine();
+ *   const input = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]);
+ *   const spectrum = await engine.fft(input);
+ *   const recovered = await engine.ifft(spectrum);
+ *   engine.dispose();
+ * }
+ * ```
+ *
+ * @example CPU Fallback
+ * ```typescript
+ * import { cpuFFT, cpuIFFT } from 'webgpu-fft';
+ *
+ * const input = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]);
+ * const spectrum = cpuFFT(input);
+ * const signal = cpuIFFT(spectrum);
+ * ```
+ *
+ * @see {@link https://lessup.github.io/gpu-fft/} Documentation
+ * @see {@link https://github.com/LessUp/gpu-fft} GitHub Repository
+ */
 
 // Core GPU engine
 export { FFTEngine, createFFTEngine } from './core/fft-engine';

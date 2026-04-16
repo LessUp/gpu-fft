@@ -1,10 +1,12 @@
-# WebGPU FFT Library
+# # WebGPU FFT Library
 
 [![npm version](https://img.shields.io/npm/v/webgpu-fft.svg)](https://www.npmjs.com/package/webgpu-fft)
+[![Version](https://img.shields.io/badge/版本-1.1.0-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![WebGPU](https://img.shields.io/badge/WebGPU-Enabled-green.svg)](https://www.w3.org/TR/webgpu/)
-[![Docs](https://img.shields.io/badge/Docs-GitHub%20Pages-blue?logo=github)](https://lessup.github.io/gpu-fft/)
+[![Docs](https://img.shields.io/badge/文档-双语-blue?logo=github)](https://lessup.github.io/gpu-fft/)
+[![CI](https://github.com/LessUp/gpu-fft/actions/workflows/ci.yml/badge.svg)](https://github.com/LessUp/gpu-fft/actions/workflows/ci.yml)
 
 [English](README.md) | 简体中文
 
@@ -12,17 +14,16 @@
 
 ## ✨ 特性
 
-- **1D FFT/IFFT** - 支持 2 到 65536 个元素的快速傅里叶变换
-- **2D FFT/IFFT** - 图像处理的二维傅里叶变换（最大 2048×2048）
-- **WebGPU 核心 FFT 引擎** - 为支持 WebGPU 的浏览器提供 GPU 路径的 1D/2D FFT 原语
-- **位反转置换** - 高效的并行位反转实现
-- **频域滤波** - 基于 CPU 的低通/高通/带通滤波器（Ideal 和 Gaussian）
-- **音频频谱分析** - 基于 CPU 的实时频谱分析
-- **窗函数** - Hann、Hamming、Blackman、Flat-top、矩形窗
-- **CPU 回退** - 完整的 CPU FFT 实现，无需 GPU 也可使用
-- **GPU 检测** - `isWebGPUAvailable()` 自动检测 GPU 支持
-- **TypeScript** - 完整的类型定义
-- **属性测试** - 使用 fast-check 进行全面的正确性验证
+| 特性 | 描述 |
+|------|------|
+| **1D FFT/IFFT** | 支持 2 到 65,536 个元素 |
+| **2D FFT/IFFT** | 图像处理，最大 2048×2048 |
+| **GPU 加速** | 基于 WebGPU 计算着色器 |
+| **CPU 回退** | 无需 GPU 也可使用完整 FFT |
+| **频域滤波** | 低通、高通、带通（Ideal 与 Gaussian） |
+| **频谱分析** | 实时音频频率分析，支持窗函数 |
+| **TypeScript** | 完整类型定义，严格模式支持 |
+| **零依赖** | 无运行时依赖 |
 
 ## 🚀 快速开始
 
@@ -32,16 +33,16 @@
 npm install webgpu-fft
 ```
 
-### GPU 路径
+### GPU 路径（推荐）
 
 ```typescript
 import { createFFTEngine, isWebGPUAvailable } from 'webgpu-fft';
 
-// 检测 GPU 支持
+// 检测 WebGPU 支持
 if (await isWebGPUAvailable()) {
   const engine = await createFFTEngine();
 
-  // 准备输入数据（交错格式：[real, imag, real, imag, ...]）
+  // 准备输入（交错格式：[实部, 虚部, 实部, 虚部, ...]）
   const input = new Float32Array(16); // 8 个复数
   for (let i = 0; i < 8; i++) {
     input[i * 2] = Math.sin(i);     // 实部
@@ -51,7 +52,7 @@ if (await isWebGPUAvailable()) {
   const fftResult = await engine.fft(input);
   const ifftResult = await engine.ifft(fftResult);
 
-  engine.dispose();
+  engine.dispose(); // 释放 GPU 资源
 }
 ```
 
@@ -67,75 +68,84 @@ const recovered = cpuIFFT(spectrum);
 
 ## 📖 API 参考
 
-### FFT 引擎（GPU）
+### 核心 FFT 引擎
 
 ```typescript
+import { createFFTEngine, type FFTEngineConfig } from 'webgpu-fft';
+
 // 使用默认配置创建
 const engine = await createFFTEngine();
 
-// 使用自定义配置创建
-const engine = await createFFTEngine({
-  enableBankConflictOptimization: true,
-  workgroupSize: 256
-});
+// 1D 变换
+const spectrum = await engine.fft(input);
+const signal = await engine.ifft(spectrum);
 
-// 1D FFT
-const result = await engine.fft(input);
-const inverse = await engine.ifft(result);
+// 2D 变换
+const freq2d = await engine.fft2d(input, width, height);
+const spatial2d = await engine.ifft2d(freq2d, width, height);
 
-// 2D FFT
-const result2d = await engine.fft2d(input, width, height);
-const inverse2d = await engine.ifft2d(result2d, width, height);
-
-// 释放资源
+// 清理资源
 engine.dispose();
 ```
 
-### CPU FFT
+> ⚠️ **注意**：当前 GPU 着色器仅支持 `workgroupSize: 256`。`enableBankConflictOptimization` 选项预留给未来使用。
+
+### CPU FFT 函数
 
 ```typescript
-import { cpuFFT, cpuIFFT, cpuFFT2D, cpuIFFT2D } from 'webgpu-fft';
+import {
+  cpuFFT, cpuIFFT,
+  cpuFFT2D, cpuIFFT2D,
+  validateFFTInput, validateFFT2DInput
+} from 'webgpu-fft';
 
-// 1D
+// 1D 变换
 const spectrum = cpuFFT(input);
 const signal = cpuIFFT(spectrum);
 
-// 2D
+// 2D 变换
 const freq2d = cpuFFT2D(input, width, height);
 const spatial2d = cpuIFFT2D(freq2d, width, height);
+
+// 输入验证
+validateFFTInput(input); // 无效输入会抛出异常
 ```
 
-### 频谱分析器（CPU 工具）
+### 频谱分析器
 
 ```typescript
 import { createSpectrumAnalyzer } from 'webgpu-fft';
 
 const analyzer = await createSpectrumAnalyzer({
-  fftSize: 1024,    // 任意 2 的幂
-  sampleRate: 44100
+  fftSize: 1024,     // 必须为 2 的幂
+  sampleRate: 44100  // 采样率 (Hz)
 });
 
 // 分析音频数据（返回 dB 值）
 const spectrum = await analyzer.analyze(audioData);
 
-// 获取频率信息
+// 获取频率 bin 中心频率
 const frequencies = analyzer.getFrequencies();
+
+// 获取特定 bin 的频率
+const freq = analyzer.getFrequency(10); // 第 10 个 bin 的频率
 
 analyzer.dispose();
 ```
 
-### 图像滤波器（CPU 工具）
+### 图像滤波器
 
 ```typescript
-import { createImageFilter } from 'webgpu-fft';
+import { createImageFilter, type FilterType, type FilterShape } from 'webgpu-fft';
 
 const filter = await createImageFilter({
-  type: 'lowpass',      // 'lowpass' | 'highpass' | 'bandpass'
-  shape: 'gaussian',    // 'ideal' | 'gaussian'
-  cutoffFrequency: 0.3, // 0.0 到 1.0
-  bandwidth: 0.1,       // 仅 bandpass 模式
+  type: 'lowpass',           // 'lowpass' | 'highpass' | 'bandpass'
+  shape: 'gaussian',         // 'ideal' | 'gaussian'
+  cutoffFrequency: 0.3,      // 0.0 到 1.0
+  bandwidth: 0.1             // 仅 bandpass 模式需要
 });
 
+// 应用滤波器（imageData 为交错复数格式：[r,i,r,i,...]）
 const filtered = await filter.apply(imageData, width, height);
 
 filter.dispose();
@@ -145,17 +155,17 @@ filter.dispose();
 
 ```typescript
 import {
-  hannWindow,
-  hammingWindow,
-  blackmanWindow,
-  flatTopWindow,
-  rectangularWindow,
-  applyWindow,
-  applyWindowComplex,
+  hannWindow, hammingWindow, blackmanWindow,
+  flatTopWindow, rectangularWindow,
+  applyWindow, applyWindowComplex
 } from 'webgpu-fft';
 
+// 生成窗函数
 const window = hannWindow(1024);
-const windowed = applyWindow(signal, window);
+
+// 应用到信号
+const windowedReal = applyWindow(signal, window);
+const windowedComplex = applyWindowComplex(complexSignal, window);
 ```
 
 ### GPU 检测
@@ -164,10 +174,14 @@ const windowed = applyWindow(signal, window);
 import { isWebGPUAvailable, hasWebGPUSupport } from 'webgpu-fft';
 
 // 异步完整检测（验证 adapter 可用性）
-if (await isWebGPUAvailable()) { /* GPU 可用 */ }
+if (await isWebGPUAvailable()) {
+  // WebGPU 完全支持
+}
 
-// 同步 API 检测（仅检查 navigator.gpu 存在性）
-if (hasWebGPUSupport()) { /* API 存在 */ }
+// 同步检测（仅检查 API 存在性）
+if (hasWebGPUSupport()) {
+  // navigator.gpu 存在
+}
 ```
 
 ### 复数运算
@@ -176,147 +190,184 @@ if (hasWebGPUSupport()) { /* API 存在 */ }
 import {
   complexAdd, complexSub, complexMul,
   complexMagnitude, complexConj, complexScale,
+  twiddleFactor, twiddleFactorInverse,
   interleavedToComplex, complexToInterleaved,
+  complexApproxEqual,
+  naiveDFT, naiveIDFT
 } from 'webgpu-fft';
+```
+
+### 位反转工具
+
+```typescript
+import {
+  bitReverse, log2, isPowerOf2,
+  bitReversalPermutation, bitReversalPermutationInPlace
+} from 'webgpu-fft';
+```
+
+### 错误处理
+
+```typescript
+import { FFTError, FFTErrorCode } from 'webgpu-fft';
+
+try {
+  await engine.fft(invalidInput);
+} catch (error) {
+  if (error instanceof FFTError) {
+    console.error(`[${error.code}] ${error.message}`);
+    // 处理特定错误码
+    switch (error.code) {
+      case FFTErrorCode.WEBGPU_NOT_AVAILABLE:
+        // 回退到 CPU
+        break;
+      case FFTErrorCode.INVALID_INPUT_SIZE:
+        // 修正输入大小
+        break;
+      // ...
+    }
+  }
+}
 ```
 
 ## 🌐 浏览器兼容性
 
-需要 WebGPU 支持。以下浏览器已支持：
+GPU 加速需要 WebGPU 支持。支持的浏览器：
 
 | 浏览器 | 最低版本 | 状态 |
 |--------|---------|------|
 | Chrome | 113+ | ✅ 稳定支持 |
 | Edge | 113+ | ✅ 稳定支持 |
-| Firefox | Nightly | ⚠️ 需要开启 flag |
+| Firefox | 128+ | ✅ 稳定支持 |
 | Safari | 17+ | ⚠️ 预览版 |
 
-> **注意**: 不支持 WebGPU 的环境可以使用 `cpuFFT` / `cpuIFFT` 等 CPU 实现作为回退方案。
+> **注意**：使用 `isWebGPUAvailable()` 检测支持情况，不支持时可使用 `cpuFFT`/`cpuIFFT` 作为回退。
 
 ## 🔧 算法实现
 
 ### Cooley-Tukey Radix-2 DIT
 
-本库实现了经典的 Cooley-Tukey Radix-2 Decimation-In-Time (DIT) 算法：
+本库实现了经典的 Cooley-Tukey Radix-2 Decimation-In-Time 算法：
 
 1. **位反转置换** - 重排输入数据
 2. **蝴蝶操作** - log₂(N) 个阶段的并行蝴蝶运算
-3. **旋转因子** - 使用预计算的复数指数
+3. **旋转因子** - 预计算的复数指数
 
-### 当前 GPU 执行说明
+### GPU 执行说明
 
-- 当前 WebGPU shader 路径只支持 `workgroupSize: 256`。
-- `enableBankConflictOptimization` 预留给未来 shader fast path，当前多阶段 kernel 并不会启用它。
-- `createSpectrumAnalyzer()` 与 `createImageFilter()` 当前都是基于 CPU FFT 的工具。
+- 当前着色器仅支持 `workgroupSize: 256`
+- `enableBankConflictOptimization` 预留给未来优化
+- 频谱分析器和图像滤波器内部使用 CPU FFT
 
 ## 🧪 测试
 
-运行所有测试（包括属性测试）：
-
 ```bash
+# 运行所有测试
 npm test
+
+# 带覆盖率
+npm run test:coverage
+
+# 监视模式
+npm run test:watch
 ```
 
-测试覆盖：
-- ✅ 复数运算正确性（Property 5-8）
-- ✅ 位反转 Round-Trip（Property 3-4）
-- ✅ FFT 匹配 DFT 定义（Property 2）
-- ✅ FFT/IFFT Round-Trip（Property 1, 9）
-- ✅ 输出格式验证（Property 16）
-- ✅ 错误处理（Property 17）
-- ✅ 滤波器衰减特性（Property 10-11）
-- ✅ 频谱分析器（Property 12-15）
-- ✅ 窗函数正确性
+### 测试覆盖率
 
-## 📊 性能
-
-- **批量命令提交** - 所有 GPU 计算阶段合并为单次命令提交
-- **Buffer 复用** - 相同大小的 FFT 调用复用 GPU Buffer，避免重复分配/销毁
-- **Pipeline 缓存** - 着色器编译结果缓存，消除重复编译开销
-- **并行执行** - 充分利用 GPU 并行计算能力
-
-## 📁 项目结构
-
-```
-src/
-├── core/              # 核心 FFT 引擎
-│   ├── fft-engine.ts
-│   ├── gpu-resource-manager.ts
-│   └── errors.ts
-├── shaders/           # WebGPU 着色器
-│   ├── sources.ts     # 着色器源码集中管理
-│   ├── complex.wgsl   # 参考文件
-│   ├── bit-reversal.wgsl
-│   ├── butterfly.wgsl
-│   └── filter.wgsl
-├── utils/             # 工具函数
-│   ├── complex.ts
-│   ├── bit-reversal.ts
-│   ├── cpu-fft.ts
-│   ├── gpu-detect.ts
-│   └── window-functions.ts
-├── apps/              # 应用层
-│   ├── spectrum-analyzer.ts
-│   └── image-filter.ts
-├── types.ts           # 类型定义
-└── index.ts           # 公共 API 导出
-
-tests/                 # 测试文件
-├── complex.test.ts
-├── bit-reversal.test.ts
-├── fft.test.ts
-├── fft-roundtrip.test.ts
-├── filter.test.ts
-├── spectrum-analyzer.test.ts
-└── window-functions.test.ts
-```
+| 模块 | 覆盖率 |
+|------|--------|
+| 着色器 | 100% |
+| CPU 工具 | 91.55% |
+| 应用层 | 91.62% |
+| 复数运算 | 78.5% |
+| 核心错误 | 100% |
 
 ## 🔍 故障排除
 
 ### WebGPU 不可用
 
-**问题**: `FFTError: WebGPU is not available`
+```
+FFTError: WebGPU is not available
+```
 
-**解决方案**:
-1. 使用 `isWebGPUAvailable()` 检测并回退到 CPU 实现
+**解决方案：**
+1. 使用 `isWebGPUAvailable()` 检测并回退到 CPU
 2. 更新浏览器到最新版本
-3. 在浏览器设置中启用 WebGPU（Firefox/Safari）
-4. 检查 GPU 是否支持 WebGPU
+3. 启用 WebGPU 标志（Firefox/Safari）
+4. 检查 GPU 兼容性
 
 ### 输入大小无效
 
-**问题**: `FFTError: Input size must be a power of 2`
+```
+FFTError: Input size must be a power of 2
+```
 
-**解决方案**: 确保输入数组长度是 2 的幂（2, 4, 8, 16, ..., 65536）。
+**解决方案：** 确保输入长度为 2 的幂（2, 4, 8, ..., 65536）。
 
-### 性能问题
+### 输入过大
 
-**优化建议**:
-1. 当前 WebGPU 引擎请使用 `workgroupSize: 256`
-2. 复用 FFT 引擎实例，避免重复创建（`SizeCache` 自动复用同尺寸 Buffer）
-3. 使用完毕后调用 `dispose()` 释放 GPU 资源
-4. 对于不需要 GPU 的场景，直接使用 `cpuFFT` 避免 GPU 开销
+```
+FFTError: Input size exceeds maximum of 65536
+```
 
-## ✅ 正确性保证
+**解决方案：** 将数据分成小块处理，或使用 CPU 实现。
 
-本库通过以下方式确保正确性：
+### 性能优化建议
 
-1. **属性测试** - 使用 fast-check 生成随机输入，验证数学性质
-2. **Round-Trip 测试** - FFT → IFFT 应返回原始输入
-3. **DFT 对比** - 小规模输入与朴素 DFT 实现对比
-4. **已知值测试** - 验证特殊输入（常数、脉冲、正弦波）的输出
+1. 复用 `FFTEngine` 实例（Buffer 缓存）
+2. 使用完毕后调用 `dispose()`
+3. 小型变换（< 1024 元素）可考虑 CPU 路径
 
-## � 在线文档
+## 📊 性能特性
 
-项目文档已通过 GitHub Pages 发布：
+| 特性 | 描述 |
+|------|------|
+| **批量命令** | 每次变换使用单个命令缓冲区 |
+| **Buffer 复用** | 相同大小的变换复用 GPU Buffer |
+| **Pipeline 缓存** | 编译后的着色器被缓存 |
+| **并行执行** | GPU 计算着色器 |
 
-> **https://lessup.github.io/gpu-fft/**
+## 🗺️ 路线图
 
-包含：
-- [API 参考文档](https://lessup.github.io/gpu-fft/api) — TypeDoc 生成的完整 API 文档
-- [在线 Demo](https://lessup.github.io/gpu-fft/demo) — 演示频谱分析与图像频域滤波的交互效果
+### 计划功能
 
-## �📚 参考资料
+- [ ] 3D FFT 支持
+- [ ] 实值 FFT 优化 (RFFT)
+- [ ] GPU 原生图像滤波
+- [ ] 卷积运算
+- [ ] WASM 回退
+
+### 已知限制
+
+- GPU 着色器仅支持 `workgroupSize: 256`
+- 频谱分析器内部使用 CPU FFT
+- 最大 1D 大小：65,536 元素
+- 最大 2D 大小：2048×2048
+
+## 📁 项目结构
+
+```
+src/
+├── core/                    # 核心 GPU 引擎
+│   ├── fft-engine.ts        # 主 FFT 实现
+│   ├── gpu-resource-manager.ts
+│   └── errors.ts            # 自定义错误类型
+├── shaders/                 # WGSL 着色器源码
+│   └── sources.ts           # 着色器代码权威来源
+├── utils/                   # CPU 工具
+│   ├── complex.ts           # 复数运算
+│   ├── bit-reversal.ts      # 位反转工具
+│   ├── cpu-fft.ts           # CPU FFT 实现
+│   ├── gpu-detect.ts        # WebGPU 检测
+│   └── window-functions.ts  # 信号窗函数
+├── apps/                    # 应用层 API
+│   ├── spectrum-analyzer.ts
+│   └── image-filter.ts
+├── types.ts                 # 类型定义
+└── index.ts                 # 公共 API 导出
+```
+
+## 📚 参考资料
 
 - [Cooley-Tukey FFT 算法](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm)
 - [WebGPU 规范](https://www.w3.org/TR/webgpu/)

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="WebGPU FFT Library 浏览器兼容性 - 支持的浏览器和 WebGPU 检测。" />
+    <title>浏览器兼容性 — WebGPU FFT Library</title>
+    <style>
+      :root { --primary: #4f46e5; --primary-light: #818cf8; --bg: #0f172a; --bg-card: #1e293b;
+        --text: #e2e8f0; --text-muted: #94a3b8; --border: #334155; --accent-green: #22c55e;
+        --accent-blue: #3b82f6; --accent-amber: #f59e0b; --code-bg: #0d1117; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+        background: var(--bg); color: var(--text); line-height: 1.7; }
+      .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+      header { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 16px 0;
+        position: sticky; top: 0; z-index: 100; }
+      .header-content { max-width: 900px; margin: 0 auto; padding: 0 24px;
+        display: flex; align-items: center; justify-content: space-between; }
+      .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; font-weight: 700; }
+      .lang-switch { padding: 6px 12px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border);
+        color: var(--text-muted); font-size: 0.85rem; text-decoration: none; }
+      .lang-switch:hover { border-color: var(--primary-light); color: var(--text); }
+      .content { padding: 48px 0 64px; }
+      .content h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 16px;
+        background: linear-gradient(135deg, var(--primary-light), var(--accent-purple));
+        background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+      .content h2 { font-size: 1.75rem; font-weight: 700; margin: 48px 0 20px;
+        padding-bottom: 12px; border-bottom: 2px solid var(--border); }
+      .content h3 { font-size: 1.35rem; font-weight: 600; margin: 32px 0 16px; color: var(--primary-light); }
+      .content p { margin-bottom: 16px; color: var(--text); line-height: 1.7; }
+      .breadcrumb { display: flex; gap: 8px; margin-bottom: 24px; font-size: 0.9rem; color: var(--text-muted); }
+      .breadcrumb a { color: var(--primary-light); text-decoration: none; }
+      .browser-table { width: 100%; border-collapse: collapse; margin: 24px 0; }
+      .browser-table th, .browser-table td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border); }
+      .browser-table th { font-weight: 600; color: var(--text-muted); background: rgba(79, 70, 229, 0.05); }
+      .status-ok { color: var(--accent-green); font-weight: 600; }
+      .status-warn { color: var(--accent-amber); font-weight: 600; }
+      .status-no { color: #ef4444; font-weight: 600; }
+      pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px;
+        padding: 20px; overflow-x: auto; font-size: 0.9rem; line-height: 1.6; margin: 16px 0; }
+      code { font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace; color: #e6edf3; }
+      .kw { color: #ff7b72; } .fn { color: #d2a8ff; } .str { color: #a5d6ff; } .cmt { color: #8b949e; }
+      .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin: 24px 0; }
+      .feature-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+      .feature-card h4 { color: var(--primary-light); margin-bottom: 8px; }
+      .feature-card p { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+      footer { background: var(--bg-card); border-top: 1px solid var(--border); padding: 32px 0;
+        text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+      footer a { color: var(--primary-light); text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-content">
+        <a class="logo" href="index.html">⚡ WebGPU FFT</a>
+        <a class="lang-switch" href="../en/browser-compatibility.html">🇺🇸 English</a>
+      </div>
+    </header>
+    <div class="container">
+      <div class="content">
+        <nav class="breadcrumb"><a href="index.html">文档</a><span>/</span><span>浏览器兼容性</span></nav>
+        <h1>浏览器兼容性</h1>
+        <p>WebGPU FFT Library 的 GPU 加速功能需要 WebGPU 支持。以下是主要浏览器的兼容性矩阵。</p>
+        <table class="browser-table">
+          <thead>
+            <tr><th>浏览器</th><th>最低版本</th><th>WebGPU 状态</th><th>备注</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Chrome</td><td>113+</td><td class="status-ok">✅ 稳定版</td><td>Windows、macOS、Linux 完整支持</td></tr>
+            <tr><td>Edge</td><td>113+</td><td class="status-ok">✅ 稳定版</td><td>与 Chrome 相同（基于 Chromium）</td></tr>
+            <tr><td>Firefox</td><td>128+</td><td class="status-ok">✅ 稳定版</td><td>自版本 128 起默认启用</td></tr>
+            <tr><td>Safari</td><td>17+</td><td class="status-warn">⚠️ 预览版</td><td>仅技术预览版</td></tr>
+            <tr><td>Opera</td><td>99+</td><td class="status-ok">✅ 稳定版</td><td>基于 Chromium，与 Chrome 支持相同</td></tr>
+            <tr><td>移动版 Chrome</td><td>121+</td><td class="status-ok">✅ 稳定版</td><td>仅 Android</td></tr>
+            <tr><td>移动版 Safari</td><td>-</td><td class="status-no">❌ 不支持</td><td>暂不支持 WebGPU</td></tr>
+          </tbody>
+        </table>
+
+        <h2>特性检测</h2>
+        <p>在使用 GPU 功能前务必检查 WebGPU 支持：</p>
+        <pre><code><span class="kw">import</span> { <span class="fn">isWebGPUAvailable</span> } <span class="kw">from</span> <span class="str">'webgpu-fft'</span>;
+
+<span class="kw">if</span> (<span class="kw">await</span> <span class="fn">isWebGPUAvailable</span>()) {
+  <span class="cmt">// 使用 GPU 加速 FFT</span>
+  <span class="kw">const</span> engine = <span class="kw">await</span> <span class="fn">createFFTEngine</span>();
+} <span class="kw">else</span> {
+  <span class="cmt">// 回退到 CPU 实现</span>
+  <span class="kw">const</span> spectrum = <span class="fn">cpuFFT</span>(input);
+}</code></pre>
+
+        <h2>回退策略</h2>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h4>🔄 CPU 回退</h4>
+            <p>所有浏览器均可使用完整的 CPU 实现</p>
+          </div>
+          <div class="feature-card">
+            <h4>⚡ 自动检测</h4>
+            <p>自动特性检测和优雅降级</p>
+          </div>
+          <div class="feature-card">
+            <h4>📱 移动支持</h4>
+            <p>支持 Android Chrome；iOS 使用 CPU 回退</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="container">
+        <p>WebGPU FFT Library © 2024-2026 — <a href="https://opensource.org/licenses/MIT">MIT 许可证</a></p>
+      </div>
+    </footer>
+  </body>
+</html>

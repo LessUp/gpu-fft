@@ -1,9 +1,12 @@
-# WebGPU FFT Library
+# # WebGPU FFT Library
 
 [![npm version](https://img.shields.io/npm/v/webgpu-fft.svg)](https://www.npmjs.com/package/webgpu-fft)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![WebGPU](https://img.shields.io/badge/WebGPU-Enabled-green.svg)](https://www.w3.org/TR/webgpu/)
+[![Docs](https://img.shields.io/badge/Docs-Bilingual-blue?logo=github)](https://lessup.github.io/gpu-fft/)
+[![CI](https://github.com/LessUp/gpu-fft/actions/workflows/ci.yml/badge.svg)](https://github.com/LessUp/gpu-fft/actions/workflows/ci.yml)
 
 English | [简体中文](README.zh-CN.md)
 
@@ -11,14 +14,16 @@ High-performance Fast Fourier Transform library with a WebGPU-accelerated core e
 
 ## ✨ Features
 
-- **1D FFT/IFFT** - Support for 2 to 65,536 elements
-- **2D FFT/IFFT** - Image processing with 2D transforms up to 2048×2048
-- **WebGPU Core FFT Engine** - GPU-backed 1D/2D FFT primitives for WebGPU-capable browsers
-- **Bit-Reversal Permutation** - Efficient parallel bit-reversal implementation
-- **Frequency Domain Filtering** - CPU-based low-pass/high-pass filters (Ideal and Gaussian)
-- **Audio Spectrum Analysis** - CPU-based real-time spectrum analysis with Hann window
-- **TypeScript** - Full type definitions included
-- **Property-Based Testing** - Comprehensive correctness verification with fast-check
+| Feature | Description |
+|---------|-------------|
+| **1D FFT/IFFT** | Support for 2 to 65,536 elements |
+| **2D FFT/IFFT** | Image processing with 2D transforms up to 2048×2048 |
+| **GPU Acceleration** | WebGPU compute shaders for high performance |
+| **CPU Fallback** | Full CPU implementation for non-WebGPU environments |
+| **Frequency Filtering** | Low-pass, high-pass, band-pass (Ideal & Gaussian) |
+| **Spectrum Analysis** | Real-time audio frequency analysis with windowing |
+| **TypeScript** | Full type definitions with strict mode support |
+| **Zero Dependencies** | No runtime dependencies |
 
 ## 🚀 Quick Start
 
@@ -28,115 +33,217 @@ High-performance Fast Fourier Transform library with a WebGPU-accelerated core e
 npm install webgpu-fft
 ```
 
-### Basic Usage
+### GPU Path (Recommended)
 
 ```typescript
-import { createFFTEngine } from 'webgpu-fft';
+import { createFFTEngine, isWebGPUAvailable } from 'webgpu-fft';
 
-// Create FFT engine
-const engine = await createFFTEngine();
+// Check WebGPU support
+if (await isWebGPUAvailable()) {
+  const engine = await createFFTEngine();
 
-// Prepare input data (interleaved format: [real, imag, real, imag, ...])
-const input = new Float32Array(16); // 8 complex numbers
-for (let i = 0; i < 8; i++) {
-  input[i * 2] = Math.sin(i);     // Real part
-  input[i * 2 + 1] = 0;           // Imaginary part
+  // Prepare input (interleaved: [real, imag, real, imag, ...])
+  const input = new Float32Array(16); // 8 complex numbers
+  for (let i = 0; i < 8; i++) {
+    input[i * 2] = Math.sin(i);     // Real part
+    input[i * 2 + 1] = 0;           // Imaginary part
+  }
+
+  const fftResult = await engine.fft(input);
+  const ifftResult = await engine.ifft(fftResult);
+
+  engine.dispose(); // Clean up GPU resources
 }
+```
 
-// Compute FFT
-const fftResult = await engine.fft(input);
+### CPU Path (No GPU Required)
 
-// Compute IFFT
-const ifftResult = await engine.ifft(fftResult);
+```typescript
+import { cpuFFT, cpuIFFT } from 'webgpu-fft';
 
-// Clean up resources
-engine.dispose();
+const input = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]);
+const spectrum = cpuFFT(input);
+const recovered = cpuIFFT(spectrum);
 ```
 
 ## 📖 API Reference
 
-### FFT Engine
+### Core FFT Engine
 
 ```typescript
+import { createFFTEngine, type FFTEngineConfig } from 'webgpu-fft';
+
 // Create with default options
 const engine = await createFFTEngine();
 
-// Create with custom options
-// Note: the current shader implementation only supports workgroupSize = 256.
-const engine = await createFFTEngine({
-  enableBankConflictOptimization: true,
-  workgroupSize: 256
-});
+// 1D transforms
+const spectrum = await engine.fft(input);
+const signal = await engine.ifft(spectrum);
 
-// 1D FFT
-const result = await engine.fft(input);
-const inverse = await engine.ifft(result);
-
-// 2D FFT
-const result2d = await engine.fft2d(input, width, height);
-const inverse2d = await engine.ifft2d(result2d, width, height);
+// 2D transforms
+const freq2d = await engine.fft2d(input, width, height);
+const spatial2d = await engine.ifft2d(freq2d, width, height);
 
 // Clean up
 engine.dispose();
 ```
 
-### Spectrum Analyzer (CPU utility)
+> ⚠️ **Note**: The current GPU shader only supports `workgroupSize: 256`. The `enableBankConflictOptimization` option is reserved for future use.
+
+### CPU FFT Functions
+
+```typescript
+import {
+  cpuFFT, cpuIFFT,
+  cpuFFT2D, cpuIFFT2D,
+  validateFFTInput, validateFFT2DInput
+} from 'webgpu-fft';
+
+// 1D transforms
+const spectrum = cpuFFT(input);
+const signal = cpuIFFT(spectrum);
+
+// 2D transforms
+const freq2d = cpuFFT2D(input, width, height);
+const spatial2d = cpuIFFT2D(freq2d, width, height);
+
+// Validation
+validateFFTInput(input); // Throws on invalid input
+```
+
+### Spectrum Analyzer
 
 ```typescript
 import { createSpectrumAnalyzer } from 'webgpu-fft';
 
 const analyzer = await createSpectrumAnalyzer({
-  fftSize: 1024,
-  sampleRate: 44100
+  fftSize: 1024,     // Must be power of 2
+  sampleRate: 44100  // Hz
 });
 
 // Analyze audio data (returns dB values)
 const spectrum = await analyzer.analyze(audioData);
 
-// Get frequency bins
+// Get frequency bin centers
 const frequencies = analyzer.getFrequencies();
+
+// Get frequency for specific bin
+const freq = analyzer.getFrequency(10); // 10th bin frequency
 
 analyzer.dispose();
 ```
 
-### Image Filter (CPU utility)
+### Image Filter
 
 ```typescript
-import { createImageFilter } from 'webgpu-fft';
+import { createImageFilter, type FilterType, type FilterShape } from 'webgpu-fft';
 
 const filter = await createImageFilter({
-  type: 'lowpass',      // 'lowpass' or 'highpass'
-  shape: 'gaussian',    // 'ideal' or 'gaussian'
-  cutoffFrequency: 0.3  // 0.0 to 1.0
+  type: 'lowpass',           // 'lowpass' | 'highpass' | 'bandpass'
+  shape: 'gaussian',         // 'ideal' | 'gaussian'
+  cutoffFrequency: 0.3,      // 0.0 to 1.0
+  bandwidth: 0.1             // For bandpass only
 });
 
-// Apply filter to image
+// Apply filter (imageData is interleaved complex: [r,i,r,i,...])
 const filtered = await filter.apply(imageData, width, height);
 
 filter.dispose();
 ```
 
+### Window Functions
+
+```typescript
+import {
+  hannWindow, hammingWindow, blackmanWindow,
+  flatTopWindow, rectangularWindow,
+  applyWindow, applyWindowComplex
+} from 'webgpu-fft';
+
+// Generate window
+const window = hannWindow(1024);
+
+// Apply to signal
+const windowedReal = applyWindow(signal, window);
+const windowedComplex = applyWindowComplex(complexSignal, window);
+```
+
+### GPU Detection
+
+```typescript
+import { isWebGPUAvailable, hasWebGPUSupport } from 'webgpu-fft';
+
+// Async full check (verifies adapter availability)
+if (await isWebGPUAvailable()) {
+  // WebGPU is fully supported
+}
+
+// Sync check (only checks API presence)
+if (hasWebGPUSupport()) {
+  // navigator.gpu exists
+}
+```
+
+### Complex Number Utilities
+
+```typescript
+import {
+  complexAdd, complexSub, complexMul,
+  complexMagnitude, complexConj, complexScale,
+  twiddleFactor, twiddleFactorInverse,
+  interleavedToComplex, complexToInterleaved,
+  complexApproxEqual,
+  naiveDFT, naiveIDFT
+} from 'webgpu-fft';
+```
+
+### Bit-Reversal Utilities
+
+```typescript
+import {
+  bitReverse, log2, isPowerOf2,
+  bitReversalPermutation, bitReversalPermutationInPlace
+} from 'webgpu-fft';
+```
+
+### Error Handling
+
+```typescript
+import { FFTError, FFTErrorCode } from 'webgpu-fft';
+
+try {
+  await engine.fft(invalidInput);
+} catch (error) {
+  if (error instanceof FFTError) {
+    console.error(`[${error.code}] ${error.message}`);
+    // Handle specific error codes
+    switch (error.code) {
+      case FFTErrorCode.WEBGPU_NOT_AVAILABLE:
+        // Fallback to CPU
+        break;
+      case FFTErrorCode.INVALID_INPUT_SIZE:
+        // Fix input size
+        break;
+      // ...
+    }
+  }
+}
+```
+
 ## 🌐 Browser Compatibility
 
-WebGPU is required. The following browsers are supported:
+WebGPU is required for GPU acceleration. The following browsers are supported:
 
 | Browser | Minimum Version | Status |
 |---------|----------------|--------|
 | Chrome | 113+ | ✅ Stable |
 | Edge | 113+ | ✅ Stable |
-| Firefox | Nightly | ⚠️ Behind flag |
+| Firefox | 128+ | ✅ Stable |
 | Safari | 17+ | ⚠️ Preview |
 
-### Checking WebGPU Support
+> **Note**: Use `isWebGPUAvailable()` to detect support and `cpuFFT`/`cpuIFFT` as fallback.
 
-```typescript
-if (!navigator.gpu) {
-  console.error('WebGPU is not supported in this browser');
-  // Provide fallback or show error message
-}
-```
-
-## 🔧 Algorithm Implementation
+## 🔧 Algorithm
 
 ### Cooley-Tukey Radix-2 DIT
 
@@ -146,62 +253,79 @@ This library implements the classic Cooley-Tukey Radix-2 Decimation-In-Time algo
 2. **Butterfly Operations** - log₂(N) stages of parallel butterfly computations
 3. **Twiddle Factors** - Pre-computed complex exponentials
 
-### Notes on GPU execution
+### GPU Execution Notes
 
-- The current WebGPU kernel path supports `workgroupSize: 256`.
-- `enableBankConflictOptimization` is reserved for a future shader fast path and is not active in the current multi-stage kernel.
-- `createSpectrumAnalyzer()` and `createImageFilter()` are currently CPU utilities built on the CPU FFT implementation.
+- Current shader only supports `workgroupSize: 256`
+- `enableBankConflictOptimization` is reserved for future optimization
+- Spectrum analyzer and image filter use CPU FFT internally
 
 ## 🧪 Testing
 
-Run all tests (including property-based tests):
-
 ```bash
+# Run all tests
 npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Watch mode
+npm run test:watch
 ```
 
-Test coverage includes:
-- ✅ Complex arithmetic correctness (Property 5-8)
-- ✅ Bit-reversal round-trip (Property 3-4)
-- ✅ FFT matches DFT definition (Property 2)
-- ✅ FFT/IFFT round-trip (Property 1, 9)
-- ✅ Output format validation (Property 16)
-- ✅ Error handling (Property 17)
-- ✅ Filter attenuation characteristics (Property 10-11)
-- ✅ Spectrum analyzer (Property 12-15)
+### Test Coverage
+
+| Module | Coverage |
+|--------|----------|
+| Shaders | 100% |
+| CPU Utilities | 91.55% |
+| Apps | 91.62% |
+| Complex | 78.5% |
+| Core Errors | 100% |
 
 ## 🔍 Troubleshooting
 
 ### WebGPU Not Available
 
-**Problem**: `FFTError: WebGPU is not available`
+```
+FFTError: WebGPU is not available
+```
 
-**Solutions**:
-1. Update your browser to the latest version
-2. Enable WebGPU flags in browser settings (for Firefox/Safari)
-3. Check if your GPU supports WebGPU
-4. Try a different browser
+**Solutions:**
+1. Use `isWebGPUAvailable()` to detect and fallback to CPU
+2. Update browser to latest version
+3. Enable WebGPU flags (Firefox/Safari)
+4. Check GPU compatibility
 
 ### Invalid Input Size
 
-**Problem**: `FFTError: Input size must be a power of 2`
+```
+FFTError: Input size must be a power of 2
+```
 
-**Solution**: Ensure your input array length is a power of 2 (2, 4, 8, 16, ..., 65536).
+**Solution:** Ensure input length is a power of 2 (2, 4, 8, ..., 65536).
 
-### Performance Issues
+### Input Too Large
 
-**Tips**:
-1. Use `workgroupSize: 256` with the current WebGPU engine
-2. Use appropriate FFT sizes for your use case
-3. Reuse the FFT engine instance instead of creating new ones
-4. Call `dispose()` when done to free GPU resources
+```
+FFTError: Input size exceeds maximum of 65536
+```
+
+**Solution:** Split data into smaller chunks or use CPU implementation.
+
+### Performance Optimization
+
+1. Reuse `FFTEngine` instances (buffer caching)
+2. Call `dispose()` when done
+3. Use CPU path for small transforms (< 1024 elements)
 
 ## 📊 Performance
 
-- **Parallel Execution**: Uses GPU compute pipelines for the core FFT engine
-- **Pipeline Caching**: Reuses compute pipelines to reduce overhead
-- **Buffer Reuse**: Reuses cached GPU buffers for repeated transforms of the same size
-- **Batched Submission**: Submits each transform as a single command buffer
+| Feature | Description |
+|---------|-------------|
+| **Batched Commands** | Single command buffer per transform |
+| **Buffer Reuse** | Same-size transforms reuse GPU buffers |
+| **Pipeline Caching** | Compiled shaders are cached |
+| **Parallel Execution** | GPU compute shaders |
 
 ## 🗺️ Roadmap
 
@@ -209,24 +333,46 @@ Test coverage includes:
 
 - [ ] 3D FFT support
 - [ ] Real-valued FFT optimization (RFFT)
+- [ ] GPU-native image filtering
 - [ ] Convolution operations
-- [ ] GPU-native image filtering pipeline
-- [ ] WebGPU fallback to WebGL
-- [ ] WASM fallback for unsupported browsers
+- [ ] WASM fallback
 
 ### Known Limitations
 
-- The current WebGPU shader path only supports `workgroupSize: 256`
-- The spectrum analyzer and image filter helpers currently use the CPU FFT implementation
-- The demo pages are illustrative and do not fully mirror the packaged runtime
-- Requires WebGPU-capable browser and GPU for the GPU engine
+- GPU shader only supports `workgroupSize: 256`
+- Spectrum analyzer uses CPU FFT internally
+- Maximum 1D size: 65,536 elements
+- Maximum 2D size: 2048×2048
+
+## 📁 Project Structure
+
+```
+src/
+├── core/                    # Core GPU engine
+│   ├── fft-engine.ts        # Main FFT implementation
+│   ├── gpu-resource-manager.ts
+│   └── errors.ts            # Custom error types
+├── shaders/                 # WGSL shader sources
+│   └── sources.ts           # Canonical shader code
+├── utils/                   # CPU utilities
+│   ├── complex.ts           # Complex number ops
+│   ├── bit-reversal.ts      # Bit-reversal utilities
+│   ├── cpu-fft.ts           # CPU FFT implementation
+│   ├── gpu-detect.ts        # WebGPU detection
+│   └── window-functions.ts  # Signal windows
+├── apps/                    # Application-level APIs
+│   ├── spectrum-analyzer.ts
+│   └── image-filter.ts
+├── types.ts                 # Type definitions
+└── index.ts                 # Public API exports
+```
 
 ## 📚 References
 
 - [Cooley-Tukey FFT Algorithm](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm)
 - [WebGPU Specification](https://www.w3.org/TR/webgpu/)
 - [WGSL Specification](https://www.w3.org/TR/WGSL/)
-- [Bank Conflicts in GPU Shared Memory](https://developer.nvidia.com/blog/using-shared-memory-cuda-cc/)
+- [GPU Memory Bank Conflicts](https://developer.nvidia.com/blog/using-shared-memory-cuda-cc/)
 
 ## 🤝 Contributing
 

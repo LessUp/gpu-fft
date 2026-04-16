@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="WebGPU FFT Library 示例 - 频谱分析、图像滤波和信号处理的代码示例。" />
+    <title>示例教程 — WebGPU FFT Library</title>
+    <style>
+      :root { --primary: #4f46e5; --primary-light: #818cf8; --bg: #0f172a; --bg-card: #1e293b;
+        --text: #e2e8f0; --text-muted: #94a3b8; --border: #334155; --accent-green: #22c55e;
+        --accent-blue: #3b82f6; --accent-purple: #a78bfa; --accent-amber: #f59e0b; --code-bg: #0d1117; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+        background: var(--bg); color: var(--text); line-height: 1.7; }
+      .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+      header { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 16px 0;
+        position: sticky; top: 0; z-index: 100; }
+      .header-content { max-width: 900px; margin: 0 auto; padding: 0 24px;
+        display: flex; align-items: center; justify-content: space-between; }
+      .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; font-weight: 700; }
+      .lang-switch { padding: 6px 12px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border);
+        color: var(--text-muted); font-size: 0.85rem; text-decoration: none; }
+      .lang-switch:hover { border-color: var(--primary-light); color: var(--text); }
+      .content { padding: 48px 0 64px; }
+      .content h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 16px;
+        background: linear-gradient(135deg, var(--primary-light), var(--accent-purple));
+        background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+      .content h2 { font-size: 1.75rem; font-weight: 700; margin: 48px 0 20px;
+        padding-bottom: 12px; border-bottom: 2px solid var(--border); }
+      .content h3 { font-size: 1.35rem; font-weight: 600; margin: 32px 0 16px; color: var(--primary-light); }
+      .content p { margin-bottom: 16px; color: var(--text); line-height: 1.7; }
+      .breadcrumb { display: flex; gap: 8px; margin-bottom: 24px; font-size: 0.9rem; color: var(--text-muted); }
+      .breadcrumb a { color: var(--primary-light); text-decoration: none; }
+      pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px;
+        padding: 20px; overflow-x: auto; font-size: 0.9rem; line-height: 1.6; margin: 16px 0; }
+      code { font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace; color: #e6edf3; }
+      .kw { color: #ff7b72; } .fn { color: #d2a8ff; } .str { color: #a5d6ff; }
+      .cmt { color: #8b949e; } .num { color: #79c0ff; } .type { color: #ffa657; }
+      .example-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+        padding: 24px; margin: 24px 0; }
+      .example-card h3 { margin-top: 0; }
+      .run-command { background: rgba(34, 197, 94, 0.1); padding: 12px 16px; border-radius: 8px;
+        margin: 16px 0; font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+      .tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;
+        font-weight: 600; margin-right: 8px; }
+      .tag-gpu { background: rgba(34, 197, 94, 0.15); color: var(--accent-green); }
+      .tag-cpu { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
+      .tag-audio { background: rgba(167, 139, 250, 0.15); color: var(--accent-purple); }
+      footer { background: var(--bg-card); border-top: 1px solid var(--border); padding: 32px 0;
+        text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+      footer a { color: var(--primary-light); text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-content">
+        <a class="logo" href="index.html">⚡ WebGPU FFT</a>
+        <a class="lang-switch" href="../en/examples.html">🇺🇸 English</a>
+      </div>
+    </header>
+    <div class="container">
+      <div class="content">
+        <nav class="breadcrumb">
+          <a href="index.html">文档</a><span>/</span><span>示例教程</span>
+        </nav>
+        <h1>示例与教程</h1>
+        <p>实用的代码示例，演示 WebGPU FFT Library 的各种用例。</p>
+
+        <div class="example-card">
+          <h3>🎵 音频频谱分析</h3>
+          <div>
+            <span class="tag tag-audio">音频</span>
+            <span class="tag tag-cpu">CPU</span>
+          </div>
+          <p>实时分析音频信号，检测频率成分。</p>
+          <pre><code><span class="kw">import</span> { <span class="fn">createSpectrumAnalyzer</span> } <span class="kw">from</span> <span class="str">'webgpu-fft'</span>;
+
+<span class="kw">const</span> analyzer = <span class="kw">await</span> <span class="fn">createSpectrumAnalyzer</span>({
+  fftSize: <span class="num">2048</span>,
+  sampleRate: <span class="num">44100</span>
+});
+
+<span class="cmt">// 分析音频数据</span>
+<span class="kw">const</span> audioData = <span class="kw">new</span> <span class="fn">Float32Array</span>(<span class="num">2048</span>);
+<span class="cmt">// ... 填充音频样本 ...</span>
+
+<span class="kw">const</span> spectrumDb = <span class="kw">await</span> analyzer.<span class="fn">analyze</span>(audioData);
+<span class="cmt">// spectrumDb[i] = 第 i 个频率 bin 的 dB 幅值</span>
+
+<span class="cmt">// 获取各 bin 的频率</span>
+<span class="kw">const</span> freqs = analyzer.<span class="fn">getFrequencies</span>();
+console.<span class="fn">log</span>(<span class="str">`</span>${freqs[<span class="num">10</span>]}<span class="str"> Hz 处峰值: </span>${spectrumDb[<span class="num">10</span>].<span class="fn">toFixed</span>(<span class="num">1</span>)}<span class="str"> dB`</span>);
+
+analyzer.<span class="fn">dispose</span>();</code></pre>
+        </div>
+
+        <div class="example-card">
+          <h3>🖼️ 图像低通滤波</h3>
+          <div>
+            <span class="tag tag-cpu">CPU</span>
+          </div>
+          <p>使用频域处理对图像应用高斯低通滤波器。</p>
+          <pre><code><span class="kw">import</span> { <span class="fn">createImageFilter</span>, <span class="fn">cpuFFT2D</span>, <span class="fn">cpuIFFT2D</span> } <span class="kw">from</span> <span class="str">'webgpu-fft'</span>;
+
+<span class="cmt">// 创建高斯低通滤波器</span>
+<span class="kw">const</span> filter = <span class="kw">await</span> <span class="fn">createImageFilter</span>({
+  type: <span class="str">'lowpass'</span>,
+  shape: <span class="str">'gaussian'</span>,
+  cutoffFrequency: <span class="num">0.2</span>  <span class="cmt">// 保留低频，模糊图像</span>
+});
+
+<span class="cmt">// 将图像转换为复数格式 [实部,虚部,实部,虚部,...]</span>
+<span class="kw">const</span> width = <span class="num">512</span>, height = <span class="num">512</span>;
+<span class="kw">const</span> imageData = <span class="kw">new</span> <span class="fn">Float32Array</span>(width * height * <span class="num">2</span>);
+<span class="cmt">// ... 用灰度像素值填充 imageData ...</span>
+
+<span class="cmt">// 应用滤波器</span>
+<span class="kw">const</span> filtered = <span class="kw">await</span> filter.<span class="fn">apply</span>(imageData, width, height);
+<span class="cmt">// filtered 包含模糊后的图像</span>
+
+filter.<span class="fn">dispose</span>();</code></pre>
+        </div>
+
+        <div class="example-card">
+          <h3>⚡ GPU 批处理</h3>
+          <div>
+            <span class="tag tag-gpu">GPU</span>
+          </div>
+          <p>使用 GPU 批处理高效处理多个 FFT 变换。</p>
+          <pre><code><span class="kw">import</span> { <span class="fn">createFFTEngine</span> } <span class="kw">from</span> <span class="str">'webgpu-fft'</span>;
+
+<span class="kw">const</span> engine = <span class="kw">await</span> <span class="fn">createFFTEngine</span>();
+
+<span class="cmt">// 处理多个相同大小的信号</span>
+<span class="kw">const</span> signals = [];
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; <span class="num">100</span>; i++) {
+  signals.<span class="fn">push</span>(<span class="fn">generateSignal</span>(i));
+}
+
+<span class="cmt">// 批处理 - 复用 GPU 缓冲区</span>
+<span class="kw">const</span> results = <span class="kw">await</span> <span class="type">Promise</span>.<span class="fn">all</span>(
+  signals.<span class="fn">map</span>(<span class="kw">async</span> (sig) =&gt; engine.<span class="fn">fft</span>(sig))
+);
+
+engine.<span class="fn">dispose</span>();</code></pre>
+        </div>
+
+        <h2>运行示例</h2>
+        <p>所有示例都可在 <code>examples/</code> 目录中找到：</p>
+        <div class="run-command">npx tsx examples/basic-fft.ts</div>
+
+        <h2>下一步</h2>
+        <ul style="list-style: disc; padding-left: 24px; color: var(--text);">
+          <li><a href="api-reference.html" style="color: var(--primary-light);">查看 API 参考</a> 了解详细函数文档</li>
+          <li><a href="quick-start.html" style="color: var(--primary-light);">快速入门指南</a> 了解设置说明</li>
+          <li><a href="advanced/performance-tuning.html" style="color: var(--primary-light);">性能调优</a> 获取优化技巧</li>
+        </ul>
+      </div>
+    </div>
+    <footer>
+      <div class="container">
+        <p>WebGPU FFT Library © 2024-2026 — <a href="https://opensource.org/licenses/MIT">MIT 许可证</a></p>
+        <p style="margin-top: 8px"><a href="../index.html">切换语言</a> | <a href="https://github.com/LessUp/gpu-fft">GitHub</a></p>
+      </div>
+    </footer>
+  </body>
+</html>

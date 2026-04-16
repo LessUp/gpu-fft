@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="WebGPU FFT Library Quick Start Guide - Installation, basic concepts, and first FFT transform."
+    />
+    <meta name="theme-color" content="#0f172a" />
+    <title>Quick Start — WebGPU FFT Library</title>
+    <style>
+      :root {
+        --primary: #4f46e5;
+        --primary-light: #818cf8;
+        --primary-dark: #3730a3;
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-hover: #334155;
+        --text: #e2e8f0;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --accent-green: #22c55e;
+        --accent-blue: #3b82f6;
+        --accent-purple: #a78bfa;
+        --accent-amber: #f59e0b;
+        --code-bg: #0d1117;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.7;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* Header */
+      header {
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--border);
+        padding: 16px 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-content {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: inherit;
+        font-weight: 700;
+      }
+
+      .lang-switch {
+        padding: 6px 12px;
+        border-radius: 6px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        text-decoration: none;
+      }
+
+      .lang-switch:hover {
+        border-color: var(--primary-light);
+        color: var(--text);
+      }
+
+      /* Content */
+      .content {
+        padding: 48px 0 64px;
+      }
+
+      .content h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 16px;
+        background: linear-gradient(135deg, var(--primary-light), var(--accent-purple));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .content h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 48px 0 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--border);
+      }
+
+      .content h3 {
+        font-size: 1.35rem;
+        font-weight: 600;
+        margin: 32px 0 16px;
+        color: var(--primary-light);
+      }
+
+      .content h4 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin: 24px 0 12px;
+      }
+
+      .content p {
+        margin-bottom: 16px;
+        color: var(--text);
+      }
+
+      /* Step Cards */
+      .step {
+        display: flex;
+        gap: 20px;
+        margin: 32px 0;
+        padding: 24px;
+        background: var(--bg-card);
+        border-radius: 12px;
+        border-left: 4px solid var(--primary);
+      }
+
+      .step-number {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+      }
+
+      .step-content {
+        flex: 1;
+      }
+
+      .step-content h3 {
+        margin-top: 0;
+      }
+
+      /* Code Block */
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 20px;
+        overflow-x: auto;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin: 16px 0;
+      }
+
+      code {
+        font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+        color: #e6edf3;
+      }
+
+      .kw { color: #ff7b72; }
+      .fn { color: #d2a8ff; }
+      .str { color: #a5d6ff; }
+      .cmt { color: #8b949e; }
+      .num { color: #79c0ff; }
+      .type { color: #ffa657; }
+
+      /* Info Box */
+      .info-box {
+        padding: 16px 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .info-box.tip {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+      }
+
+      .info-box.warn {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+      }
+
+      .info-box.info {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+      }
+
+      .info-box-icon {
+        font-size: 1.25rem;
+      }
+
+      .info-box p {
+        margin: 0;
+      }
+
+      /* Next Steps */
+      .next-steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin: 24px 0;
+      }
+
+      .next-card {
+        display: block;
+        padding: 20px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s;
+      }
+
+      .next-card:hover {
+        border-color: var(--primary-light);
+        transform: translateY(-2px);
+      }
+
+      .next-card h4 {
+        margin: 0 0 8px;
+        color: var(--primary-light);
+      }
+
+      .next-card p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+      }
+
+      /* Footer */
+      footer {
+        background: var(--bg-card);
+        border-top: 1px solid var(--border);
+        padding: 32px 0;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      footer a {
+        color: var(--primary-light);
+        text-decoration: none;
+      }
+
+      /* Breadcrumb */
+      .breadcrumb {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+      }
+
+      .breadcrumb a {
+        color: var(--primary-light);
+        text-decoration: none;
+      }
+
+      .breadcrumb a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="header-content">
+        <a class="logo" href="index.html">⚡ WebGPU FFT</a>
+        <a class="lang-switch" href="../zh/quick-start.html">🇨🇳 中文</a>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="content">
+        <nav class="breadcrumb">
+          <a href="index.html">Docs</a>
+          <span>/</span>
+          <span>Quick Start</span>
+        </nav>
+
+        <h1>Quick Start Guide</h1>
+        <p>
+          Get started with WebGPU FFT Library in minutes. This guide will walk you through
+          installation, basic concepts, and your first FFT transform.
+        </p>
+
+        <!-- Step 1 -->
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Installation</h3>
+            <p>Install the library via npm:</p>
+            <pre><code>npm install webgpu-fft</code></pre>
+
+            <div class="info-box info">
+              <span class="info-box-icon">ℹ️</span>
+              <p>
+                <strong>Requirements:</strong> Node.js 18+ and a WebGPU-capable browser (Chrome 113+,
+                Edge 113+, Firefox 128+, Safari 17+).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Check WebGPU Availability</h3>
+            <p>
+              Before using the GPU-accelerated FFT, check if WebGPU is available. The library
+              provides an async function for this:
+            </p>
+            <pre><code><span class="kw">import</span> { <span class="fn">isWebGPUAvailable</span> } <span class="kw">from</span> <span class="str">'webgpu-fft'</span>;
+
+<span class="kw">if</span> (<span class="kw">await</span> <span class="fn">isWebGPUAvailable</span>()) {
+  console.<span class="fn">log</span>(<span class="str">'WebGPU is available!'</span>);
+} <span class="kw">else</span> {
+  console.<span class="fn">log</span>(<span class="str">'Using CPU fallback'</span>);
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Create FFT Engine</h3>
+            <p>
+              Create an FFT engine instance. The engine handles GPU resources and provides FFT/IFFT
+              methods:
+            </p>
+            <pre><code><span class="kw">import</span> { <span class="fn">createFFTEngine</span> } <span class="kw">from</span> <span class="str">'webgpu-fft'</span>;
+
+<span class="cmt">// Create engine with default configuration</span>
+<span class="kw">const</span> engine = <span class="kw">await</span> <span class="fn">createFFTEngine</span>();
+
+<span class="cmt">// Or with custom workgroup size</span>
+<span class="kw">const</span> engine = <span class="kw">await</span> <span class="fn">createFFTEngine</span>({
+  workgroupSize: <span class="num">256</span>  <span class="cmt">// Current limitation: only 256 supported</span>
+});</code></pre>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>Prepare Input Data</h3>
+            <p>
+              The library uses interleaved complex number format: <code>[real0, imag0, real1, imag1, ...]</code>.
+              Input size must be power of 2 (2, 4, 8, ..., 65536).
+            </p>
+            <pre><code><span class="cmt">// Create a simple sine wave signal</span>
+<span class="kw">const</span> size = <span class="num">1024</span>;
+<span class="kw">const</span> frequency = <span class="num">5</span>;
+<span class="kw">const</span> input = <span class="kw">new</span> <span class="fn">Float32Array</span>(size * <span class="num">2</span>);
+
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; size; i++) {
+  input[i * <span class="num">2</span>] = <span class="fn">Math.sin</span>((<span class="num">2</span> * <span class="num">3.14159</span> * frequency * i) / size);  <span class="cmt">// Real</span>
+  input[i * <span class="num">2</span> + <span class="num">1</span>] = <span class="num">0</span>;  <span class="cmt">// Imaginary</span>
+}</code></pre>
+
+            <div class="info-box tip">
+              <span class="info-box-icon">💡</span>
+              <p>
+                <strong>Tip:</strong> Use <code>cpuFFT</code> for small transforms (&lt; 1024 elements)
+                as it may be faster due to lower overhead.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <h3>Compute FFT</h3>
+            <p>Perform the forward FFT transform:</p>
+            <pre><code><span class="cmt">// Compute FFT</span>
+<span class="kw">const</span> spectrum = <span class="kw">await</span> engine.<span class="fn">fft</span>(input);
+
+<span class="cmt">// spectrum now contains complex frequency data</span>
+<span class="cmt">// spectrum[i*2] = real part of i-th frequency bin</span>
+<span class="cmt">// spectrum[i*2+1] = imaginary part of i-th frequency bin</span>
+
+<span class="cmt">// To get magnitude</span>
+<span class="kw">const</span> magnitude = <span class="fn">Math.sqrt</span>(
+  spectrum[i * <span class="num">2</span>] * spectrum[i * <span class="num">2</span>] + 
+  spectrum[i * <span class="num">2</span> + <span class="num">1</span>] * spectrum[i * <span class="num">2</span> + <span class="num">1</span>]
+);</code></pre>
+          </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="step">
+          <div class="step-number">6</div>
+          <div class="step-content">
+            <h3>Compute IFFT (Inverse FFT)</h3>
+            <p>To transform back to time domain:</p>
+            <pre><code><span class="cmt">// Compute inverse FFT</span>
+<span class="kw">const</span> recovered = <span class="kw">await</span> engine.<span class="fn">ifft</span>(spectrum);
+
+<span class="cmt">// The recovered signal should match the original input</span>
+<span class="cmt">// (within floating-point precision)</span></code></pre>
+          </div>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="step">
+          <div class="step-number">7</div>
+          <div class="step-content">
+            <h3>Cleanup</h3>
+            <p>
+              Always dispose the engine when done to release GPU resources. This is especially
+              important in single-page applications:
+            </p>
+            <pre><code><span class="cmt">// Release all GPU resources</span>
+engine.<span class="fn">dispose</span>();</code></pre>
+          </div>
+        </div>
+
+        <h2>CPU Fallback</h2>
+        <p>If WebGPU is not available, use the CPU implementation:</p>
+        <pre><code><span class="kw">import</span> { <span class="fn">cpuFFT</span>, <span class="fn">cpuIFFT</span> } <span class="kw">from</span> <span class="str">'webgpu-fft'</span>;
+
+<span class="kw">const</span> input = <span class="kw">new</span> <span class="fn">Float32Array</span>([<span class="num">1</span>, <span class="num">0</span>, <span class="num">2</span>, <span class="num">0</span>, <span class="num">3</span>, <span class="num">0</span>, <span class="num">4</span>, <span class="num">0</span>]);
+<span class="kw">const</span> spectrum = <span class="fn">cpuFFT</span>(input);
+<span class="kw">const</span> recovered = <span class="fn">cpuIFFT</span>(spectrum);</code></pre>
+
+        <div class="info-box tip">
+          <span class="info-box-icon">💡</span>
+          <p>
+            <strong>Performance Tip:</strong> For 2D FFT on images, the CPU implementation uses the
+            row-column decomposition algorithm and can handle images up to 2048×2048 pixels.
+          </p>
+        </div>
+
+        <h2>Complete Example</h2>
+        <p>Here's a complete working example:</p>
+        <pre><code><span class="kw">import</span> { 
+  <span class="fn">createFFTEngine</span>, 
+  <span class="fn">isWebGPUAvailable</span>,
+  <span class="fn">cpuFFT</span>,
+  <span class="fn">cpuIFFT</span> 
+} <span class="kw">from</span> <span class="str">'webgpu-fft'</span>;
+
+<span class="kw">async function</span> <span class="fn">fftExample</span>() {
+  <span class="cmt">// Create test signal: sum of two sine waves</span>
+  <span class="kw">const</span> size = <span class="num">1024</span>;
+  <span class="kw">const</span> input = <span class="kw">new</span> <span class="fn">Float32Array</span>(size * <span class="num">2</span>);
+  
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; size; i++) {
+    <span class="kw">const</span> t = i / size;
+    input[i * <span class="num">2</span>] = <span class="fn">Math.sin</span>(<span class="num">2</span> * <span class="num">Math.PI</span> * <span class="num">10</span> * t) + 
+                   <span class="fn">Math.sin</span>(<span class="num">2</span> * <span class="num">Math.PI</span> * <span class="num">20</span> * t);
+    input[i * <span class="num">2</span> + <span class="num">1</span>] = <span class="num">0</span>;
+  }
+  
+  <span class="cmt">// Try GPU first, fallback to CPU</span>
+  <span class="kw">if</span> (<span class="kw">await</span> <span class="fn">isWebGPUAvailable</span>()) {
+    console.<span class="fn">log</span>(<span class="str">'Using GPU acceleration'</span>);
+    <span class="kw">const</span> engine = <span class="kw">await</span> <span class="fn">createFFTEngine</span>();
+    
+    <span class="kw">const</span> spectrum = <span class="kw">await</span> engine.<span class="fn">fft</span>(input);
+    <span class="kw">const</span> recovered = <span class="kw">await</span> engine.<span class="fn">ifft</span>(spectrum);
+    
+    <span class="cmt">// Verify round-trip accuracy</span>
+    <span class="kw">let</span> maxError = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; input.length; i++) {
+      maxError = <span class="fn">Math.max</span>(maxError, <span class="fn">Math.abs</span>(input[i] - recovered[i]));
+    }
+    console.<span class="fn">log</span>(<span class="str">`Max round-trip error: </span>${maxError}<span class="str">`</span>);  <span class="cmt">// ~1e-6</span>
+    
+    engine.<span class="fn">dispose</span>();
+  } <span class="kw">else</span> {
+    console.<span class="fn">log</span>(<span class="str">'Using CPU fallback'</span>);
+    <span class="kw">const</span> spectrum = <span class="fn">cpuFFT</span>(input);
+    <span class="kw">const</span> recovered = <span class="fn">cpuIFFT</span>(spectrum);
+  }
+}
+
+<span class="fn">fftExample</span>();</code></pre>
+
+        <h2>Next Steps</h2>
+        <div class="next-steps">
+          <a class="next-card" href="api-reference.html">
+            <h4>📖 API Reference</h4>
+            <p>Complete API documentation with all functions and types</p>
+          </a>
+
+          <a class="next-card" href="examples.html">
+            <h4>💡 Examples & Tutorials</h4>
+            <p>Code examples for spectrum analysis and image filtering</p>
+          </a>
+
+          <a class="next-card" href="browser-compatibility.html">
+            <h4>🌐 Browser Compatibility</h4>
+            <p>Supported browsers and detection strategies</p>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="container">
+        <p>
+          WebGPU FFT Library © 2024-2026 —
+          <a href="https://opensource.org/licenses/MIT">MIT License</a>
+        </p>
+        <p style="margin-top: 8px">
+          <a href="../index.html">Change Language</a> |
+          <a href="https://github.com/LessUp/gpu-fft">GitHub</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
