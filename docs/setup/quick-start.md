@@ -159,6 +159,6 @@ try {
 
 ## Next Steps
 
-- Learn about [Data Formats](./data-formats)
-- Explore [API Reference](/api/)
-- See [Examples](/examples/)
+- Explore the [API Reference](/api/index)
+- Read the [Architecture Overview](/architecture/overview)
+- Try the [Tutorials](/tutorials/introduction)

@@ -17,7 +17,7 @@ hero:
       link: https://github.com/LessUp/gpu-fft
     - theme: alt
       text: API Reference
-      link: /api/
+      link: /api/index
 
 features:
   - icon: ⚡

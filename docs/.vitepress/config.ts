@@ -25,7 +25,28 @@ export default defineConfig({
     ],
     ['meta', { property: 'og:site_name', content: 'WebGPU FFT Library' }],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
-    ['link', { rel: 'icon', href: '/favicon.ico' }],
+    ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
+    [
+      'meta',
+      { property: 'og:image', content: 'https://lessup.github.io/gpu-fft/hero.svg' },
+    ],
+    [
+      'meta',
+      { property: 'og:image:alt', content: 'WebGPU FFT Library - GPU-Accelerated FFT' },
+    ],
+    [
+      'meta',
+      { property: 'og:image:type', content: 'image/svg+xml' },
+    ],
+    ['meta', { property: 'og:url', content: 'https://lessup.github.io/gpu-fft/' }],
+    [
+      'meta',
+      { property: 'og:locale:alternate', content: 'zh_CN' },
+    ],
+    [
+      'meta',
+      { name: 'twitter:image', content: 'https://lessup.github.io/gpu-fft/hero.svg' },
+    ],
   ],
 
   locales: {
@@ -39,13 +60,15 @@ export default defineConfig({
       link: '/zh/',
       themeConfig: {
         nav: [
-          { text: '指南', link: '/zh/tutorials/introduction' },
-          { text: 'API', link: '/zh/api/' },
+          { text: '设置', link: '/setup/quick-start' },
+          { text: '教程', link: '/tutorials/introduction' },
+          { text: '架构', link: '/architecture/overview' },
+          { text: 'API', link: '/api/index' },
           {
             text: 'v1.1.0',
             items: [
-              { text: '变更日志', link: '/zh/changelog' },
-              { text: '贡献指南', link: '/zh/contributing' },
+              { text: '变更日志', link: '/changelog' },
+              { text: '贡献指南', link: '/contributing' },
             ],
           },
         ],
@@ -72,12 +95,13 @@ export default defineConfig({
       { text: 'Setup', link: '/setup/quick-start' },
       { text: 'Tutorials', link: '/tutorials/introduction' },
       { text: 'Architecture', link: '/architecture/overview' },
-      { text: 'Specs', link: '/specs/' },
+      { text: 'API', link: '/api/index' },
       {
-        text: 'v1.1.0',
+        text: 'More',
         items: [
           { text: 'Changelog', link: '/changelog' },
           { text: 'Contributing', link: '/contributing' },
+          { text: 'Quality Assessment', link: '/quality/assessment' },
         ],
       },
     ],
@@ -120,29 +144,23 @@ export default defineConfig({
         {
           text: 'API Reference',
           items: [
-            { text: 'Overview', link: '/api/' },
+            { text: 'Overview', link: '/api/index' },
             { text: 'FFTEngine', link: '/api/fft-engine' },
             { text: 'CPU FFT', link: '/api/cpu-fft' },
             { text: 'Spectrum Analyzer', link: '/api/spectrum-analyzer' },
             { text: 'Image Filter', link: '/api/image-filter' },
             { text: 'Window Functions', link: '/api/window-functions' },
-            { text: 'Utilities', link: '/api/utilities' },
+            { text: 'Complex Numbers', link: '/api/complex' },
+            { text: 'GPU Detection', link: '/api/gpu-detect' },
+            { text: 'Bit Reversal', link: '/api/bit-reversal' },
           ],
         },
       ],
-      '/specs/': [
+      '/quality/': [
         {
-          text: 'Specifications',
+          text: 'Quality',
           items: [
-            { text: 'Overview', link: '/specs/' },
-            { text: 'Product Requirements', link: '/specs/product/webgpu-fft-library' },
-            { text: 'Architecture RFC', link: '/specs/rfc/0001-webgpu-fft-library-architecture' },
-            {
-              text: 'Quality RFC',
-              link: '/specs/rfc/0002-project-quality-enhancement-architecture',
-            },
-            { text: 'API Specification', link: '/specs/api/public-api' },
-            { text: 'Testing Strategy', link: '/specs/testing/testing-strategy' },
+            { text: 'Assessment', link: '/quality/assessment' },
           ],
         },
       ],

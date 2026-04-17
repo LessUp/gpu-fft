@@ -88,9 +88,6 @@ temp/
 *.spirv
 
 # Generated documentation
-docs/api/
-
-# VitePress build output
 docs/.vitepress/dist/
 
 # Assembled site output

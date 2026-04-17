@@ -49,9 +49,13 @@ engine.dispose()
 
 ## 文档导航
 
-- [指南](/zh/guide/introduction) - 介绍和快速开始
-- [API 参考](/zh/api/) - 完整的 API 文档
+- [教程](/zh/tutorials/introduction) - 介绍和快速开始
+- [API 参考](/api/index) - 完整的 API 文档（英文）
 - [规范文档](/specs/) - 产品需求和技术设计
+
+## 状态
+
+> **中文文档正在完善中**。欢迎贡献翻译！
 
 ## 许可证
 

@@ -95,6 +95,6 @@ Typical performance on an NVIDIA RTX 3080:
 
 ## Next Steps
 
-- [Quick Start Guide](./quick-start) - Get up and running in minutes
-- [API Reference](/api/) - Complete API documentation
-- [Examples](/examples/) - Practical code examples
+- [1D FFT Tutorial](./1d-fft)
+- [2D FFT Tutorial](./2d-fft)
+- [API Reference](/api/index) - Complete API documentation
