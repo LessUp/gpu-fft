@@ -2,7 +2,17 @@
 
 This directory contains example code demonstrating various use cases of the WebGPU FFT Library.
 
-## Examples
+## Directory Structure
+
+```
+examples/
+├── node/    # TypeScript examples (run with tsx)
+└── web/     # HTML/JavaScript demos (open in browser)
+```
+
+## Node.js Examples (`node/`)
+
+These TypeScript examples can be run with `tsx`:
 
 ### 1. Basic FFT (`basic-fft.ts`)
 
@@ -14,7 +24,7 @@ Demonstrates basic 1D FFT operations including:
 
 **Run:**
 ```bash
-npx tsx examples/basic-fft.ts
+npx tsx examples/node/basic-fft.ts
 ```
 
 **Expected Output:**
@@ -53,7 +63,7 @@ Demonstrates 2D FFT for image processing:
 
 **Run:**
 ```bash
-npx tsx examples/2d-fft.ts
+npx tsx examples/node/2d-fft.ts
 ```
 
 ### 3. Spectrum Analyzer (`spectrum-analyzer.ts`)
@@ -67,7 +77,7 @@ Demonstrates audio spectrum analysis:
 
 **Run:**
 ```bash
-npx tsx examples/spectrum-analyzer.ts
+npx tsx examples/node/spectrum-analyzer.ts
 ```
 
 **Expected Output:**
@@ -102,7 +112,7 @@ Demonstrates frequency domain filtering:
 
 **Run:**
 ```bash
-npx tsx examples/image-filtering.ts
+npx tsx examples/node/image-filtering.ts
 ```
 
 ### 5. Feature Detection (`feature-detection.ts`)
@@ -115,7 +125,7 @@ Demonstrates WebGPU feature detection:
 
 **Run:**
 ```bash
-npx tsx examples/feature-detection.ts
+npx tsx examples/node/feature-detection.ts
 ```
 
 **Expected Output:**
@@ -144,15 +154,24 @@ Limits:
 
 ## Running Examples
 
-These examples are TypeScript files that can be run with `tsx`:
+### Node.js Examples
 
 ```bash
 # Install tsx if not already installed
 npm install -g tsx
 
-# Run an example
-npx tsx examples/basic-fft.ts
+# Run a Node.js example
+npx tsx examples/node/basic-fft.ts
 ```
+
+### Web Examples
+
+```bash
+# Serve the web examples locally
+npx serve examples/web
+```
+
+Then open `http://localhost:3000` in a WebGPU-enabled browser.
 
 ## Environment Notes
 

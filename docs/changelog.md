@@ -4,7 +4,7 @@ All notable changes to this project are documented here.
 
 ::: tip Quick Links
 - [Full Changelog on GitHub](https://github.com/LessUp/gpu-fft/blob/main/CHANGELOG.md)
-- [Detailed Version Changelogs](/changelog/)
+- [CHANGELOG.md](/CHANGELOG.md) - Complete version history
 :::
 
 ## [1.1.0] - 2026-04-16
@@ -44,4 +44,4 @@ All notable changes to this project are documented here.
 
 ---
 
-For detailed changelogs of each version, see the [changelog directory](/changelog/).
+For detailed changelogs of each version, see the [CHANGELOG.md](/CHANGELOG.md).

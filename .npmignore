@@ -13,19 +13,24 @@ vitest.config.ts
 .lintstagedrc.json
 .husky/
 .vscode/
-.kiro/
 
 # Documentation source
 typedoc.json
-docs/
+docs/.vitepress/
+
+# Specs (source only, not published)
+specs/
 
 # Examples and demos
 examples/
-demo/
 benchmarks/
 
 # GitHub
 .github/
+
+# AI agent files
+CLAUDE.md
+AGENTS.md
 
 # Build artifacts
 *.tsbuildinfo
@@ -45,7 +50,4 @@ Thumbs.db
 .idea/
 
 # Misc
-CONTRIBUTING.md
-CODE_OF_CONDUCT.md
-SECURITY.md
 PROJECT_QUALITY_ASSESSMENT.md

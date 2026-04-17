@@ -28,15 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Simplified Chinese documentation (9 guides)
   - Language selection portal at docs root
   - Modern dark theme with code syntax highlighting
-- New documentation pages:
-  - API Reference with complete function signatures
-  - Quick Start guides for both languages
-  - Examples and tutorials
-  - Browser compatibility matrix
-  - Troubleshooting guides
-- Restructured changelog directory:
-  - Added `/changelog/README.md` for directory documentation
-  - Individual version changelogs in `/changelog/`
 
 ### Changed
 
