@@ -87,8 +87,8 @@ jobs:
         with:
           urls: |
             https://lessup.github.io/gpu-fft/
-            https://lessup.github.io/gpu-fft/guide/quick-start
-            https://lessup.github.io/gpu-fft/api/
+            https://lessup.github.io/gpu-fft/setup/quick-start
+            https://lessup.github.io/gpu-fft/api/index
           budgetPath: ./budget.json
           uploadArtifacts: true
           temporaryPublicStorage: true
