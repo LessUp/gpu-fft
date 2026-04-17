@@ -23,6 +23,10 @@ import { FFTError, FFTErrorCode } from '../core/errors';
  * ```
  */
 export function validateFFTInput(input: Float32Array): number {
+  if (input === null || input === undefined) {
+    throw new FFTError('Input cannot be null or undefined', FFTErrorCode.INVALID_INPUT_SIZE);
+  }
+
   if (input.length % 2 !== 0) {
     throw new FFTError(
       `Input must contain interleaved complex pairs, got length ${input.length}`,
@@ -40,6 +44,17 @@ export function validateFFTInput(input: Float32Array): number {
   if (n < 2) {
     throw new FFTError(`Input size must be at least 2, got ${n}`, FFTErrorCode.INVALID_INPUT_SIZE);
   }
+
+  // Check for NaN/Infinity values
+  for (let i = 0; i < input.length; i++) {
+    if (!Number.isFinite(input[i])) {
+      throw new FFTError(
+        `Input contains non-finite value (NaN or Infinity) at index ${i}`,
+        FFTErrorCode.INVALID_INPUT_SIZE
+      );
+    }
+  }
+
   return n;
 }
 
@@ -58,6 +73,17 @@ export function validateFFTInput(input: Float32Array): number {
  * ```
  */
 export function validateFFT2DInput(input: Float32Array, width: number, height: number): void {
+  if (input === null || input === undefined) {
+    throw new FFTError('Input cannot be null or undefined', FFTErrorCode.INVALID_INPUT_SIZE);
+  }
+
+  if (width <= 0 || height <= 0) {
+    throw new FFTError(
+      `2D FFT dimensions must be positive, got ${width}x${height}`,
+      FFTErrorCode.INVALID_INPUT_SIZE
+    );
+  }
+
   if (!isPowerOf2(width) || !isPowerOf2(height)) {
     throw new FFTError(
       `2D FFT dimensions must be powers of 2, got ${width}x${height}`,

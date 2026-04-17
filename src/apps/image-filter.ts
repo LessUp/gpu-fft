@@ -6,6 +6,23 @@ import { cpuFFT2D, cpuIFFT2D, validateFFT2DInput } from '../utils/cpu-fft';
 const DEFAULT_BANDWIDTH = 0.1;
 const MIN_GAUSSIAN_SIGMA = 0.01;
 
+/**
+ * Apply frequency-domain filters to images (lowpass, highpass, bandpass).
+ *
+ * @remarks
+ * This is a CPU-only implementation and does not use GPU acceleration.
+ * For GPU-accelerated FFT, use {@link FFTEngine} directly.
+ *
+ * @example
+ * ```typescript
+ * const filter = await createImageFilter({
+ *   type: 'lowpass',
+ *   shape: 'gaussian',
+ *   cutoffFrequency: 0.3
+ * });
+ * const filtered = await filter.apply(imageData, 256, 256);
+ * ```
+ */
 export class ImageFilter {
   private config: ImageFilterConfig;
 
@@ -38,7 +55,7 @@ export class ImageFilter {
     ) {
       throw new FFTError(
         `cutoffFrequency must be a finite number in [0, 1], got ${config.cutoffFrequency}`,
-        FFTErrorCode.INVALID_INPUT_SIZE
+        FFTErrorCode.INVALID_PARAMETER
       );
     }
 
@@ -46,7 +63,7 @@ export class ImageFilter {
       if (!Number.isFinite(config.bandwidth) || config.bandwidth <= 0 || config.bandwidth > 1) {
         throw new FFTError(
           `bandwidth must be a finite number in (0, 1], got ${config.bandwidth}`,
-          FFTErrorCode.INVALID_INPUT_SIZE
+          FFTErrorCode.INVALID_PARAMETER
         );
       }
     }

@@ -34,12 +34,13 @@ export interface Complex {
  */
 export interface FFTEngineConfig {
   /**
-   * Reserved for future shader fast paths.
+   * Enable bank conflict optimization in GPU shader.
    *
-   * The current multi-stage GPU kernel does not use this option.
-   * Bank conflict optimization is planned for a future single-pass kernel.
+   * When enabled, adds padding to shared memory access to avoid bank conflicts.
+   * This can improve performance on some GPUs but may have no effect or even
+   * slight overhead on others. Test with your target hardware.
    *
-   * @default true
+   * @default false
    */
   enableBankConflictOptimization: boolean;
 

@@ -280,7 +280,7 @@ describe('Filter Operations', () => {
           shape: 'ideal',
           cutoffFrequency: -0.1,
         }),
-        FFTErrorCode.INVALID_INPUT_SIZE
+        FFTErrorCode.INVALID_PARAMETER
       );
 
       await expectFFTError(
@@ -290,7 +290,7 @@ describe('Filter Operations', () => {
           cutoffFrequency: 0.5,
           bandwidth: 0,
         }),
-        FFTErrorCode.INVALID_INPUT_SIZE
+        FFTErrorCode.INVALID_PARAMETER
       );
     });
 

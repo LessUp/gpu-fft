@@ -5,6 +5,7 @@ Thank you for your interest in contributing to WebGPU FFT Library! This document
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
+- [Spec-Driven Development](#spec-driven-development)
 - [Getting Started](#getting-started)
 - [Development Workflow](#development-workflow)
 - [Code Style](#code-style)
@@ -16,6 +17,39 @@ Thank you for your interest in contributing to WebGPU FFT Library! This document
 ## Code of Conduct
 
 This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+
+## Spec-Driven Development
+
+This project follows **Spec-Driven Development (SDD)**. All code implementations must derive from specifications in the `/specs` directory.
+
+### Spec Directory Structure
+
+```
+specs/
+├── product/           # Product requirements and user stories
+├── rfc/               # Technical design documents (architecture decisions)
+├── api/               # API interface specifications
+├── db/                # Data models (N/A for this library)
+└── testing/           # Testing specifications and property definitions
+```
+
+### Contribution Workflow
+
+1. **Read specs first** — Before writing code, review relevant specs in `/specs`
+2. **Spec-first** — For new features or interface changes, propose spec modifications first
+3. **Implement per spec** — Follow spec definitions exactly (no gold-plating)
+4. **Test against specs** — Write tests that verify acceptance criteria
+
+When submitting a PR, reference the relevant spec documents in your description.
+
+### Available Specifications
+
+| Spec Type | Location | Purpose |
+|-----------|----------|---------|
+| Product | `/specs/product/webgpu-fft-library.md` | What to build |
+| Architecture | `/specs/rfc/0001-webgpu-fft-library-architecture.md` | How it's designed |
+| API | `/specs/api/public-api.md` | Interface contracts |
+| Testing | `/specs/testing/testing-strategy.md` | Verification approach |
 
 ## Getting Started
 
@@ -148,7 +182,7 @@ We use [fast-check](https://github.com/dubzzz/fast-check) for property-based tes
 - Test mathematical properties (e.g., FFT/IFFT round-trip)
 - Use generators to create random valid inputs
 - Run at least 100 iterations per property
-- Tag tests with the property number from the design document
+- Tag tests with the property number from the testing spec: `/specs/testing/testing-strategy.md`
 
 Example:
 ```typescript
@@ -180,14 +214,16 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 
 ### Types
 
-- `feat`: A new feature
-- `fix`: A bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, semicolons, etc.)
-- `refactor`: Code refactoring without feature changes
-- `perf`: Performance improvements
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks (dependencies, build, etc.)
+| Type | Description |
+|------|-------------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation changes |
+| `style` | Code style changes (formatting) |
+| `refactor` | Code refactoring without feature changes |
+| `perf` | Performance improvements |
+| `test` | Adding or updating tests |
+| `chore` | Maintenance tasks (dependencies, build, etc.) |
 
 ### Examples
 
@@ -226,6 +262,7 @@ test(complex): add property tests for complex multiplication
 - [ ] All tests pass locally
 - [ ] Commit messages follow conventions
 - [ ] PR description explains the changes
+- [ ] Relevant spec documents are updated (if applicable)
 
 ## Reporting Issues
 

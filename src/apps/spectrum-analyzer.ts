@@ -8,6 +8,22 @@ import { FFTError, FFTErrorCode } from '../core/errors';
 const DB_FLOOR = -100;
 const MIN_MAGNITUDE = 1e-10;
 
+/**
+ * Real-time audio frequency spectrum analyzer.
+ *
+ * @remarks
+ * This is a CPU-only implementation and does not use GPU acceleration.
+ * For GPU-accelerated FFT, use {@link FFTEngine} directly.
+ *
+ * @example
+ * ```typescript
+ * const analyzer = await createSpectrumAnalyzer({
+ *   fftSize: 2048,
+ *   sampleRate: 44100
+ * });
+ * const spectrum = await analyzer.analyze(audioData);
+ * ```
+ */
 export class SpectrumAnalyzer {
   private config: SpectrumAnalyzerConfig;
   private window: Float32Array;

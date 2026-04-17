@@ -1,4 +1,4 @@
-# # WebGPU FFT Library
+# WebGPU FFT Library
 
 [![npm version](https://img.shields.io/npm/v/webgpu-fft.svg)](https://www.npmjs.com/package/webgpu-fft)
 [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](./CHANGELOG.md)
@@ -256,8 +256,8 @@ This library implements the classic Cooley-Tukey Radix-2 Decimation-In-Time algo
 ### GPU Execution Notes
 
 - Current shader only supports `workgroupSize: 256`
-- `enableBankConflictOptimization` is reserved for future optimization
-- Spectrum analyzer and image filter use CPU FFT internally
+- `enableBankConflictOptimization` enables padding in GPU shared memory to reduce bank conflicts. Performance impact varies by GPU - test on your target hardware.
+- **Note:** `SpectrumAnalyzer` and `ImageFilter` use CPU FFT internally. For GPU-accelerated processing, use `FFTEngine` directly.
 
 ## 🧪 Testing
 

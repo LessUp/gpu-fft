@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /guide/quick-start
+      link: /setup/quick-start
     - theme: alt
       text: View on GitHub
       link: https://github.com/LessUp/gpu-fft
@@ -44,7 +44,7 @@ features:
 :root {
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #4f46e5 30%, #a78bfa);
-  
+
   --vp-home-hero-image-background-image: linear-gradient(-45deg, #4f46e5 50%, #a78bfa 50%);
   --vp-home-hero-image-filter: blur(44px);
 }
@@ -72,42 +72,3 @@ features:
   box-shadow: 0 8px 24px rgba(79, 70, 229, 0.15);
 }
 </style>
-
-## Quick Start
-
-```bash
-npm install webgpu-fft
-```
-
-```typescript
-import { createFFTEngine, isWebGPUAvailable } from 'webgpu-fft'
-
-if (await isWebGPUAvailable()) {
-  const engine = await createFFTEngine()
-  const input = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0])
-  const spectrum = await engine.fft(input)
-  engine.dispose()
-}
-```
-
-## Browser Support
-
-| Browser | Minimum | Status |
-|---------|---------|--------|
-| Chrome | 113+ | ✅ Stable |
-| Edge | 113+ | ✅ Stable |
-| Firefox | 128+ | ✅ Stable |
-| Safari | 17+ | ⚠️ Preview |
-
-## Performance
-
-WebGPU FFT Library is designed for maximum performance:
-
-- **GPU Acceleration**: Compute shaders parallelize butterfly operations
-- **Buffer Reuse**: Same-size transforms reuse GPU buffers
-- **Pipeline Caching**: Compiled shaders are cached for reuse
-- **Batched Commands**: Single command buffer per transform
-
-## License
-
-[MIT](https://opensource.org/licenses/MIT) © WebGPU FFT Library Contributors

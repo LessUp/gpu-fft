@@ -1,3 +1,9 @@
+// ============================================================================
+// REFERENCE COPY - DO NOT EDIT
+// This file is a reference copy only. The canonical source is in sources.ts.
+// Edit src/shaders/sources.ts and run build to update this file if needed.
+// ============================================================================
+
 // Complex number operations for FFT
 // Complex numbers are represented as vec2<f32> where x = real, y = imaginary
 

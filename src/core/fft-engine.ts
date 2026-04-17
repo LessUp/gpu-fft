@@ -8,13 +8,12 @@ import { BUTTERFLY_SHADER, BIT_REVERSAL_SHADER, SCALE_SHADER } from '../shaders/
 
 const SUPPORTED_WORKGROUP_SIZE = 256;
 const MAX_GPU_FFT_SIZE = 65536;
-const BUTTERFLY_ENABLE_PADDING = 0;
 const BIT_REVERSAL_PARAM_BUFFER_SIZE = 8;
 const BUTTERFLY_PARAM_BUFFER_SIZE = 16;
 const SCALE_PARAM_BUFFER_SIZE = 8;
 
 const DEFAULT_CONFIG: FFTEngineConfig = {
-  enableBankConflictOptimization: true,
+  enableBankConflictOptimization: false,
   workgroupSize: SUPPORTED_WORKGROUP_SIZE,
 };
 
@@ -53,8 +52,13 @@ function createBitReversalParams(n: number, numStages: number): Uint32Array {
   return new Uint32Array([n, numStages]);
 }
 
-function createButterflyParams(n: number, stage: number, inverse: boolean): Uint32Array {
-  return new Uint32Array([n, stage, inverse ? 1 : 0, BUTTERFLY_ENABLE_PADDING]);
+function createButterflyParams(
+  n: number,
+  stage: number,
+  inverse: boolean,
+  enablePadding: boolean
+): Uint32Array {
+  return new Uint32Array([n, stage, inverse ? 1 : 0, enablePadding ? 1 : 0]);
 }
 
 function createScaleParams(n: number): Uint8Array {
@@ -240,7 +244,7 @@ export class FFTEngine {
     for (let stage = 0; stage < numStages; stage++) {
       this.resourceManager.uploadData(
         cache.stageParamBuffers[stage],
-        createButterflyParams(n, stage, inverse)
+        createButterflyParams(n, stage, inverse, this.config.enableBankConflictOptimization)
       );
 
       const bindGroup = device.createBindGroup({

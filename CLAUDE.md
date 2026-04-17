@@ -37,3 +37,47 @@ Conventional Commits: `type(scope): description` (feat, fix, docs, style, refact
 - `createSpectrumAnalyzer()` and `createImageFilter()` are CPU-only, not GPU-accelerated.
 - `enableBankConflictOptimization` config option is reserved for a future fast path — currently unused.
 - `workgroupSize` is fixed at 256 for compute kernels (16x16 for filter shader).
+
+---
+
+# Project Philosophy: Spec-Driven Development (SDD)
+
+This project strictly follows the **Spec-Driven Development (SDD)** paradigm. All code implementations must use the `/specs` directory as the single source of truth.
+
+## Directory Context (Specs)
+
+- `/specs/product/` — Product feature definitions and acceptance criteria
+- `/specs/rfc/` — Technical design documents (architecture decisions)
+- `/specs/api/` — API interface specifications
+- `/specs/db/` — Database model definitions (N/A for this library)
+- `/specs/testing/` — Testing specifications and property definitions
+
+## AI Agent Workflow Instructions
+
+When you (AI) are asked to develop a new feature, modify existing functionality, or fix a bug, **you MUST strictly follow this workflow without skipping any steps**:
+
+### Step 1: Review Specs
+
+- First, read the relevant documents in `/specs` (product specs, RFCs, API definitions)
+- If the user's request conflicts with existing specs, **stop immediately** and point out the conflict. Ask the user whether to update the specs first
+
+### Step 2: Spec-First Update
+
+- For new features or changes to interfaces/database structures, **you MUST propose modifying or creating spec documents first** (e.g., `/specs/product/*.md`, `/specs/rfc/*.md`)
+- Wait for user confirmation of spec changes before proceeding to code implementation
+
+### Step 3: Implementation
+
+- When writing code, **100% comply** with spec definitions (including variable names, API paths, data types, status codes, etc.)
+- **Do not add features not defined in specs** (No Gold-Plating)
+
+### Step 4: Test Against Specs
+
+- Write unit and integration tests based on acceptance criteria in `/specs`
+- Ensure test cases cover all boundary conditions described in specs
+
+## Code Generation Rules
+
+- Any externally exposed API changes MUST be reflected in `/specs/api/public-api.md`
+- For uncertain technical details, consult `/specs/rfc/` for architectural conventions — do not invent design patterns
+- Reference the relevant spec documents in commit messages when implementing features

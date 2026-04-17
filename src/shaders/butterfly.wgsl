@@ -1,3 +1,9 @@
+// ============================================================================
+// REFERENCE COPY - DO NOT EDIT
+// This file is a reference copy only. The canonical source is in sources.ts.
+// Edit src/shaders/sources.ts and run build to update this file if needed.
+// ============================================================================
+
 // FFT Butterfly operation shader with Bank Conflict optimization
 
 const PI: f32 = 3.14159265358979323846;

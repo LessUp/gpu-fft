@@ -17,6 +17,8 @@ export enum FFTErrorCode {
   INPUT_TOO_LARGE = 'INPUT_TOO_LARGE',
   /** Input dimensions do not match expected values */
   DIMENSION_MISMATCH = 'DIMENSION_MISMATCH',
+  /** Invalid configuration parameter (e.g., cutoff frequency out of range) */
+  INVALID_PARAMETER = 'INVALID_PARAMETER',
   /** Failed to allocate GPU buffer */
   BUFFER_ALLOCATION_FAILED = 'BUFFER_ALLOCATION_FAILED',
   /** Failed to compile WGSL shader */

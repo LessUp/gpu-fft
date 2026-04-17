@@ -1,30 +1,31 @@
-# Requirements Document
+# Product Spec: WebGPU FFT Library
 
 ## Introduction
 
-WebGPU FFT Library 是一个高性能的快速傅里叶变换库，利用 WebGPU 的计算着色器在 GPU 上实现 FFT 算法。该库支持 1D 和 2D FFT，针对 GPU 架构进行了深度优化，包括 Bank Conflict 消除和高效的位反转置换。主要应用场景包括实时音频频谱分析和图像频域滤波。
+The WebGPU FFT Library is a high-performance Fast Fourier Transform library that leverages WebGPU compute shaders for GPU-accelerated FFT algorithms. It supports 1D and 2D FFT with deep optimization for GPU architecture, including Bank Conflict elimination and efficient bit-reversal permutation. Primary use cases include real-time audio spectrum analysis and image frequency-domain filtering.
 
-**Status: ✅ COMPLETED** - All requirements have been implemented and verified.
+**Status**: ✅ COMPLETED - All requirements implemented and verified. 106 tests passing.
 
 ## Glossary
 
-- **FFT**: Fast Fourier Transform，快速傅里叶变换，将时域信号转换为频域表示的高效算法
-- **IFFT**: Inverse Fast Fourier Transform，逆快速傅里叶变换，将频域信号转换回时域
-- **Radix-2**: 基-2 FFT 算法，每次将问题分解为两个子问题
-- **Cooley-Tukey**: 最常用的 FFT 算法，采用分治策略
-- **Butterfly_Operation**: 蝴蝶操作，FFT 的基本计算单元，包含复数加减和旋转因子乘法
-- **Twiddle_Factor**: 旋转因子，FFT 中使用的复数指数 e^(-2πi·k/N)
-- **Bit_Reversal**: 位反转置换，FFT 输入/输出重排序所需的索引变换
-- **Bank_Conflict**: 存储体冲突，多个线程同时访问同一 Shared Memory Bank 导致的性能下降
-- **Shared_Memory**: GPU 上工作组内线程共享的高速缓存
-- **Workgroup**: WebGPU 中的工作组，一组协同执行的线程
-- **Complex_Number**: 复数，包含实部和虚部的数值类型
+| Term | Definition |
+|------|------------|
+| **FFT** | Fast Fourier Transform - efficient algorithm for computing Discrete Fourier Transform |
+| **IFFT** | Inverse Fast Fourier Transform - transforms frequency-domain data back to time domain |
+| **Radix-2** | Base-2 FFT algorithm that decomposes into two sub-problems per iteration |
+| **Cooley-Tukey** | Most common FFT algorithm using divide-and-conquer strategy |
+| **Butterfly Operation** | Basic FFT computation unit involving complex addition/subtraction and twiddle factor multiplication |
+| **Twiddle Factor** | Complex exponential e^(-2πi·k/N) used in FFT |
+| **Bit Reversal** | Index permutation required for FFT input/output reordering |
+| **Bank Conflict** | Performance degradation when multiple threads access same Shared Memory bank |
+| **Shared Memory** | Fast on-chip memory shared within a GPU workgroup |
+| **Workgroup** | Group of threads executing cooperatively on GPU |
 
 ## Requirements
 
-### Requirement 1: 复数运算支持 ✅
+### Requirement 1: Complex Number Support ✅
 
-**User Story:** As a developer, I want to perform complex number arithmetic on GPU, so that I can implement FFT algorithms efficiently.
+**User Story**: As a developer, I want to perform complex number arithmetic on GPU, so that I can implement FFT algorithms efficiently.
 
 #### Acceptance Criteria
 
@@ -34,9 +35,9 @@ WebGPU FFT Library 是一个高性能的快速傅里叶变换库，利用 WebGPU
 4. WHEN a complex number's magnitude is requested, THE Complex_Module SHALL return sqrt(real² + imag²) ✅
 5. WHEN a twiddle factor is requested for index k and size N, THE Complex_Module SHALL return e^(-2πik/N) = cos(-2πk/N) + i·sin(-2πk/N) ✅
 
-### Requirement 2: 位反转置换 ✅
+### Requirement 2: Bit-Reversal Permutation ✅
 
-**User Story:** As a developer, I want efficient bit-reversal permutation on GPU, so that I can reorder FFT input/output correctly.
+**User Story**: As a developer, I want efficient bit-reversal permutation on GPU, so that I can reorder FFT input/output correctly.
 
 #### Acceptance Criteria
 
@@ -45,9 +46,9 @@ WebGPU FFT Library 是一个高性能的快速傅里叶变换库，利用 WebGPU
 3. THE Bit_Reversal_Module SHALL execute bit-reversal in parallel across GPU threads ✅
 4. WHEN the array size is N = 2^n, THE Bit_Reversal_Module SHALL use n bits for reversal computation ✅
 
-### Requirement 3: 1D FFT 核心算法 ✅
+### Requirement 3: 1D FFT Core Algorithm ✅
 
-**User Story:** As a developer, I want to compute 1D FFT on GPU, so that I can transform time-domain signals to frequency domain.
+**User Story**: As a developer, I want to compute 1D FFT on GPU, so that I can transform time-domain signals to frequency domain.
 
 #### Acceptance Criteria
 
@@ -58,9 +59,9 @@ WebGPU FFT Library 是一个高性能的快速傅里叶变换库，利用 WebGPU
 5. WHEN the FFT computation completes, THE FFT_Engine SHALL produce output where X[k] = Σ(x[n] · e^(-2πink/N)) for n=0 to N-1 ✅
 6. THE FFT_Engine SHALL support input sizes from 2 to at least 2^16 (65536) elements ✅
 
-### Requirement 4: 逆 FFT (IFFT) ✅
+### Requirement 4: Inverse FFT (IFFT) ✅
 
-**User Story:** As a developer, I want to compute inverse FFT, so that I can transform frequency-domain data back to time domain.
+**User Story**: As a developer, I want to compute inverse FFT, so that I can transform frequency-domain data back to time domain.
 
 #### Acceptance Criteria
 
@@ -69,9 +70,9 @@ WebGPU FFT Library 是一个高性能的快速傅里叶变换库，利用 WebGPU
 3. WHEN IFFT completes, THE IFFT_Module SHALL divide all results by N for proper normalization ✅
 4. WHEN FFT followed by IFFT is applied to input x, THE result SHALL equal x within floating-point tolerance ✅
 
-### Requirement 5: Bank Conflict 优化 ✅
+### Requirement 5: Bank Conflict Optimization ✅
 
-**User Story:** As a developer, I want to eliminate Shared Memory bank conflicts, so that FFT achieves maximum GPU performance.
+**User Story**: As a developer, I want to eliminate Shared Memory bank conflicts, so that FFT achieves maximum GPU performance.
 
 #### Acceptance Criteria
 
@@ -82,7 +83,7 @@ WebGPU FFT Library 是一个高性能的快速傅里叶变换库，利用 WebGPU
 
 ### Requirement 6: 2D FFT ✅
 
-**User Story:** As a developer, I want to compute 2D FFT for image processing, so that I can perform frequency-domain operations on images.
+**User Story**: As a developer, I want to compute 2D FFT for image processing, so that I can perform frequency-domain operations on images.
 
 #### Acceptance Criteria
 
@@ -92,9 +93,9 @@ WebGPU FFT Library 是一个高性能的快速傅里叶变换库，利用 WebGPU
 4. WHEN processing columns, THE FFT_2D_Module SHALL execute all column FFTs in parallel ✅
 5. THE FFT_2D_Module SHALL support image sizes up to at least 2048×2048 pixels ✅
 
-### Requirement 7: 频域滤波 ✅
+### Requirement 7: Frequency-Domain Filtering ✅
 
-**User Story:** As a user, I want to apply frequency-domain filters to images, so that I can perform low-pass and high-pass filtering.
+**User Story**: As a user, I want to apply frequency-domain filters to images, so that I can perform low-pass and high-pass filtering.
 
 #### Acceptance Criteria
 
@@ -104,9 +105,9 @@ WebGPU FFT Library 是一个高性能的快速傅里叶变换库，利用 WebGPU
 4. WHEN filtering is applied, THE Filter_Module SHALL perform: FFT → multiply by filter mask → IFFT ✅
 5. THE Filter_Module SHALL provide Gaussian and ideal (sharp cutoff) filter types ✅
 
-### Requirement 8: 实时音频频谱分析 ✅
+### Requirement 8: Real-Time Audio Spectrum Analysis ✅
 
-**User Story:** As a user, I want to visualize audio frequency spectrum in real-time, so that I can analyze audio signals.
+**User Story**: As a user, I want to visualize audio frequency spectrum in real-time, so that I can analyze audio signals.
 
 #### Acceptance Criteria
 
@@ -116,9 +117,9 @@ WebGPU FFT Library 是一个高性能的快速傅里叶变换库，利用 WebGPU
 4. THE Spectrum_Analyzer SHALL convert magnitude to decibels using 20·log₁₀(magnitude) ✅
 5. WHEN spectrum is computed, THE Spectrum_Analyzer SHALL return frequency bins from 0 Hz to Nyquist frequency ✅
 
-### Requirement 9: WebGPU 资源管理 ✅
+### Requirement 9: WebGPU Resource Management ✅
 
-**User Story:** As a developer, I want proper GPU resource management, so that the library works reliably across different WebGPU implementations.
+**User Story**: As a developer, I want proper GPU resource management, so that the library works reliably across different WebGPU implementations.
 
 #### Acceptance Criteria
 
@@ -129,9 +130,9 @@ WebGPU FFT Library 是一个高性能的快速傅里叶变换库，利用 WebGPU
 5. THE Resource_Manager SHALL provide methods to release GPU resources when no longer needed ✅
 6. THE Resource_Manager SHALL reuse buffers when possible to minimize allocation overhead ✅
 
-### Requirement 10: API 易用性 ✅
+### Requirement 10: API Usability ✅
 
-**User Story:** As a developer, I want a simple and intuitive API, so that I can integrate FFT functionality easily.
+**User Story**: As a developer, I want a simple and intuitive API, so that I can integrate FFT functionality easily.
 
 #### Acceptance Criteria
 
@@ -141,3 +142,16 @@ WebGPU FFT Library 是一个高性能的快速傅里叶变换库，利用 WebGPU
 4. THE Library SHALL provide separate functions for forward FFT, inverse FFT, and 2D variants ✅
 5. THE Library SHALL include TypeScript type definitions for all public APIs ✅
 6. IF invalid input size (not power of 2) is provided, THEN THE Library SHALL throw a descriptive error ✅
+
+## CPU Fallback Support
+
+**Status**: ✅ COMPLETED - Full CPU implementation available for non-WebGPU environments.
+
+### Additional Requirements
+
+1. THE Library SHALL provide CPU-based FFT implementations as fallback ✅
+2. THE CPU FFT SHALL match GPU FFT output within floating-point tolerance ✅
+3. THE Library SHALL automatically detect WebGPU availability ✅
+4. THE Library SHALL support 2D FFT on CPU ✅
+5. THE Library SHALL provide window functions (Hann, Hamming, Blackman, Flat Top, Rectangular) ✅
+6. THE Library SHALL support band-pass filtering in addition to low-pass and high-pass ✅
