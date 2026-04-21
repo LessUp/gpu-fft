@@ -12,40 +12,63 @@ export default defineConfig({
       'meta',
       {
         name: 'keywords',
-        content: 'WebGPU, FFT, GPU, signal processing, image processing, JavaScript, TypeScript',
+        content:
+          'WebGPU, FFT, GPU, signal processing, image processing, JavaScript, TypeScript, Fourier transform, spectrum analyzer, audio analysis',
       },
     ],
     ['meta', { name: 'author', content: 'WebGPU FFT Library Contributors' }],
+    ['meta', { name: 'googlebot', content: 'index, follow' }],
+    ['meta', { name: 'robots', content: 'index, follow' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:locale', content: 'en' }],
     ['meta', { property: 'og:title', content: 'WebGPU FFT Library' }],
     [
       'meta',
-      { property: 'og:description', content: 'High-performance GPU-accelerated FFT library' },
+      {
+        property: 'og:description',
+        content:
+          'High-performance GPU-accelerated FFT library with WebGPU compute shaders. Supports 1D/2D FFT, frequency domain filtering, and real-time spectrum analysis.',
+      },
     ],
     ['meta', { property: 'og:site_name', content: 'WebGPU FFT Library' }],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:site', content: '@webgpu_fft' }],
+    ['meta', { name: 'twitter:title', content: 'WebGPU FFT Library' }],
+    [
+      'meta',
+      {
+        name: 'twitter:description',
+        content: 'High-performance GPU-accelerated FFT library with WebGPU compute shaders',
+      },
+    ],
     ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
-    [
-      'meta',
-      { property: 'og:image', content: 'https://lessup.github.io/gpu-fft/hero.svg' },
-    ],
-    [
-      'meta',
-      { property: 'og:image:alt', content: 'WebGPU FFT Library - GPU-Accelerated FFT' },
-    ],
-    [
-      'meta',
-      { property: 'og:image:type', content: 'image/svg+xml' },
-    ],
+    ['link', { rel: 'canonical', href: 'https://lessup.github.io/gpu-fft/' }],
+    ['meta', { property: 'og:image', content: 'https://lessup.github.io/gpu-fft/og-image.png' }],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
+    ['meta', { property: 'og:image:alt', content: 'WebGPU FFT Library - GPU-Accelerated FFT' }],
     ['meta', { property: 'og:url', content: 'https://lessup.github.io/gpu-fft/' }],
+    ['meta', { property: 'og:locale:alternate', content: 'zh_CN' }],
+    ['meta', { name: 'twitter:image', content: 'https://lessup.github.io/gpu-fft/og-image.png' }],
     [
-      'meta',
-      { property: 'og:locale:alternate', content: 'zh_CN' },
-    ],
-    [
-      'meta',
-      { name: 'twitter:image', content: 'https://lessup.github.io/gpu-fft/hero.svg' },
+      'script',
+      { type: 'application/ld+json' },
+      JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareSourceCode',
+        name: 'WebGPU FFT Library',
+        description:
+          'High-performance GPU-accelerated Fast Fourier Transform library for JavaScript/TypeScript',
+        codeRepository: 'https://github.com/LessUp/gpu-fft',
+        programmingLanguage: 'TypeScript',
+        license: 'https://opensource.org/licenses/MIT',
+        author: {
+          '@type': 'Organization',
+          name: 'WebGPU FFT Library Contributors',
+        },
+        keywords: 'WebGPU, FFT, GPU, signal processing, TypeScript',
+        version: '1.1.0',
+      }),
     ],
   ],
 
@@ -81,11 +104,19 @@ export default defineConfig({
 
   sitemap: {
     hostname: 'https://lessup.github.io/gpu-fft/',
+    transformItems(items) {
+      return items.map((item) => {
+        item.lastmod = new Date().toISOString();
+        return item;
+      });
+    },
   },
 
   ignoreDeadLinks: true,
 
   srcExclude: ['**/specs/**/*.md'],
+
+  metaChunk: true,
 
   themeConfig: {
     logo: { src: '/logo.svg', width: 24, height: 24 },
@@ -159,9 +190,7 @@ export default defineConfig({
       '/quality/': [
         {
           text: 'Quality',
-          items: [
-            { text: 'Assessment', link: '/quality/assessment' },
-          ],
+          items: [{ text: 'Assessment', link: '/quality/assessment' }],
         },
       ],
     },

@@ -9,7 +9,7 @@
 
 [English](README.md) | 简体中文
 
-> **高性能快速傅里叶变换库**，采用 WebGPU 计算着色器，支持 CPU 回退。提供 1D/2D FFT、频域滤波和实时频谱分析。
+> **高性能 GPU 加速快速傅里叶变换库**，专为 JavaScript/TypeScript 设计。WebGPU 计算着色器实现**最高 92 倍加速**。支持 1D/2D FFT、频域滤波和实时频谱分析，零运行时依赖。
 
 ## ⚡ 为什么选择 WebGPU FFT？
 
@@ -48,8 +48,8 @@ for (let i = 0; i < 8; i++) {
   signal[i * 2 + 1] = 0;         // 虚部
 }
 
-const spectrum = await engine.fft1D(signal);
-const recovered = await engine.ifft1D(spectrum);
+const spectrum = await engine.fft(signal);
+const recovered = await engine.ifft(spectrum);
 
 engine.dispose(); // 释放 GPU 资源
 ```
@@ -132,10 +132,10 @@ filter.dispose();
 
 | 方法 | 说明 | 最大尺寸 |
 |------|------|----------|
-| `fft1D(data)` | 1D 正向 FFT | 65,536 |
-| `ifft1D(data)` | 1D 逆向 FFT | 65,536 |
-| `fft2D(data, w, h)` | 2D 正向 FFT | 2048×2048 |
-| `ifft2D(data, w, h)` | 2D 逆向 FFT | 2048×2048 |
+| `fft(data)` | 1D 正向 FFT | 65,536 |
+| `ifft(data)` | 1D 逆向 FFT | 65,536 |
+| `fft2d(data, w, h)` | 2D 正向 FFT | 2048×2048 |
+| `ifft2d(data, w, h)` | 2D 逆向 FFT | 2048×2048 |
 | `dispose()` | 释放 GPU 资源 | - |
 
 ### 工具函数
@@ -164,7 +164,7 @@ const data = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]);
 import { FFTError } from 'webgpu-fft';
 
 try {
-  await engine.fft1D(invalidData);
+  await engine.fft(invalidData);
 } catch (error) {
   if (error instanceof FFTError) {
     console.error(`[${error.code}] ${error.message}`);

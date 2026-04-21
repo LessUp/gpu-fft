@@ -22,22 +22,22 @@ hero:
 features:
   - icon: ⚡
     title: GPU Acceleration
-    details: WebGPU compute shaders deliver maximum performance for FFT calculations. Falls back to CPU when WebGPU is unavailable.
+    details: WebGPU compute shaders deliver up to 92x faster FFT calculations compared to CPU. Automatic fallback when WebGPU is unavailable.
   - icon: 📊
     title: 1D & 2D FFT
     details: Support for 1D transforms (2-65,536 elements) and 2D transforms (up to 2048×2048 pixels) for image processing.
   - icon: 🎵
     title: Audio Spectrum Analysis
-    details: Real-time frequency analysis with configurable FFT sizes and window functions.
+    details: Real-time frequency analysis with configurable FFT sizes and multiple window functions (Hann, Hamming, Blackman, etc.).
   - icon: 🔍
     title: Frequency Domain Filtering
-    details: Low-pass, high-pass, and band-pass filters with ideal or Gaussian shapes.
+    details: Low-pass, high-pass, and band-pass filters with ideal or Gaussian shapes for image and signal processing.
   - icon: 🔷
     title: TypeScript First
-    details: Full type definitions with strict mode support. Zero runtime dependencies.
+    details: Full type definitions with strict mode support. Complete IDE autocomplete and type safety.
   - icon: 🚀
     title: Zero Dependencies
-    details: No runtime dependencies for minimal bundle size. Works in browsers and Node.js.
+    details: No runtime dependencies. ~27 kB ESM bundle. Works in browsers and Node.js 18+.
 ---
 
 <style>

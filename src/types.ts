@@ -87,7 +87,28 @@ export interface SpectrumAnalyzerConfig {
    * Common values: 44100 (CD quality), 48000 (professional audio), 96000 (high-res)
    */
   sampleRate: number;
+
+  /**
+   * The window function to apply before FFT.
+   *
+   * Windowing reduces spectral leakage for signals that are not perfectly
+   * periodic within the analysis window.
+   *
+   * @default 'hann'
+   */
+  windowType?: WindowType;
 }
+
+/**
+ * Window function type for spectrum analysis.
+ *
+ * - `'hann'`: Good general-purpose window with moderate side lobe attenuation
+ * - `'hamming'`: Similar to Hann but with slightly better side lobe suppression
+ * - `'blackman'`: Excellent side lobe attenuation at the cost of wider main lobe
+ * - `'flattop'`: Most accurate amplitude measurements but widest main lobe
+ * - `'rectangular'`: No windowing, best frequency resolution but worst side lobe suppression
+ */
+export type WindowType = 'hann' | 'hamming' | 'blackman' | 'flattop' | 'rectangular';
 
 /**
  * Type of frequency domain filter.

@@ -1,12 +1,35 @@
 // Spectrum Analyzer - Real-time audio frequency spectrum analysis
-import type { SpectrumAnalyzerConfig } from '../types';
+import type { SpectrumAnalyzerConfig, WindowType } from '../types';
 import { cpuFFT } from '../utils/cpu-fft';
-import { hannWindow } from '../utils/window-functions';
+import {
+  hannWindow,
+  hammingWindow,
+  blackmanWindow,
+  flatTopWindow,
+  rectangularWindow,
+} from '../utils/window-functions';
 import { isPowerOf2 } from '../utils/bit-reversal';
 import { FFTError, FFTErrorCode } from '../core/errors';
 
 const DB_FLOOR = -100;
 const MIN_MAGNITUDE = 1e-10;
+
+function getWindowFunction(type: WindowType): (size: number) => Float32Array {
+  switch (type) {
+    case 'hann':
+      return hannWindow;
+    case 'hamming':
+      return hammingWindow;
+    case 'blackman':
+      return blackmanWindow;
+    case 'flattop':
+      return flatTopWindow;
+    case 'rectangular':
+      return rectangularWindow;
+    default:
+      return hannWindow;
+  }
+}
 
 /**
  * Real-time audio frequency spectrum analyzer.
@@ -42,8 +65,9 @@ export class SpectrumAnalyzer {
         FFTErrorCode.INVALID_INPUT_SIZE
       );
     }
-    this.config = config;
-    this.window = hannWindow(config.fftSize);
+    this.config = { windowType: 'hann', ...config };
+    const windowFn = getWindowFunction(this.config.windowType!);
+    this.window = windowFn(config.fftSize);
     this.complexInput = new Float32Array(config.fftSize * 2);
   }
 

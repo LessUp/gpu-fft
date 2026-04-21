@@ -9,7 +9,7 @@
 
 English | [简体中文](README.zh-CN.md)
 
-> **High-performance Fast Fourier Transform library** with WebGPU compute shaders and CPU fallback. Supports 1D/2D FFT, frequency-domain filtering, and real-time spectrum analysis.
+> **High-performance GPU-accelerated Fast Fourier Transform library** for JavaScript/TypeScript. WebGPU compute shaders deliver up to **92x faster** FFT than CPU. Supports 1D/2D FFT, frequency-domain filtering, and real-time spectrum analysis with zero runtime dependencies.
 
 ## ⚡ Why WebGPU FFT?
 
@@ -48,8 +48,8 @@ for (let i = 0; i < 8; i++) {
   signal[i * 2 + 1] = 0;         // Imag
 }
 
-const spectrum = await engine.fft1D(signal);
-const recovered = await engine.ifft1D(spectrum);
+const spectrum = await engine.fft(signal);
+const recovered = await engine.ifft(spectrum);
 
 engine.dispose(); // Release GPU resources
 ```
@@ -132,10 +132,10 @@ filter.dispose();
 
 | Method | Description | Max Size |
 |--------|-------------|----------|
-| `fft1D(data)` | 1D forward FFT | 65,536 |
-| `ifft1D(data)` | 1D inverse FFT | 65,536 |
-| `fft2D(data, w, h)` | 2D forward FFT | 2048×2048 |
-| `ifft2D(data, w, h)` | 2D inverse FFT | 2048×2048 |
+| `fft(data)` | 1D forward FFT | 65,536 |
+| `ifft(data)` | 1D inverse FFT | 65,536 |
+| `fft2d(data, w, h)` | 2D forward FFT | 2048×2048 |
+| `ifft2d(data, w, h)` | 2D inverse FFT | 2048×2048 |
 | `dispose()` | Release GPU resources | - |
 
 ### Utilities
@@ -164,7 +164,7 @@ const data = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]);
 import { FFTError } from 'webgpu-fft';
 
 try {
-  await engine.fft1D(invalidData);
+  await engine.fft(invalidData);
 } catch (error) {
   if (error instanceof FFTError) {
     console.error(`[${error.code}] ${error.message}`);
@@ -183,7 +183,7 @@ try {
 | Firefox | 128+ | ✅ Stable | ✅ |
 | Safari | 17+ | ⚠️ Preview | ✅ |
 
-Always use `isWebGPUAvailable` to detect support and fallback to CPU.
+> **Tip**: Use `isWebGPUAvailable` to detect support at runtime and gracefully fallback to CPU when needed.
 
 ## 📦 Package Info
 

@@ -104,4 +104,5 @@ export type {
   FilterType,
   FilterShape,
   ImageFilterConfig,
+  WindowType,
 } from './types';

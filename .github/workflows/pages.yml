@@ -2,29 +2,29 @@
 name: Deploy VitePress to GitHub Pages
 
 on:
-  # Runs on pushes targeting the `main` branch
   push:
     branches: [main, master]
     paths:
       - 'docs/**'
+      - 'src/**'
       - '.github/workflows/pages.yml'
-
-  # Allows you to run this workflow manually from the Actions tab
+      - 'package.json'
+      - 'package-lock.json'
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
 
 jobs:
-  # Build job
   build:
     runs-on: ubuntu-latest
     steps:
@@ -36,24 +36,29 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore docs cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            docs/.vitepress/cache
+            docs/.vitepress/dist
+          key: docs-${{ hashFiles('docs/**', 'package-lock.json') }}
+          restore-keys: |
+            docs-
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Reuse dist directory
-        run: mkdir -vp dist
-        continue-on-error: true
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Build library
-        run: npm run build
-
       - name: Build documentation
         run: npm run docs:build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Copy coverage report
         run: cp -r coverage docs/.vitepress/dist/coverage || true
@@ -63,8 +68,8 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/.vitepress/dist
+          retention-days: 7
 
-  # Deployment job
   deploy:
     environment:
       name: github-pages
@@ -77,11 +82,13 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  # Lighthouse CI for performance monitoring
   lighthouse:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Audit with Lighthouse
         uses: treosh/lighthouse-ci-action@v12
         with:

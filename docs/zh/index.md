@@ -1,62 +1,74 @@
-# WebGPU FFT 库
+---
+layout: home
 
-[![npm version](https://img.shields.io/npm/v/webgpu-fft.svg)](https://www.npmjs.com/package/webgpu-fft)
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](/changelog)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+hero:
+  name: "WebGPU FFT"
+  text: "GPU 加速 FFT"
+  tagline: 基于 WebGPU 计算着色器的高性能快速傅里叶变换库。支持 1D/2D FFT、频域滤波和实时频谱分析。
+  image:
+    src: /hero.svg
+    alt: WebGPU FFT
+  actions:
+    - theme: brand
+      text: 快速开始
+      link: /setup/quick-start
+    - theme: alt
+      text: GitHub 仓库
+      link: https://github.com/LessUp/gpu-fft
+    - theme: alt
+      text: API 参考
+      link: /api/index
 
-高性能的 WebGPU 加速快速傅里叶变换（FFT）库。
+features:
+  - icon: ⚡
+    title: GPU 加速
+    details: WebGPU 计算着色器比 CPU 快 92 倍。WebGPU 不可用时自动回退到 CPU 实现。
+  - icon: 📊
+    title: 1D & 2D FFT
+    details: 支持 1D 变换（2-65,536 元素）和 2D 变换（最大 2048×2048 像素）用于图像处理。
+  - icon: 🎵
+    title: 音频频谱分析
+    details: 可配置 FFT 大小和多种窗函数（Hann、Hamming、Blackman 等）的实时频率分析。
+  - icon: 🔍
+    title: 频域滤波
+    details: 支持理想和高斯形状的低通、高通、带通滤波器，用于图像和信号处理。
+  - icon: 🔷
+    title: TypeScript 优先
+    details: 完整类型定义，启用严格模式。完整的 IDE 自动补全和类型安全。
+  - icon: 🚀
+    title: 零依赖
+    details: 无运行时依赖。ESM 包约 27 kB。支持浏览器和 Node.js 18+。
+---
 
-## 快速开始
+<style>
+:root {
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #4f46e5 30%, #a78bfa);
 
-### 安装
+  --vp-home-hero-image-background-image: linear-gradient(-45deg, #4f46e5 50%, #a78bfa 50%);
+  --vp-home-hero-image-filter: blur(44px);
+}
 
-```bash
-npm install webgpu-fft
-```
+@media (min-width: 640px) {
+  :root {
+    --vp-home-hero-image-filter: blur(56px);
+  }
+}
 
-### 基础用法
+@media (min-width: 960px) {
+  :root {
+    --vp-home-hero-image-filter: blur(68px);
+  }
+}
 
-```typescript
-import { createFFTEngine } from 'webgpu-fft'
+.VPFeature {
+  border: 1px solid var(--vp-c-divider);
+  transition: all 0.3s ease;
+}
 
-const engine = await createFFTEngine()
-const input = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0])
-const spectrum = await engine.fft(input)
-engine.dispose()
-```
-
-## 特性
-
-| 特性 | 描述 |
-|------|------|
-| **1D FFT/IFFT** | 支持 2 到 65,536 个元素 |
-| **2D FFT/IFFT** | 图像处理支持高达 2048×2048 |
-| **GPU 加速** | WebGPU 计算着色器 |
-| **CPU 回退** | 完整的 CPU 实现 |
-| **频域滤波** | 低通、高通、带通 |
-| **频谱分析** | 实时音频频率分析 |
-| **TypeScript** | 完整的类型定义 |
-| **零依赖** | 无运行时依赖 |
-
-## 浏览器支持
-
-| 浏览器 | 最低版本 | 状态 |
-|--------|---------|------|
-| Chrome | 113+ | ✅ 稳定 |
-| Edge | 113+ | ✅ 稳定 |
-| Firefox | 128+ | ✅ 稳定 |
-| Safari | 17+ | ⚠️ 预览 |
-
-## 文档导航
-
-- [教程](/zh/tutorials/introduction) - 介绍和快速开始
-- [API 参考](/api/index) - 完整的 API 文档（英文）
-- [规范文档](/specs/) - 产品需求和技术设计
-
-## 状态
-
-> **中文文档正在完善中**。欢迎贡献翻译！
-
-## 许可证
-
-[MIT](https://opensource.org/licenses/MIT) © WebGPU FFT Library Contributors
+.VPFeature:hover {
+  border-color: var(--vp-c-brand);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.15);
+}
+</style>
