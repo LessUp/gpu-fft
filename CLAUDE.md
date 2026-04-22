@@ -40,44 +40,54 @@ Conventional Commits: `type(scope): description` (feat, fix, docs, style, refact
 
 ---
 
-# Project Philosophy: Spec-Driven Development (SDD)
+## OpenSpec Workflow (Core Profile)
 
-This project strictly follows the **Spec-Driven Development (SDD)** paradigm. All code implementations must use the `/specs` directory as the single source of truth.
+This project uses **OpenSpec** for spec-driven development. All changes follow a structured workflow with automatic artifact generation.
 
-## Directory Context (Specs)
+### Commands
 
-- `/specs/product/` — Product feature definitions and acceptance criteria
-- `/specs/rfc/` — Technical design documents (architecture decisions)
-- `/specs/api/` — API interface specifications
-- `/specs/db/` — Database model definitions (N/A for this library)
-- `/specs/testing/` — Testing specifications and property definitions
+| Command | Purpose |
+|---------|---------|
+| `/opsx:propose` | Create change proposal (proposal.md, specs/, design.md, tasks.md) |
+| `/opsx:apply` | Implement proposed tasks |
+| `/opsx:archive` | Archive completed changes |
 
-## AI Agent Workflow Instructions
+### Workflow
 
-When you (AI) are asked to develop a new feature, modify existing functionality, or fix a bug, **you MUST strictly follow this workflow without skipping any steps**:
+```
+propose → apply → archive
+```
 
-### Step 1: Review Specs
+### Spec Location
 
-- First, read the relevant documents in `/specs` (product specs, RFCs, API definitions)
-- If the user's request conflicts with existing specs, **stop immediately** and point out the conflict. Ask the user whether to update the specs first
+**Source of truth:** `openspec/specs/`
 
-### Step 2: Spec-First Update
+| Directory | Purpose |
+|-----------|---------|
+| `openspec/specs/product/` | Product requirements and acceptance criteria |
+| `openspec/specs/rfc/` | Architecture decisions and design documents |
+| `openspec/specs/api/` | API interface specifications |
+| `openspec/specs/testing/` | Testing specifications |
 
-- For new features or changes to interfaces/database structures, **you MUST propose modifying or creating spec documents first** (e.g., `/specs/product/*.md`, `/specs/rfc/*.md`)
-- Wait for user confirmation of spec changes before proceeding to code implementation
+### Change Structure
 
-### Step 3: Implementation
+Each change proposal creates a folder in `openspec/changes/`:
 
-- When writing code, **100% comply** with spec definitions (including variable names, API paths, data types, status codes, etc.)
-- **Do not add features not defined in specs** (No Gold-Plating)
+```
+openspec/changes/<feature-name>/
+├── proposal.md    # Why we're doing this, what's changing
+├── specs/         # Delta requirements (ADDED/MODIFIED/REMOVED)
+├── design.md      # Technical approach
+└── tasks.md       # Implementation checklist
+```
 
-### Step 4: Test Against Specs
+### Code Generation Rules
 
-- Write unit and integration tests based on acceptance criteria in `/specs`
-- Ensure test cases cover all boundary conditions described in specs
+- API changes MUST be reflected in `openspec/specs/api/public-api.md`
+- Architectural decisions MUST reference `openspec/specs/rfc/`
+- Reference spec documents in commit messages
 
-## Code Generation Rules
+## Legacy Documentation
 
-- Any externally exposed API changes MUST be reflected in `/specs/api/public-api.md`
-- For uncertain technical details, consult `/specs/rfc/` for architectural conventions — do not invent design patterns
-- Reference the relevant spec documents in commit messages when implementing features
+- `AGENTS.md.legacy`: Previous SDD workflow (archived)
+- `specs/`: Original spec location (read-only reference)

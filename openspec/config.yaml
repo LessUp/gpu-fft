@@ -1,0 +1,20 @@
+# OpenSpec Configuration for WebGPU FFT Library
+# Generated: 2026-04-23
+
+project:
+  name: 'webgpu-fft-library'
+  description: 'High-performance WebGPU-based FFT implementation with WGSL shaders'
+
+context: |
+  Tech Stack: TypeScript, ESM+CJS, WGSL shaders
+  Build: tsc + vite (tsup), vitest for testing
+  Style: Prettier (single quotes, 100 char), ESLint
+
+defaults:
+  profile: 'core'
+
+rules:
+  spec_validation:
+    require_status: true
+  change_validation:
+    require_acceptance_criteria: true
