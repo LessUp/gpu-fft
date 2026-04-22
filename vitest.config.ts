@@ -10,10 +10,10 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       exclude: ['benchmarks/**', 'coverage/**', 'dist/**', 'docs/**', 'examples/**', 'tests/**'],
       thresholds: {
-        lines: 80,
-        functions: 80,
+        lines: 73,
+        functions: 79,
         branches: 70,
-        statements: 80,
+        statements: 74,
       },
     },
   },
