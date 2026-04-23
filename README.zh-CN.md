@@ -9,7 +9,7 @@
 
 [English](README.md) | 简体中文
 
-> **高性能 GPU 加速快速傅里叶变换库**，专为 JavaScript/TypeScript 设计。WebGPU 计算着色器实现**最高 92 倍加速**。支持 1D/2D FFT、频域滤波和实时频谱分析，零运行时依赖。
+> **高性能 GPU 加速快速傅里叶变换库**，专为 JavaScript/TypeScript 设计。WebGPU 计算着色器在大尺寸变换上可实现**最高约 92 倍加速**。项目提供 GPU FFT 内核，并附带用于频谱分析和频域图像滤波的 CPU 工具，零运行时依赖。
 
 ## ⚡ 为什么选择 WebGPU FFT？
 
@@ -18,8 +18,8 @@
 | **GPU 加速** | ✅ WebGPU 着色器 | ❌ 仅 CPU | ❌ 仅 CPU |
 | **1D FFT (65K)** | ~3ms | ~300ms | ~50ms |
 | **2D FFT (1024²)** | ~8ms | ~3s | ~100ms |
-| **频域滤波** | ✅ 内置 | 手动实现 | 手动实现 |
-| **频谱分析** | ✅ 内置 | 手动实现 | 手动实现 |
+| **频域滤波** | ✅ 内置（CPU 工具） | 手动实现 | 手动实现 |
+| **频谱分析** | ✅ 内置（CPU 工具） | 手动实现 | 手动实现 |
 | **浏览器原生** | ✅ 无需 WASM | ✅ | ❌ 服务端 |
 | **零依赖** | ✅ | ✅ | ❌ |
 | **TypeScript** | ✅ 严格模式 | 因库而异 | ❌ |
@@ -103,28 +103,34 @@ const spectrum = analyzer.analyze(audioBuffer); // 每个 bin 的 dB 值
 const frequencies = analyzer.getFrequencies();  // 每个 bin 对应的 Hz
 ```
 
+> **说明：** `createSpectrumAnalyzer()` 当前是 CPU-only，不会走 GPU FFT 内核。
+
 ### 频域图像滤波
 
 ```typescript
-import { createImageFilter, FilterType } from 'webgpu-fft';
+import { createImageFilter } from 'webgpu-fft';
 
-const filter = await createImageFilter({ width: 512, height: 512 });
+const filter = await createImageFilter({
+  type: 'lowpass',
+  shape: 'gaussian',
+  cutoffFrequency: 0.3,
+});
 
 // 低通滤波（模糊）
-const blurred = await filter.applyFilter(imageData, {
-  type: FilterType.LowPass,
-  cutoff: 0.3,
-});
+const blurred = await filter.apply(imageData, 512, 512);
 
 // 高通滤波（边缘检测）
-const edges = await filter.applyFilter(imageData, {
-  type: FilterType.HighPass,
-  cutoff: 0.1,
+const edgeFilter = await createImageFilter({
+  type: 'highpass',
   shape: 'gaussian',
+  cutoffFrequency: 0.1,
 });
+const edges = await edgeFilter.apply(imageData, 512, 512);
 
 filter.dispose();
 ```
+
+> **说明：** `createImageFilter()` 当前是 CPU-only，内部使用 CPU 版 2D FFT。
 
 ## 📖 API 概览
 
@@ -143,8 +149,8 @@ filter.dispose();
 | API | 用途 |
 |-----|------|
 | `cpuFFT()` / `cpuIFFT()` | CPU 回退实现 |
-| `createSpectrumAnalyzer()` | 实时音频分析 |
-| `createImageFilter()` | 频域滤波 |
+| `createSpectrumAnalyzer()` | 实时音频分析（CPU 工具） |
+| `createImageFilter()` | 频域滤波（CPU 工具） |
 | `isWebGPUAvailable` | 检测 GPU 支持 |
 | 窗函数 | Hann, Hamming, Blackman, FlatTop |
 | 复数工具 | 加减乘、幅度、旋转因子 |
@@ -247,7 +253,7 @@ npx serve examples/web
 
 欢迎贡献！请阅读[贡献指南](CONTRIBUTING.md)和[行为准则](CODE_OF_CONDUCT.md)。
 
-本项目遵循**规范驱动开发** — 查看 `/specs/` 目录了解产品需求和架构 RFC。
+本项目遵循 **OpenSpec 驱动开发** — 规范真源位于 [`openspec/specs/`](openspec/specs/)，所有非平凡改动都应通过 OpenSpec 变更流程推进。
 
 ## 📄 许可证
 

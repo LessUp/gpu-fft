@@ -20,25 +20,26 @@ This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDU
 
 ## Spec-Driven Development
 
-This project follows **Spec-Driven Development (SDD)**. All code implementations must derive from specifications in the `/specs` directory.
+This project follows **OpenSpec-driven development**. All non-trivial code changes must derive from the canonical specifications in `openspec/specs/` and from the relevant OpenSpec change artifacts in `openspec/changes/`.
 
 ### Spec Directory Structure
 
 ```
-specs/
-├── product/           # Product requirements and user stories
-├── rfc/               # Technical design documents (architecture decisions)
-├── api/               # API interface specifications
-├── db/                # Data models (N/A for this library)
-└── testing/           # Testing specifications and property definitions
+openspec/
+├── specs/
+│   ├── product/       # Product requirements and user stories
+│   ├── rfc/           # Technical design documents (architecture decisions)
+│   ├── api/           # API interface specifications
+│   └── testing/       # Testing specifications and property definitions
+└── changes/           # Change proposals, design docs, and task lists
 ```
 
 ### Contribution Workflow
 
-1. **Read specs first** — Before writing code, review relevant specs in `/specs`
-2. **Spec-first** — For new features or interface changes, propose spec modifications first
-3. **Implement per spec** — Follow spec definitions exactly (no gold-plating)
-4. **Test against specs** — Write tests that verify acceptance criteria
+1. **Read OpenSpec first** — Before writing code, review relevant docs in `openspec/specs/`
+2. **Propose before implementation** — For non-trivial features, fixes, or interface changes, create/update an OpenSpec change in `openspec/changes/`
+3. **Implement per spec** — Follow spec and design decisions exactly (no gold-plating)
+4. **Test against specs** — Write tests that verify acceptance criteria and documented quality gates
 
 When submitting a PR, reference the relevant spec documents in your description.
 
@@ -46,10 +47,10 @@ When submitting a PR, reference the relevant spec documents in your description.
 
 | Spec Type | Location | Purpose |
 |-----------|----------|---------|
-| Product | `/specs/product/webgpu-fft-library.md` | What to build |
-| Architecture | `/specs/rfc/0001-webgpu-fft-library-architecture.md` | How it's designed |
-| API | `/specs/api/public-api.md` | Interface contracts |
-| Testing | `/specs/testing/testing-strategy.md` | Verification approach |
+| Product | `openspec/specs/product/webgpu-fft-library.md` | What to build |
+| Architecture | `openspec/specs/rfc/0001-webgpu-fft-library-architecture.md` | How it's designed |
+| API | `openspec/specs/api/public-api.md` | Interface contracts |
+| Testing | `openspec/specs/testing/testing-strategy.md` | Verification approach |
 
 ## Getting Started
 
@@ -182,7 +183,7 @@ We use [fast-check](https://github.com/dubzzz/fast-check) for property-based tes
 - Test mathematical properties (e.g., FFT/IFFT round-trip)
 - Use generators to create random valid inputs
 - Run at least 100 iterations per property
-- Tag tests with the property number from the testing spec: `/specs/testing/testing-strategy.md`
+- Tag tests with the property number from the testing spec: `openspec/specs/testing/testing-strategy.md`
 
 Example:
 ```typescript

@@ -9,7 +9,7 @@
 
 English | [简体中文](README.zh-CN.md)
 
-> **High-performance GPU-accelerated Fast Fourier Transform library** for JavaScript/TypeScript. WebGPU compute shaders deliver up to **92x faster** FFT than CPU. Supports 1D/2D FFT, frequency-domain filtering, and real-time spectrum analysis with zero runtime dependencies.
+> **High-performance GPU-accelerated Fast Fourier Transform library** for JavaScript/TypeScript. WebGPU compute shaders deliver up to **92x faster** FFT than CPU for large transforms. The package combines a GPU FFT core with CPU-based utilities for spectrum analysis and frequency-domain image filtering, all with zero runtime dependencies.
 
 ## ⚡ Why WebGPU FFT?
 
@@ -18,8 +18,8 @@ English | [简体中文](README.zh-CN.md)
 | **GPU Acceleration** | ✅ WebGPU shaders | ❌ CPU only | ❌ CPU only |
 | **1D FFT (65K)** | ~3ms | ~300ms | ~50ms |
 | **2D FFT (1024²)** | ~8ms | ~3s | ~100ms |
-| **Frequency Filtering** | ✅ Built-in | Manual | Manual |
-| **Spectrum Analysis** | ✅ Built-in | Manual | Manual |
+| **Frequency Filtering** | ✅ Built-in (CPU utility) | Manual | Manual |
+| **Spectrum Analysis** | ✅ Built-in (CPU utility) | Manual | Manual |
 | **Browser Native** | ✅ No WASM | ✅ | ❌ Server |
 | **Zero Dependencies** | ✅ | ✅ | ❌ |
 | **TypeScript** | ✅ Strict mode | Varies | ❌ |
@@ -103,28 +103,34 @@ const spectrum = analyzer.analyze(audioBuffer); // dB values per bin
 const frequencies = analyzer.getFrequencies();  // Hz per bin
 ```
 
+> **Note:** `createSpectrumAnalyzer()` is currently CPU-only and does not use the GPU FFT path internally.
+
 ### Frequency-Domain Image Filtering
 
 ```typescript
-import { createImageFilter, FilterType } from 'webgpu-fft';
+import { createImageFilter } from 'webgpu-fft';
 
-const filter = await createImageFilter({ width: 512, height: 512 });
+const filter = await createImageFilter({
+  type: 'lowpass',
+  shape: 'gaussian',
+  cutoffFrequency: 0.3,
+});
 
 // Low-pass filter (blur)
-const blurred = await filter.applyFilter(imageData, {
-  type: FilterType.LowPass,
-  cutoff: 0.3,
-});
+const blurred = await filter.apply(imageData, 512, 512);
 
 // High-pass filter (edge detection)
-const edges = await filter.applyFilter(imageData, {
-  type: FilterType.HighPass,
-  cutoff: 0.1,
+const edgeFilter = await createImageFilter({
+  type: 'highpass',
   shape: 'gaussian',
+  cutoffFrequency: 0.1,
 });
+const edges = await edgeFilter.apply(imageData, 512, 512);
 
 filter.dispose();
 ```
+
+> **Note:** `createImageFilter()` is currently CPU-only and uses the CPU 2D FFT implementation internally.
 
 ## 📖 API Overview
 
@@ -143,8 +149,8 @@ filter.dispose();
 | API | Purpose |
 |-----|---------|
 | `cpuFFT()` / `cpuIFFT()` | CPU-based FFT fallback |
-| `createSpectrumAnalyzer()` | Real-time audio analysis |
-| `createImageFilter()` | Frequency-domain filtering |
+| `createSpectrumAnalyzer()` | Real-time audio analysis (CPU-only utility) |
+| `createImageFilter()` | Frequency-domain filtering (CPU-only utility) |
 | `isWebGPUAvailable` | Check GPU support |
 | Window functions | Hann, Hamming, Blackman, FlatTop |
 | Complex utilities | Add, Mul, Magnitude, Twiddle factors |
@@ -247,7 +253,7 @@ npx serve examples/web
 
 Contributions welcome! Read the [Contributing Guide](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md).
 
-This project follows **Spec-Driven Development** — see `/specs/` for product requirements and architecture RFCs.
+This project follows **OpenSpec-driven development** — see [`openspec/specs/`](openspec/specs/) for the canonical repository specifications and change workflow.
 
 ## 📄 License
 

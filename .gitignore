@@ -90,5 +90,8 @@ temp/
 # Generated documentation
 docs/.vitepress/dist/
 
+# Claude Code personal preferences
+CLAUDE.local.md
+
 # Assembled site output
 _site/
