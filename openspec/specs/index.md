@@ -1,44 +1,65 @@
-# Specifications
+# OpenSpec Specifications
 
-The `/specs` directory contains all specification documents that serve as the single source of truth for the WebGPU FFT Library.
+`openspec/specs/` is the canonical specification root for `gpu-fft`. The legacy top-level `/specs` tree is retired and MUST NOT be used as an active source of truth.
 
-## Directory Structure
+## Current Repository Phase
+
+The project is in a **closeout and stabilization** phase. Specification work now prioritizes:
+
+1. Preserving a single source of truth
+2. Keeping documentation and public claims accurate
+3. Simplifying workflows and maintenance burden
+4. Preparing the repository for low-maintenance archive-stage stewardship
+
+## Canonical Structure
 
 ```
-specs/
-├── product/           # Product requirements (PRDs)
-├── rfc/               # Technical design documents (RFCs)
-├── api/               # API specifications
-├── db/                # Database schemas (N/A for this library)
-└── testing/           # Testing specifications
+openspec/
+├── specs/
+│   ├── product/       # Product requirements and scope boundaries
+│   ├── rfc/           # Architecture decisions and project governance RFCs
+│   ├── api/           # Public API contracts
+│   └── testing/       # Testing and quality expectations
+└── changes/           # Proposal/design/tasks for in-flight changes
 ```
 
-## Available Specifications
+## Baseline Specification Documents
 
-### Product Requirements
+### Product
 
-- [WebGPU FFT Library](/specs/product/webgpu-fft-library) - Core product features and acceptance criteria
+- [`product/webgpu-fft-library.md`](./product/webgpu-fft-library.md) - Core library scope and functional behavior
 
-### RFCs (Technical Design)
+### RFCs
 
-- [RFC 0001: WebGPU FFT Library Architecture](/specs/rfc/0001-webgpu-fft-library-architecture) - Core architecture and design decisions
-- [RFC 0002: Project Quality Enhancement](/specs/rfc/0002-project-quality-enhancement-architecture) - Open-source best practices
+- [`rfc/0001-webgpu-fft-library-architecture.md`](./rfc/0001-webgpu-fft-library-architecture.md) - Core WebGPU FFT architecture
+- [`rfc/0002-project-quality-enhancement-architecture.md`](./rfc/0002-project-quality-enhancement-architecture.md) - Historical quality/project architecture context
+- [`rfc/index.md`](./rfc/index.md) - RFC index and OpenSpec workflow entry
 
-### API Specifications
+### API
 
-- [Public API](/specs/api/public-api) - Complete API reference with types and examples
+- [`api/public-api.md`](./api/public-api.md) - Public API contract and exported surface area
 
 ### Testing
 
-- [Testing Strategy](/specs/testing/testing-strategy) - Test conventions, property-based testing, and coverage requirements
+- [`testing/testing-strategy.md`](./testing/testing-strategy.md) - Test strategy, properties, and quality baselines
 
-## How to Use Specifications
+## Closeout Governance Capability Map
 
-These documents follow the **Spec-Driven Development (SDD)** paradigm:
+The active `project-closeout-normalization` change introduces the governance capabilities that define the repository's target end state:
 
-1. **Product specs** define what to build (requirements and user stories)
-2. **RFCs** define how to build it (architecture and design decisions)
-3. **API specs** define the interface contract
-4. **Testing specs** define how to verify correctness
+- `project-governance`
+- `documentation-platform`
+- `developer-workflow`
+- `public-api-alignment`
+- `quality-gates`
 
-When contributing to this project, always reference the relevant spec document first.
+These capabilities are implemented through change artifacts first and then reconciled back into the maintained repository surfaces.
+
+## Working Model
+
+1. Use `/opsx:explore` to investigate or clarify a problem
+2. Use `/opsx:propose` to create proposal/design/specs/tasks for non-trivial work
+3. Use `/opsx:apply` to implement the approved tasks
+4. Use `/opsx:archive` only after the change is fully implemented and reconciled
+
+When any guidance conflicts with this directory, the content under `openspec/specs/` and active change artifacts in `openspec/changes/` win.

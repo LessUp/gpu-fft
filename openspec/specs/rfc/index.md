@@ -17,6 +17,8 @@ New architectural changes use OpenSpec workflow:
 2. `/opsx:apply` — Implement changes
 3. `/opsx:archive` — Archive and update specs
 
-## Historical RFCs
+## Governance Notes
 
-For RFCs predating OpenSpec migration, see the [legacy specs archive](../../specs/rfc/).
+- `openspec/specs/` is the canonical specification root for this repository
+- The legacy top-level `/specs` tree is retained only as a migration stub and is not normative
+- New governance work for the closeout phase is tracked through OpenSpec changes before it is folded back into maintained docs

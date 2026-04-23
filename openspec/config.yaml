@@ -15,6 +15,6 @@ defaults:
 
 rules:
   spec_validation:
-    require_status: true
+    - require_status
   change_validation:
-    require_acceptance_criteria: true
+    - require_acceptance_criteria
