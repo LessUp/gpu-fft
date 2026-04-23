@@ -9,7 +9,7 @@ Learn how to perform 2D Fast Fourier Transform for image processing.
 ## Basic Usage
 
 ```ts
-import { createFFTEngine, FFTDirection } from 'webgpu-fft';
+import { createFFTEngine } from 'webgpu-fft';
 
 const engine = await createFFTEngine();
 
@@ -22,12 +22,7 @@ const imageData = new Float32Array(width * height * 2);
 // In practice, load from canvas or image file
 
 // Perform 2D FFT
-const frequencyDomain = await engine.fft2D(
-  imageData,
-  width,
-  height,
-  FFTDirection.Forward
-);
+const frequencyDomain = await engine.fft2d(imageData, width, height);
 ```
 
 ## Shifting the Zero Frequency

@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: "WebGPU FFT"
-  text: "GPU 加速 FFT"
-  tagline: 基于 WebGPU 计算着色器的高性能快速傅里叶变换库。支持 1D/2D FFT、频域滤波和实时频谱分析。
+  text: "浏览器原生 FFT 内核"
+  tagline: 面向 JavaScript/TypeScript 的 GPU 加速 1D/2D FFT。高吞吐 FFT 走 WebGPU；频谱分析与图像滤波以 CPU 工具形式提供。
   image:
     src: /hero.svg
     alt: WebGPU FFT
@@ -13,32 +13,56 @@ hero:
       text: 快速开始
       link: /setup/quick-start
     - theme: alt
-      text: GitHub 仓库
-      link: https://github.com/LessUp/gpu-fft
-    - theme: alt
       text: API 参考
       link: /api/index
+    - theme: alt
+      text: GitHub 仓库
+      link: https://github.com/LessUp/gpu-fft
 
 features:
   - icon: ⚡
-    title: GPU 加速
-    details: WebGPU 计算着色器比 CPU 快 92 倍。WebGPU 不可用时自动回退到 CPU 实现。
+    title: GPU FFT 内核
+    details: WebGPU 计算着色器用于 FFT 核心计算。大尺寸 1D FFT 可获得最高约 92 倍加速，2D FFT 也能显著受益。
   - icon: 📊
-    title: 1D & 2D FFT
-    details: 支持 1D 变换（2-65,536 元素）和 2D 变换（最大 2048×2048 像素）用于图像处理。
+    title: 能力边界清晰
+    details: 1D/2D FFT 是 GPU 加速能力；`createSpectrumAnalyzer()` 与 `createImageFilter()` 目前仍是 CPU-only 工具。
   - icon: 🎵
-    title: 音频频谱分析
-    details: 可配置 FFT 大小和多种窗函数（Hann、Hamming、Blackman 等）的实时频率分析。
-  - icon: 🔍
-    title: 频域滤波
-    details: 支持理想和高斯形状的低通、高通、带通滤波器，用于图像和信号处理。
-  - icon: 🔷
     title: TypeScript 优先
-    details: 完整类型定义，启用严格模式。完整的 IDE 自动补全和类型安全。
-  - icon: 🚀
-    title: 零依赖
-    details: 无运行时依赖。ESM 包约 27 kB。支持浏览器和 Node.js 18+。
+    details: 提供 ESM + CJS 导出、零运行时依赖，以及清晰的类型定义，适合浏览器与 Node 工作流。
+  - icon: 🔍
+    title: 快速评估路径
+    details: 从快速开始进入，先看 API 契约，再看架构页；避免在大量营销文案里兜圈子。
 ---
+
+## 这个站点的作用
+
+这个站点帮助你快速判断四件事：
+
+1. **FFT 核心是否真的走 GPU？** 是，`FFTEngine` 与 2D FFT 流程是 WebGPU 核心能力。
+2. **哪些能力仍是 CPU-only？** `createSpectrumAnalyzer()` 与 `createImageFilter()` 当前都基于 CPU FFT。
+3. **是否适合接入？** 包体零运行时依赖，导出 ESM + CJS，类型定义完整。
+4. **应该从哪里开始？** 先看快速开始，再看 API，再看架构页。
+
+## 适合 / 不适合
+
+### 适合
+
+- 浏览器侧的大尺寸 1D/2D FFT 任务
+- 希望用 TypeScript 调用 GPU FFT，又不想引入额外运行时依赖
+- 需要明确知道 GPU 与 CPU 能力边界的项目
+
+### 不适合
+
+- 需要 GPU 原生频谱分析或 GPU 原生图像滤波的场景
+- 不经过预处理就直接处理任意非 2 的幂大小输入
+- 需要“大而全”DSP 工具箱的项目
+
+## 建议阅读顺序
+
+- **先上手：** [快速开始](/setup/quick-start)
+- **查契约：** [API 参考](/api/index)
+- **看实现：** [架构概览](/architecture/overview)
+- **看协作：** [贡献指南](/contributing)
 
 <style>
 :root {

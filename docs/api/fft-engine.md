@@ -32,43 +32,46 @@ const engine = await createFFTEngine();
 
 ## `FFTEngine` Class
 
-### Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `device` | `GPUDevice` | The WebGPU device in use |
-| `isDisposed` | `boolean` | Whether resources have been released |
-
 ### Methods
 
-#### `fft1D()`
+#### `fft()`
 
 Performs a 1D forward FFT on the input data.
 
 ```ts
-fft1D(data: Float32Array, direction: FFTDirection): Promise<Float32Array>;
+fft(data: Float32Array): Promise<Float32Array>;
 ```
 
 **Parameters:**
 - `data` — Interleaved complex data `[Re, Im, Re, Im, ...]`. Length must be power of 2 (2-65536).
-- `direction` — `FFTDirection.Forward` or `FFTDirection.Inverse`
 
 **Returns:** `Promise<Float32Array>` — Frequency domain data.
 
 ```ts
-const spectrum = await engine.fft1D(signal, FFTDirection.Forward);
+const spectrum = await engine.fft(signal);
 ```
 
-#### `fft2D()`
+#### `ifft()`
+
+Performs a 1D inverse FFT on the input data.
+
+```ts
+ifft(data: Float32Array): Promise<Float32Array>;
+```
+
+```ts
+const recovered = await engine.ifft(spectrum);
+```
+
+#### `fft2d()`
 
 Performs a 2D FFT on image data.
 
 ```ts
-fft2D(
+fft2d(
   data: Float32Array,
   width: number,
-  height: number,
-  direction: FFTDirection
+  height: number
 ): Promise<Float32Array>;
 ```
 
@@ -76,12 +79,23 @@ fft2D(
 - `data` — Interleaved complex data of size `width * height * 2`
 - `width` — Image width (power of 2, max 2048)
 - `height` — Image height (power of 2, max 2048)
-- `direction` — Forward or Inverse
 
 **Returns:** `Promise<Float32Array>` — 2D frequency domain data.
 
 ```ts
-const freqData = await engine.fft2D(imageData, 256, 256, FFTDirection.Forward);
+const freqData = await engine.fft2d(imageData, 256, 256);
+```
+
+#### `ifft2d()`
+
+Performs a 2D inverse FFT on image data.
+
+```ts
+ifft2d(
+  data: Float32Array,
+  width: number,
+  height: number
+): Promise<Float32Array>;
 ```
 
 #### `dispose()`
@@ -96,23 +110,16 @@ dispose(): void;
 engine.dispose();
 ```
 
-## `FFTDirection` Enum
-
-```ts
-enum FFTDirection {
-  Forward = -1,
-  Inverse = 1,
-}
-```
-
 ## `FFTEngineConfig` Type
 
 ```ts
 interface FFTEngineConfig {
-  /** GPU power preference */
-  powerPreference?: 'high-performance' | 'low-power';
+  enableBankConflictOptimization: boolean;
+  workgroupSize: number;
 }
 ```
+
+`workgroupSize` is currently fixed at `256`. Other values are rejected during initialization.
 
 ## Related
 

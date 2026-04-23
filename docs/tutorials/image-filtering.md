@@ -9,26 +9,24 @@ Frequency domain filtering converts an image to frequency space, applies a filte
 ## Using the Image Filter API
 
 ```ts
-import { createImageFilter, FilterType } from 'webgpu-fft';
+import { createFFTEngine, createImageFilter } from 'webgpu-fft';
 
 const filter = await createImageFilter({
-  width: 512,
-  height: 512,
+  type: 'lowpass',
+  shape: 'ideal',
+  cutoffFrequency: 0.3,
 });
 
 // Apply low-pass filter (blur)
-const blurred = await filter.applyFilter(imageData, {
-  type: FilterType.LowPass,
-  cutoff: 0.3,
-  shape: 'ideal',
-});
+const blurred = await filter.apply(imageData, 512, 512);
 
 // Apply high-pass filter (edge detection)
-const edges = await filter.applyFilter(imageData, {
-  type: FilterType.HighPass,
-  cutoff: 0.1,
+const edgeFilter = await createImageFilter({
+  type: 'highpass',
   shape: 'gaussian',
+  cutoffFrequency: 0.1,
 });
+const edges = await edgeFilter.apply(imageData, 512, 512);
 ```
 
 ## Filter Types
@@ -38,13 +36,14 @@ const edges = await filter.applyFilter(imageData, {
 | Low-pass | Blurs image | Noise reduction, smoothing |
 | High-pass | Enhances edges | Edge detection, sharpening |
 | Band-pass | Keeps mid frequencies | Texture analysis |
-| Band-stop | Removes mid frequencies | Pattern removal |
 
 ## Manual Filtering
 
 ```ts
+const engine = await createFFTEngine();
+
 // 1. FFT to frequency domain
-const freqData = await engine.fft2D(imageData, width, height, FFTDirection.Forward);
+const freqData = await engine.fft2d(imageData, width, height);
 
 // 2. Create filter mask
 const mask = createGaussianMask(width, height, 0.2);
@@ -56,7 +55,7 @@ for (let i = 0; i < width * height; i++) {
 }
 
 // 4. Inverse FFT back to spatial domain
-const filtered = await engine.fft2D(freqData, width, height, FFTDirection.Inverse);
+const filtered = await engine.ifft2d(freqData, width, height);
 ```
 
 ## Creating Filter Masks

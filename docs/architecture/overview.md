@@ -48,25 +48,26 @@ The WebGPU FFT Library implements a multi-layer architecture for GPU-accelerated
 
 For complete technical design, see:
 
-- [RFC 0001: WebGPU FFT Library Architecture](/specs/rfc/0001-webgpu-fft-library-architecture)
-- [RFC 0002: Project Quality Enhancement](/specs/rfc/0002-project-quality-enhancement-architecture)
+- [RFC 0001: WebGPU FFT Library Architecture](https://github.com/LessUp/gpu-fft/blob/main/openspec/specs/rfc/0001-webgpu-fft-library-architecture.md)
+- [RFC 0002: Project Quality Enhancement](https://github.com/LessUp/gpu-fft/blob/main/openspec/specs/rfc/0002-project-quality-enhancement-architecture.md)
 
 ## Project Structure
 
 ```
 gpu-fft/
-├── specs/                  # Specification documents (SSOT)
-│   ├── product/            # Product requirements
-│   ├── rfc/                # Technical design documents
-│   ├── api/                # API specifications
-│   ├── db/                 # Database schemas (N/A)
-│   └── testing/            # Testing specifications
+├── openspec/
+│   ├── specs/              # Canonical repository specifications
+│   │   ├── product/        # Product requirements
+│   │   ├── rfc/            # Technical design documents
+│   │   ├── api/            # API specifications
+│   │   └── testing/        # Testing specifications
+│   └── changes/            # Proposal / design / task artifacts
 ├── docs/                   # Documentation site (VitePress)
 │   ├── setup/              # Environment setup guides
 │   ├── tutorials/          # User tutorials
 │   ├── architecture/       # Architecture documentation
 │   ├── assets/             # Static assets
-│   ├── api/                # Generated API documentation
+│   ├── api/                # Curated API reference source pages
 │   └── examples/           # Usage examples
 ├── src/                    # Source code
 │   ├── core/               # Core GPU engine
@@ -83,11 +84,11 @@ gpu-fft/
 
 ## Specifications as Source of Truth
 
-All implementation details are defined in `/specs/`:
+All repository-level requirements are defined in `openspec/specs/`:
 
 | Spec Type | Location | Purpose |
 |-----------|----------|---------|
-| Product | `/specs/product/` | What to build (requirements, user stories) |
-| RFC | `/specs/rfc/` | How to build it (architecture, design decisions) |
-| API | `/specs/api/` | Interface contracts (types, methods) |
-| Testing | `/specs/testing/` | Verification strategy (properties, coverage) |
+| Product | `openspec/specs/product/` | What to build (requirements, user stories) |
+| RFC | `openspec/specs/rfc/` | How to build it (architecture, design decisions) |
+| API | `openspec/specs/api/` | Interface contracts (types, methods) |
+| Testing | `openspec/specs/testing/` | Verification strategy (properties, coverage) |

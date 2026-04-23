@@ -87,13 +87,7 @@ export default defineConfig({
           { text: '教程', link: '/tutorials/introduction' },
           { text: '架构', link: '/architecture/overview' },
           { text: 'API', link: '/api/index' },
-          {
-            text: 'v1.1.0',
-            items: [
-              { text: '变更日志', link: '/changelog' },
-              { text: '贡献指南', link: '/contributing' },
-            ],
-          },
+          { text: '贡献', link: '/contributing' },
         ],
       },
     },
@@ -127,14 +121,7 @@ export default defineConfig({
       { text: 'Tutorials', link: '/tutorials/introduction' },
       { text: 'Architecture', link: '/architecture/overview' },
       { text: 'API', link: '/api/index' },
-      {
-        text: 'More',
-        items: [
-          { text: 'Changelog', link: '/changelog' },
-          { text: 'Contributing', link: '/contributing' },
-          { text: 'Quality Assessment', link: '/quality/assessment' },
-        ],
-      },
+      { text: 'Contributing', link: '/contributing' },
     ],
 
     sidebar: {
@@ -145,6 +132,7 @@ export default defineConfig({
           items: [
             { text: 'Quick Start', link: '/setup/quick-start' },
             { text: 'Browser Support', link: '/setup/browser-support' },
+            { text: 'AI Tooling & LSP', link: '/setup/ai-tooling' },
           ],
         },
       ],
@@ -185,12 +173,6 @@ export default defineConfig({
             { text: 'GPU Detection', link: '/api/gpu-detect' },
             { text: 'Bit Reversal', link: '/api/bit-reversal' },
           ],
-        },
-      ],
-      '/quality/': [
-        {
-          text: 'Quality',
-          items: [{ text: 'Assessment', link: '/quality/assessment' }],
         },
       ],
     },

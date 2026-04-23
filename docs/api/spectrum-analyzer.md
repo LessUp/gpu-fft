@@ -2,6 +2,8 @@
 
 Real-time audio frequency analysis with windowing and dB conversion.
 
+> `createSpectrumAnalyzer()` is currently a CPU-only utility. It does not use the GPU FFT engine internally.
+
 ## `createSpectrumAnalyzer()`
 
 Creates a spectrum analyzer instance.
@@ -10,8 +12,8 @@ Creates a spectrum analyzer instance.
 
 ```ts
 function createSpectrumAnalyzer(
-  config?: Partial<SpectrumAnalyzerConfig>
-): SpectrumAnalyzer;
+  config: SpectrumAnalyzerConfig
+): Promise<SpectrumAnalyzer>;
 ```
 
 ### Example
@@ -19,22 +21,14 @@ function createSpectrumAnalyzer(
 ```ts
 import { createSpectrumAnalyzer, WindowType } from 'webgpu-fft';
 
-const analyzer = createSpectrumAnalyzer({
+const analyzer = await createSpectrumAnalyzer({
   fftSize: 2048,
-  windowType: WindowType.Hann,
+  windowType: 'hann',
   sampleRate: 44100,
 });
 ```
 
 ## `SpectrumAnalyzer` Class
-
-### Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `fftSize` | `number` | FFT size (power of 2) |
-| `sampleRate` | `number` | Audio sample rate in Hz |
-| `windowType` | `WindowType` | Current window function |
 
 ### Methods
 
@@ -43,7 +37,7 @@ const analyzer = createSpectrumAnalyzer({
 Analyzes an audio buffer and returns dB values.
 
 ```ts
-analyze(buffer: Float32Array): Float32Array;
+analyze(buffer: Float32Array): Promise<Float32Array>;
 ```
 
 **Parameters:**
@@ -55,8 +49,20 @@ analyze(buffer: Float32Array): Float32Array;
 const audioBuffer = new Float32Array(2048);
 // ... fill with audio samples from Web Audio API ...
 
-const spectrum = analyzer.analyze(audioBuffer);
+const spectrum = await analyzer.analyze(audioBuffer);
 // spectrum[i] is the dB value for bin i
+```
+
+#### `getFrequency()`
+
+Returns the center frequency for one FFT bin.
+
+```ts
+getFrequency(binIndex: number): number;
+```
+
+```ts
+console.log(analyzer.getFrequency(10));
 ```
 
 #### `getFrequencies()`
@@ -93,16 +99,10 @@ interface SpectrumAnalyzerConfig {
 }
 ```
 
-## `WindowType` Enum
+## `WindowType` Type
 
 ```ts
-enum WindowType {
-  Rectangular = 'rectangular',
-  Hann = 'hann',
-  Hamming = 'hamming',
-  Blackman = 'blackman',
-  FlatTop = 'flattop',
-}
+type WindowType = 'hann' | 'hamming' | 'blackman' | 'flattop' | 'rectangular';
 ```
 
 ## Related

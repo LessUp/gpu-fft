@@ -9,19 +9,20 @@ Learn how to perform 1D Fast Fourier Transform using the WebGPU FFT Library.
 ## Basic Usage
 
 ```ts
-import { createFFTEngine, FFTDirection } from 'webgpu-fft';
+import { createFFTEngine } from 'webgpu-fft';
 
 const engine = await createFFTEngine();
 
-// Create a simple signal: sine wave
+// Create a simple signal: sine wave in interleaved complex form
 const size = 1024;
-const signal = new Float32Array(size);
+const signal = new Float32Array(size * 2);
 for (let i = 0; i < size; i++) {
-  signal[i] = Math.sin(2 * Math.PI * 50 * i / size);
+  signal[i * 2] = Math.sin((2 * Math.PI * 50 * i) / size);
+  signal[i * 2 + 1] = 0;
 }
 
 // Perform forward FFT
-const spectrum = await engine.fft1D(signal, FFTDirection.Forward);
+const spectrum = await engine.fft(signal);
 
 // spectrum contains complex interleaved data [Re, Im, Re, Im, ...]
 ```
