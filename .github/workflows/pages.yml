@@ -1,12 +1,10 @@
-# Deploy VitePress site to GitHub Pages
-name: Deploy VitePress to GitHub Pages
+name: Deploy documentation
 
 on:
   push:
     branches: [main, master]
     paths:
       - 'docs/**'
-      - 'src/**'
       - '.github/workflows/pages.yml'
       - 'package.json'
       - 'package-lock.json'
@@ -30,24 +28,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-
-      - name: Restore docs cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            docs/.vitepress/cache
-            docs/.vitepress/dist
-          key: docs-${{ hashFiles('docs/**', 'package-lock.json') }}
-          restore-keys: |
-            docs-
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -59,10 +45,6 @@ jobs:
         run: npm run docs:build
         env:
           NODE_OPTIONS: --max-old-space-size=4096
-
-      - name: Copy coverage report
-        run: cp -r coverage docs/.vitepress/dist/coverage || true
-        continue-on-error: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -81,22 +63,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-  lighthouse:
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Audit with Lighthouse
-        uses: treosh/lighthouse-ci-action@v12
-        with:
-          urls: |
-            https://lessup.github.io/gpu-fft/
-            https://lessup.github.io/gpu-fft/setup/quick-start
-            https://lessup.github.io/gpu-fft/api/index
-          budgetPath: ./budget.json
-          uploadArtifacts: true
-          temporaryPublicStorage: true
-        continue-on-error: true

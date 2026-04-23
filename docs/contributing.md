@@ -58,10 +58,10 @@ test(complex): add property tests for complex multiplication
 
 ## Spec-Driven Development
 
-This project follows Spec-Driven Development (SDD):
-- All feature changes must align with specs in `/specs/`
+This project follows OpenSpec-driven development:
+- All feature changes must align with canonical specs in `openspec/specs/`
 - New features require spec updates first
-- See `/specs/` directory for product requirements, RFCs, and API specs
+- See `openspec/specs/` for repository specifications and `openspec/changes/` for active change artifacts
 
 ## Running Examples
 

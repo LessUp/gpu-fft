@@ -147,8 +147,8 @@ try {
       case FFTErrorCode.WEBGPU_NOT_AVAILABLE:
         console.error('WebGPU not supported')
         break
-      case FFTErrorCode.SIZE_NOT_POWER_OF_2:
-        console.error('Input size must be power of 2')
+      case FFTErrorCode.INVALID_INPUT_SIZE:
+        console.error('Input size must be a power of 2')
         break
       default:
         console.error(`FFT Error: ${error.message}`)

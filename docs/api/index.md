@@ -1,6 +1,8 @@
 # API Reference Overview
 
-Complete reference for all public APIs exported by the WebGPU FFT Library.
+Complete reference for the public APIs exported by `webgpu-fft`.
+
+> These API pages are maintained source documentation inside `docs/`. Built site output under `docs/.vitepress/dist` is generated and is not the documentation source of truth.
 
 ## Core APIs
 
@@ -13,8 +15,8 @@ Complete reference for all public APIs exported by the WebGPU FFT Library.
 
 | API | Description |
 |-----|-------------|
-| [`SpectrumAnalyzer`](./spectrum-analyzer) | Real-time audio frequency analysis |
-| [`ImageFilter`](./image-filter) | Frequency domain image filtering |
+| [`SpectrumAnalyzer`](./spectrum-analyzer) | CPU-based real-time audio frequency analysis |
+| [`ImageFilter`](./image-filter) | CPU-based frequency-domain image filtering |
 
 ## Utilities
 
@@ -48,10 +50,13 @@ The library uses custom error classes for clear error messages:
 import { FFTError, FFTErrorCode } from 'webgpu-fft';
 
 try {
-  await engine.fft1D(invalidData, FFTDirection.Forward);
+  await engine.fft(invalidData);
 } catch (error) {
   if (error instanceof FFTError) {
     console.error(`FFT Error [${error.code}]: ${error.message}`);
+    if (error.code === FFTErrorCode.INVALID_INPUT_SIZE) {
+      console.error('Input size must be a power of 2');
+    }
   }
 }
 ```

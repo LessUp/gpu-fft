@@ -3,42 +3,66 @@ layout: home
 
 hero:
   name: "WebGPU FFT"
-  text: "GPU-Accelerated FFT"
-  tagline: High-performance Fast Fourier Transform library with WebGPU compute shaders. Supports 1D/2D FFT, frequency domain filtering, and real-time spectrum analysis.
+  text: "Browser-native FFT core"
+  tagline: GPU-accelerated 1D/2D FFT for JavaScript and TypeScript. High-throughput transforms run on WebGPU; spectrum analysis and image filtering are included as CPU-based utilities.
   image:
     src: /hero.svg
     alt: WebGPU FFT
   actions:
     - theme: brand
-      text: Get Started
+      text: Quick Start
       link: /setup/quick-start
+    - theme: alt
+      text: Evaluate the API
+      link: /api/index
     - theme: alt
       text: View on GitHub
       link: https://github.com/LessUp/gpu-fft
-    - theme: alt
-      text: API Reference
-      link: /api/index
 
 features:
   - icon: ⚡
-    title: GPU Acceleration
-    details: WebGPU compute shaders deliver up to 92x faster FFT calculations compared to CPU. Automatic fallback when WebGPU is unavailable.
+    title: GPU FFT core
+    details: WebGPU compute shaders accelerate the FFT engine itself, with up to 92x speedup for large 1D transforms and strong gains for large 2D workloads.
   - icon: 📊
-    title: 1D & 2D FFT
-    details: Support for 1D transforms (2-65,536 elements) and 2D transforms (up to 2048×2048 pixels) for image processing.
+    title: Honest capability boundaries
+    details: 1D/2D FFT are GPU-accelerated. Spectrum analysis and image filtering are built-in helpers, but they currently use CPU FFT internally.
   - icon: 🎵
-    title: Audio Spectrum Analysis
-    details: Real-time frequency analysis with configurable FFT sizes and multiple window functions (Hann, Hamming, Blackman, etc.).
+    title: TypeScript-first package
+    details: ESM + CJS exports, no runtime dependencies, and a clean typed API surface for browser or Node-based workflows.
   - icon: 🔍
-    title: Frequency Domain Filtering
-    details: Low-pass, high-pass, and band-pass filters with ideal or Gaussian shapes for image and signal processing.
-  - icon: 🔷
-    title: TypeScript First
-    details: Full type definitions with strict mode support. Complete IDE autocomplete and type safety.
-  - icon: 🚀
-    title: Zero Dependencies
-    details: No runtime dependencies. ~27 kB ESM bundle. Works in browsers and Node.js 18+.
+    title: Fast evaluation path
+    details: Start with Quick Start, verify supported APIs in the reference, then inspect the architecture pages if you need implementation details.
 ---
+
+## What this site is for
+
+This site helps you answer four questions quickly:
+
+1. **Is the FFT core actually GPU-accelerated?** Yes — the `FFTEngine` and 2D FFT pipeline are the GPU-centered parts.
+2. **What is CPU-only today?** `createSpectrumAnalyzer()` and `createImageFilter()` are convenience utilities built on the CPU FFT path.
+3. **Is it practical to adopt?** The package is TypeScript-first, has zero runtime dependencies, and ships ESM + CJS.
+4. **Where should I start?** Use Quick Start for usage, API Reference for contracts, and Architecture for internals.
+
+## Good fit / Not a fit
+
+### Good fit
+
+- Browser-native FFT workloads where WebGPU is available
+- Large 1D or 2D transforms that justify GPU setup overhead
+- Projects that want a typed FFT core without runtime dependency sprawl
+
+### Not a fit
+
+- Workloads that require GPU-native spectrum analysis or GPU-native image filtering today
+- Arbitrary non-power-of-two FFT sizes without preprocessing
+- A broad DSP framework with many unrelated signal-processing features
+
+## Evaluate quickly
+
+- **Start here:** [Quick Start](/setup/quick-start)
+- **Check contracts:** [API Reference](/api/index)
+- **Inspect design:** [Architecture Overview](/architecture/overview)
+- **Contribute or audit:** [Contributing](/contributing)
 
 <style>
 :root {

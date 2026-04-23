@@ -1,190 +1,104 @@
-# AGENTS.md — AI Agent Guide for WebGPU FFT Library
+# AGENTS.md
 
-## /init Command
+本文件是本仓库面向所有 AI coding agent 的**项目级真源说明**。如与其他代理文档冲突，以本文件和 `openspec/` 中的内容为准。
 
-When a user runs `/init` or asks to initialize the project, follow these steps:
+## 1. 项目定位
 
-### Step 1: Verify Project Setup
+- 项目：`gpu-fft`
+- 技术栈：TypeScript、WebGPU、WGSL、Vite、Vitest
+- 当前阶段：**收尾 / 规范化 / 低维护准备阶段**
+- 工作目标：优先修复治理漂移、文档冗余、工程配置失配、规范不一致；**不主动扩张产品范围**
 
-1. Check that `package.json` exists and is valid
-2. Run `npm install` to install dependencies
-3. Run `npm run build` to verify build succeeds
-4. Run `npm test` to verify all tests pass
+## 2. 规范真源
 
-### Step 2: Display Project Context
+### 必须优先阅读
 
-Show the user:
-- Project name and description (from `package.json`)
-- Available npm scripts
-- Current specs in `/specs` directory
-- Current test count and coverage (if available)
+1. `openspec/specs/`：仓库级规范真源
+2. `openspec/changes/<change>/`：当前变更的 proposal / design / specs / tasks
+3. `AGENTS.md`：项目级通用 agent 规范
+4. `CLAUDE.md` / `.github/copilot-instructions.md`：工具级薄适配层
 
-### Step 3: Setup Verification Checklist
+### 已退役
 
-- [ ] Dependencies installed (`node_modules/` exists)
-- [ ] Build succeeds (`npm run build`)
-- [ ] Tests pass (`npm test`)
-- [ ] Linting passes (`npm run lint`)
-- [ ] Type check passes (`npm run typecheck`)
+- 顶层 `/specs`：仅保留 migration stub，不再是活跃真源
+- `AGENTS.md.legacy`、`QWEN.md`：仅作为兼容提示，不再维护项目事实
 
----
+## 3. 开发流程
 
-# Project Philosophy: Spec-Driven Development (SDD)
+对**非平凡修改**必须遵循：
 
-This project strictly follows the **Spec-Driven Development (SDD)** paradigm. All code implementations must use the `/specs` directory as the single source of truth.
+`/opsx:explore` → `/opsx:propose` → `/opsx:apply` → `/review` → `/opsx:archive`
 
-## Directory Context (Specs)
+执行规则：
 
-| Directory | Purpose |
-|-----------|---------|
-| `/specs/product/` | Product feature definitions and acceptance criteria |
-| `/specs/rfc/` | Technical design documents (architecture decisions) |
-| `/specs/api/` | API interface specifications |
-| `/specs/db/` | Database model definitions (N/A for this library) |
-| `/specs/testing/` | Testing specifications and property definitions |
+- 开始实现前，先确认是否已有对应 OpenSpec change
+- 架构、文档体系、工程化、公开 API 变更都要经过 `/review`
+- 优先长会话串行推进，避免堆积大量分支与未合并上下文
+- 尽量少用高成本远程模式（例如不必要的 `/fleet`）
+- 优先 skill、subagent、局部 review，而不是引入更多复杂工具
 
-## AI Agent Workflow Instructions
+## 4. 当前收尾约束
 
-When you (AI) are asked to develop a new feature, modify existing functionality, or fix a bug, **you MUST strictly follow this workflow without skipping any steps**:
+- 优先级高于新功能：规范统一、文档压缩提纯、工作流瘦身、公开表述准确、归档前稳定性
+- 如果一个改动不能提升一致性、可维护性、可验证性或项目展示质量，应谨慎纳入
+- 删除低价值、重复、陈旧文档是允许的；但要避免破坏 canonical 入口
 
-### Step 1: Review Specs (审查与分析)
+## 5. 公开表述与文档规则
 
-- First, read the relevant documents in `/specs` (product specs, RFCs, API definitions)
-- If the user's request conflicts with existing specs, **stop immediately** and point out the conflict. Ask the user whether to update the specs first
+- README：仓库入口，简洁、可信、转化导向
+- GitHub Pages：展示与说明，不要机械搬运 README
+- OpenSpec：规范和变更契约，不写营销文案
+- 文档默认要求：
+  - 对外文档可使用英文或中英双语
+  - agent/治理文档优先中文，必要时夹带英文术语
+- 禁止继续保留“质量已完美完成”这类失真的宣传式陈述
 
-### Step 2: Spec-First Update (规范优先)
+## 6. 工程化与质量门禁
 
-- For new features or changes to interfaces/database structures, **you MUST propose modifying or creating spec documents first** (e.g., `/specs/product/*.md`, `/specs/rfc/*.md`)
-- Wait for user confirmation of spec changes before proceeding to code implementation
+### Canonical validation chain
 
-### Step 3: Implementation (代码实现)
-
-- When writing code, **100% comply** with spec definitions (including variable names, API paths, data types, status codes, etc.)
-- **Do not add features not defined in specs** (No Gold-Plating)
-
-### Step 4: Test Against Specs (测试验证)
-
-- Write unit and integration tests based on acceptance criteria in `/specs`
-- Ensure test cases cover all boundary conditions described in specs
-
-## Decision Tree
-
-```
-User Request
-    │
-    ├── Modify existing feature?
-    │   └── Read /specs/product/ and /specs/rfc/
-    │       └── Conflict with spec? → Ask user to update spec first
-    │       └── No conflict → Implement per spec → Test against spec
-    │
-    ├── New feature?
-    │   └── Create spec document → Get approval → Implement → Test
-    │
-    └── Fix bug?
-        └── Check if bug is in spec or implementation error
-            └── Spec error → Update spec first
-            └── Implementation error → Fix code to match spec
+```bash
+npm run lint && npm run format:check && npm run typecheck && npm test
 ```
 
-## Quick Reference
+### 补充检查
 
-| Task | Spec Location |
-|------|---------------|
-| What features to build | `/specs/product/*.md` |
-| Architecture decisions | `/specs/rfc/*.md` |
-| API definitions | `/specs/api/*.md` |
-| Testing requirements | `/specs/testing/*.md` |
+- 打包/发布相关改动需要关注：
+  - `npm run build`
+  - `npm run smoke:package`
 
-## Code Generation Rules
+### 原则
 
-- Any externally exposed API changes MUST be reflected in `/specs/api/public-api.md`
-- For uncertain technical details, consult `/specs/rfc/` for architectural conventions — do not invent design patterns
-- Reference the relevant spec documents in commit messages when implementing features
+- 保留最少但有效的自动化
+- 发现陈旧或失配配置时，优先删除或收敛，而不是继续叠加
 
----
+## 7. 项目关键事实
 
-# Project Reference
+- `src/shaders/sources.ts` 是 WGSL shader 的唯一真源；`.wgsl` 文件只是参考副本
+- `createSpectrumAnalyzer()` 和 `createImageFilter()` 是 **CPU-only**
+- `dist/` 构建前不会自动清空
+- `enableBankConflictOptimization` 当前仍是保留位，不是已落地性能特性
+- `workgroupSize` 目前固定为 256
 
-## Commands
+## 8. GitHub 与本机配置边界
 
-| Command | Description |
-|---------|-------------|
-| `npm run build` | Build (types + vite) |
-| `npm test` | Run all tests |
-| `npm run test:coverage` | Run with coverage report |
-| `npm run lint` | ESLint check |
-| `npm run lint:fix` | ESLint auto-fix |
-| `npm run format` | Prettier formatting |
-| `npm run format:check` | Prettier check |
-| `npm run typecheck` | TypeScript type check |
-| `npm run smoke:package` | Validate ESM/CJS exports |
+- GitHub About / homepage / topics / Pages 用 `gh` 管理
+- 用户级 Copilot 中文回复、LSP、MCP、plugin 只在仓库中记录**推荐方案与取舍**
+- 不把某个开发者机器上的私有状态直接写成仓库硬依赖
 
-## Code Style
+## 9. 变更时的同步要求
 
-- **Prettier**: single quotes, semicolons, trailing comma es5, 100 char width, LF line endings
-- **ESLint**: `eqeqeq` (strict equality), `curly` (all braces required), `prefer-const`, no `var`
-- **TypeScript**: Strict mode enabled
+以下变更必须同步更新相关表面：
 
-## Commit Message Format
+- 公开 API 变化：实现 + `openspec/specs/api/` + README/docs
+- 工作流变化：`AGENTS.md` + `CLAUDE.md` + Copilot 指令 + 相关工程文件
+- 文档定位变化：README + docs 首页 + GitHub About / homepage
 
-Use Conventional Commits:
+## 10. 预期行为
 
-```
-type(scope): description
-```
+理想 agent 行为：
 
-### Types
-
-| Type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation |
-| `style` | Code style (formatting) |
-| `refactor` | Code refactoring |
-| `perf` | Performance improvement |
-| `test` | Adding/updating tests |
-| `chore` | Maintenance tasks |
-
-### Examples
-
-```
-feat(fft): add 3D FFT support
-fix(spectrum): correct dB calculation for zero magnitude
-docs(readme): add browser compatibility section
-test(complex): add property tests for complex multiplication
-```
-
-## Architecture Notes
-
-### Shader Source of Truth
-
-WGSL shader strings live in `src/shaders/sources.ts` — this is the **source of truth**. The `.wgsl` files in `src/shaders/` are reference copies only. Always edit `sources.ts`.
-
-### Known Limitations
-
-- `dist/` is not cleaned between builds — delete manually for clean build
-- `createSpectrumAnalyzer()` and `createImageFilter()` are CPU-only, not GPU-accelerated
-- `enableBankConflictOptimization` is reserved for future use
-- `workgroupSize` is fixed at 256 for compute kernels
-
----
-
-# Available Specifications
-
-## Product Requirements
-
-- **[WebGPU FFT Library](/specs/product/webgpu-fft-library.md)** — Core product features and acceptance criteria
-
-## RFCs (Technical Design)
-
-- **[RFC 0001: WebGPU FFT Library Architecture](/specs/rfc/0001-webgpu-fft-library-architecture.md)** — Core architecture and design decisions
-- **[RFC 0002: Project Quality Enhancement](/specs/rfc/0002-project-quality-enhancement-architecture.md)** — Open-source best practices
-
-## API Specifications
-
-- **[Public API](/specs/api/public-api.md)** — Complete API reference with types and examples
-
-## Testing
-
-- **[Testing Strategy](/specs/testing/testing-strategy.md)** — Test conventions, property-based testing, and coverage requirements
+- 先读规范，再改代码
+- 先消歧义，再加复杂度
+- 先合并真源，再删除旧入口
+- 先保证表述准确，再追求“看起来完整”

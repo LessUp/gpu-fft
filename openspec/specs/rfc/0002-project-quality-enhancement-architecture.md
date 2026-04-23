@@ -2,18 +2,22 @@
 
 ## Status
 
-- **Status**: ✅ IMPLEMENTED
+- **Status**: Historical baseline under closeout normalization
 - **Created**: 2024
-- **Last Updated**: 2026-04-16
+- **Last Updated**: 2026-04-23
 
 ## Context
 
-This RFC describes the architecture for enhancing the WebGPU FFT Library to meet modern open-source project quality standards, covering documentation, CI/CD, code quality tools, and community infrastructure.
+This RFC records the original quality-enhancement architecture for the WebGPU FFT Library. It remains useful as historical context, but the repository is now in a closeout-oriented normalization phase where `openspec/` is the canonical source of truth and legacy documentation/automation patterns are being reduced.
 
 ## Documentation Structure
 
 ```
+openspec/
+├── specs/              # Canonical repository specifications
+└── changes/            # Proposal / design / task artifacts
 docs/
+├── index.md            # Pages landing and project positioning
 ├── setup/              # Environment setup guides
 │   ├── quick-start.md
 │   └── browser-support.md
@@ -22,12 +26,7 @@ docs/
 ├── architecture/       # Architecture documentation
 │   └── overview.md
 ├── assets/             # Static assets (images, diagrams)
-├── specs/              # Specification documents (SSOT)
-│   ├── product/
-│   ├── rfc/
-│   ├── api/
-│   └── testing/
-├── api/                # Generated API documentation
+├── api/                # Source or curated API reference pages
 └── examples/           # Usage examples
 ```
 
@@ -38,13 +37,10 @@ docs/
 - **ci.yml** - Continuous integration (lint, test, build)
 - **pages.yml** - GitHub Pages deployment for docs
 
-### Automated Release
+### Release Model
 
-Using semantic-release for:
-- Automatic version bumping based on conventional commits
-- CHANGELOG generation
-- npm publishing
-- GitHub release creation
+- Tag-triggered GitHub Actions releases remain the active release path
+- Any leftover semantic-release residue is migration debt and is not normative for the closeout architecture
 
 ## Code Quality Tools
 
@@ -63,6 +59,11 @@ Using semantic-release for:
 - Coverage threshold: ≥80% line, ≥75% branch
 
 ## Implementation Notes
+
+The authoritative contract for the closeout governance effort now lives in:
+
+- `openspec/specs/index.md`
+- `openspec/changes/project-closeout-normalization/`
 
 ### Priority Levels
 

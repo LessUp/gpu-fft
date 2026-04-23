@@ -1,6 +1,8 @@
 # Image Filter API
 
-Frequency domain image filtering using 2D FFT.
+Frequency-domain image filtering using the CPU 2D FFT path.
+
+> `createImageFilter()` is currently CPU-only. It uses the CPU 2D FFT implementation internally and does not allocate GPU resources.
 
 ## `createImageFilter()`
 
@@ -11,7 +13,7 @@ Creates an image filter instance.
 ```ts
 function createImageFilter(
   config: ImageFilterConfig
-): ImageFilter;
+): Promise<ImageFilter>;
 ```
 
 ### Example
@@ -20,8 +22,9 @@ function createImageFilter(
 import { createImageFilter, FilterType } from 'webgpu-fft';
 
 const filter = await createImageFilter({
-  width: 512,
-  height: 512,
+  type: 'lowpass',
+  shape: 'gaussian',
+  cutoffFrequency: 0.3,
 });
 ```
 
@@ -29,47 +32,40 @@ const filter = await createImageFilter({
 
 ### Methods
 
-#### `applyFilter()`
+#### `apply()`
 
-Applies a filter to image data.
+Applies the configured filter to image data.
 
 ```ts
-applyFilter(
+apply(
   imageData: Float32Array,
-  options: {
-    type: FilterType;
-    cutoff: number;
-    shape?: 'ideal' | 'gaussian';
-  }
-): Float32Array;
+  width: number,
+  height: number
+): Promise<Float32Array>;
 ```
 
 **Parameters:**
 - `imageData` — Interleaved complex image data
-- `options.type` — Filter type (LowPass, HighPass, BandPass, BandStop)
-- `options.cutoff` — Cutoff frequency (0-1, normalized)
-- `options.shape` — Filter shape ('ideal' or 'gaussian', default 'ideal')
+- `width` — Image width
+- `height` — Image height
 
 **Returns:** `Float32Array` — Filtered image data.
 
 ```ts
 // Low-pass filter (blur)
-const blurred = await filter.applyFilter(imageData, {
-  type: FilterType.LowPass,
-  cutoff: 0.3,
-});
+const blurred = await filter.apply(imageData, 512, 512);
 
-// High-pass filter (edge detection)
-const edges = await filter.applyFilter(imageData, {
-  type: FilterType.HighPass,
-  cutoff: 0.1,
+const edgeFilter = await createImageFilter({
+  type: 'highpass',
   shape: 'gaussian',
+  cutoffFrequency: 0.1,
 });
+const edges = await edgeFilter.apply(imageData, 512, 512);
 ```
 
 #### `dispose()`
 
-Releases GPU resources.
+Releases resources. For the current CPU-only implementation this is a no-op.
 
 ```ts
 dispose(): void;
@@ -79,22 +75,17 @@ dispose(): void;
 
 ```ts
 interface ImageFilterConfig {
-  /** Image width (power of 2) */
-  width: number;
-  /** Image height (power of 2) */
-  height: number;
+  type: FilterType;
+  shape: FilterShape;
+  cutoffFrequency: number;
+  bandwidth?: number;
 }
 ```
 
-## `FilterType` Enum
+## `FilterType` Type
 
 ```ts
-enum FilterType {
-  LowPass = 'lowpass',
-  HighPass = 'highpass',
-  BandPass = 'bandpass',
-  BandStop = 'bandstop',
-}
+type FilterType = 'lowpass' | 'highpass' | 'bandpass';
 ```
 
 ## `FilterShape` Type

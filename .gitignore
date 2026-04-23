@@ -90,5 +90,11 @@ temp/
 # Generated documentation
 docs/.vitepress/dist/
 
+# Claude Code personal preferences
+CLAUDE.local.md
+
+# OMC (oh-my-claudecode) local state
+.omc/
+
 # Assembled site output
 _site/

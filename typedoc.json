@@ -1,7 +1,7 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": ["src/index.ts"],
-  "out": "docs/api",
+  "out": "dist/typedoc",
   "name": "WebGPU FFT Library",
   "readme": "README.md",
   "includeVersion": true,
