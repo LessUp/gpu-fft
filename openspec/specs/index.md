@@ -45,15 +45,15 @@ openspec/
 
 ## Closeout Governance Capability Map
 
-The active `project-closeout-normalization` change introduces the governance capabilities that define the repository's target end state:
+The repository's closeout governance baseline is defined by these maintained capability specs:
 
-- `project-governance`
-- `documentation-platform`
-- `developer-workflow`
-- `public-api-alignment`
-- `quality-gates`
+- [`project-governance/spec.md`](./project-governance/spec.md)
+- [`documentation-platform/spec.md`](./documentation-platform/spec.md)
+- [`developer-workflow/spec.md`](./developer-workflow/spec.md)
+- [`public-api-alignment/spec.md`](./public-api-alignment/spec.md)
+- [`quality-gates/spec.md`](./quality-gates/spec.md)
 
-These capabilities are implemented through change artifacts first and then reconciled back into the maintained repository surfaces.
+These capability specs define the normalized closeout workflow, documentation policy, API-claim discipline, and quality gates that all future low-maintenance changes must follow.
 
 ## Working Model
 
