@@ -44,7 +44,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --emitDeclarationOnly && vite build",
-    "smoke:package": "node -e \"const { existsSync, readFileSync } = require('node:fs'); const { pathToFileURL } = require('node:url'); const pkg = JSON.parse(readFileSync('./package.json', 'utf8')); const normalize = (value) => value.replace(/^\\.\\//, ''); const artifacts = [pkg.main, pkg.module, pkg.types, pkg.exports['.'].types, pkg.exports['.'].import, pkg.exports['.'].require].map(normalize); for (const artifact of artifacts) { if (!existsSync(artifact)) throw new Error('Missing package artifact: ' + artifact); } (async () => { const esm = await import(pathToFileURL(normalize(pkg.exports['.'].import)).href); if (typeof esm.createFFTEngine !== 'function') throw new Error('Missing ESM export createFFTEngine'); const cjs = require('./' + normalize(pkg.exports['.'].require)); if (typeof cjs.createFFTEngine !== 'function') throw new Error('Missing CJS export createFFTEngine'); })().catch((error) => { console.error(error); process.exit(1); });\"",
+    "smoke:package": "node scripts/smoke-package.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

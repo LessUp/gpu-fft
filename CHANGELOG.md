@@ -9,9 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Professional bilingual documentation (English & 中文)
-- Comprehensive documentation site with 18 pages
-- Restructured changelog directory
+- Chinese language portal with documentation overview
 
 ### Changed
 
@@ -23,10 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Documentation
-- **Complete documentation overhaul** with bilingual support:
-  - English documentation site (9 guides)
-  - Simplified Chinese documentation (9 guides)
-  - Language selection portal at docs root
+- **Documentation site with VitePress**:
+  - English documentation (18 pages)
+  - Chinese language portal
   - Modern dark theme with code syntax highlighting
 
 ### Changed

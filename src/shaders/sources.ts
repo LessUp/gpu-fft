@@ -205,6 +205,13 @@ fn scale(@builtin(global_invocation_id) global_id: vec3<u32>) {
 }
 `;
 
+/**
+ * GPU-native frequency domain filter shader.
+ *
+ * NOTE: This shader is reserved for future "GPU-native image filtering" feature.
+ * Currently, image filtering uses CPU-based FFT. See README Roadmap for details.
+ * Do not delete - this is intentional reserved code for upcoming GPU acceleration.
+ */
 export const FILTER_SHADER = `
 struct FilterParams {
     width: u32,

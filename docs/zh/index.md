@@ -59,6 +59,8 @@ features:
 
 ## 建议阅读顺序
 
+> **注意**：本站点的详细文档目前仅提供英文版本。以下链接将跳转至英文文档页面。
+
 - **先上手：** [快速开始](/setup/quick-start)
 - **查契约：** [API 参考](/api/index)
 - **看实现：** [架构概览](/architecture/overview)

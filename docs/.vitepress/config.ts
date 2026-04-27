@@ -83,12 +83,16 @@ export default defineConfig({
       link: '/zh/',
       themeConfig: {
         nav: [
-          { text: '设置', link: '/setup/quick-start' },
+          { text: '快速开始', link: '/setup/quick-start' },
           { text: '教程', link: '/tutorials/introduction' },
           { text: '架构', link: '/architecture/overview' },
           { text: 'API', link: '/api/index' },
           { text: '贡献', link: '/contributing' },
         ],
+        editLink: {
+          pattern: 'https://github.com/LessUp/gpu-fft/edit/main/docs/:path',
+          text: '在 GitHub 上编辑此页',
+        },
       },
     },
   },
