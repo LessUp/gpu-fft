@@ -24,36 +24,16 @@
 
 ## 规范来源
 
+详见 AGENTS.md §2 规范真源。
+
 - Canonical specs: `openspec/specs/`
 - Active changes: `openspec/changes/`
 - Project-wide agent guidance: `AGENTS.md`
-- Claude-specific guidance: `CLAUDE.md`
 
 顶层 `/specs` 已移除，不再是 source of truth。
 
-## 工作流
+## 工作流与质量门禁
 
-对非平凡改动，优先遵循：
+遵循 AGENTS.md §3 开发流程和 §6 质量门禁。
 
-`/opsx:explore` → `/opsx:propose` → `/opsx:apply` → `/review`
-
-如果改动影响以下内容，必须同步更新相关表面：
-
-- 公开 API
-- README / docs / Pages
-- OpenSpec 规范
-- GitHub workflow / hooks / release 配置
-
-## 关键项目事实
-
-- `src/shaders/sources.ts` 是 WGSL shader 真源
-- `createSpectrumAnalyzer()` 和 `createImageFilter()` 是 CPU-only
-- `npm run build` 会先清空 `dist/`
-
-## 质量门禁
-
-Canonical validation chain:
-
-```bash
-npm run lint && npm run format:check && npm run typecheck && npm test
-```
+关键项目事实见 AGENTS.md §7。

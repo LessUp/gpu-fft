@@ -20,5 +20,5 @@ New architectural changes use OpenSpec workflow:
 ## Governance Notes
 
 - `openspec/specs/` is the canonical specification root for this repository
-- The legacy top-level `/specs` tree is retained only as a migration stub and is not normative
+- The legacy top-level `/specs` tree has been removed; `openspec/specs/` is the only canonical spec root
 - New governance work for the closeout phase is tracked through OpenSpec changes before it is folded back into maintained docs
