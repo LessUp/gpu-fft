@@ -20,8 +20,8 @@
 
 ### 已退役
 
-- 顶层 `/specs`：仅保留 migration stub，不再是活跃真源
-- `AGENTS.md.legacy`、`QWEN.md`：仅作为兼容提示，不再维护项目事实
+- 顶层 `/specs`：已移除，不再是活跃真源
+- `AGENTS.md.legacy`、`QWEN.md`：已移除，不再维护项目事实
 
 ## 3. 开发流程
 
@@ -74,10 +74,10 @@ npm run lint && npm run format:check && npm run typecheck && npm test
 
 ## 7. 项目关键事实
 
-- `src/shaders/sources.ts` 是 WGSL shader 的唯一真源；`.wgsl` 文件只是参考副本
+- `src/shaders/sources.ts` 是 WGSL shader 的唯一真源；不再维护独立 `.wgsl` 参考副本
 - `createSpectrumAnalyzer()` 和 `createImageFilter()` 是 **CPU-only**
-- `dist/` 构建前不会自动清空
-- `enableBankConflictOptimization` 当前仍是保留位，不是已落地性能特性
+- `npm run build` 会先清空 `dist/`，避免陈旧包产物残留
+- `enableBankConflictOptimization` 已接入 shader padding，默认关闭；是否启用应基于目标硬件 profile
 - `workgroupSize` 目前固定为 256
 
 ## 8. GitHub 与本机配置边界

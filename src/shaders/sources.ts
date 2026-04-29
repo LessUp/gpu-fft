@@ -1,5 +1,4 @@
-// Centralized shader source strings for WebGPU compute pipelines.
-// Canonical source of truth — standalone .wgsl files are kept as reference.
+// Canonical WGSL shader source strings for WebGPU compute pipelines.
 
 export const COMPLEX_OPS = `
 const PI: f32 = 3.14159265358979323846;

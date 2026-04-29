@@ -43,7 +43,8 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc --emitDeclarationOnly && vite build",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run clean && tsc --emitDeclarationOnly && vite build",
     "smoke:package": "node scripts/smoke-package.mjs",
     "test": "vitest run",
     "test:watch": "vitest",

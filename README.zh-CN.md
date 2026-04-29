@@ -9,22 +9,21 @@
 
 [English](README.md) | 简体中文
 
-> **高性能 GPU 加速快速傅里叶变换库**，专为 JavaScript/TypeScript 设计。WebGPU 计算着色器在大尺寸变换上可实现**最高约 92 倍加速**。项目提供 GPU FFT 内核，并附带用于频谱分析和频域图像滤波的 CPU 工具，零运行时依赖。
+> **高性能 GPU 加速快速傅里叶变换库**，专为 JavaScript/TypeScript 设计。项目提供 WebGPU FFT 内核、面向实值输入的 RFFT/IRFFT API，以及用于频谱分析和频域图像滤波的 CPU 工具，零运行时依赖。
 
 ## ⚡ 为什么选择 WebGPU FFT？
 
 | | **webgpu-fft** | 纯 CPU 库 | Python (numpy) |
 |---|---|---|---|
 | **GPU 加速** | ✅ WebGPU 着色器 | ❌ 仅 CPU | ❌ 仅 CPU |
-| **1D FFT (65K)** | ~3ms | ~300ms | ~50ms |
-| **2D FFT (1024²)** | ~8ms | ~3s | ~100ms |
+| **实值 FFT API** | ✅ RFFT / IRFFT / 2D RFFT | 因库而异 | 因环境而异 |
 | **频域滤波** | ✅ 内置（CPU 工具） | 手动实现 | 手动实现 |
 | **频谱分析** | ✅ 内置（CPU 工具） | 手动实现 | 手动实现 |
 | **浏览器原生** | ✅ 无需 WASM | ✅ | ❌ 服务端 |
 | **零依赖** | ✅ | ✅ | ❌ |
 | **TypeScript** | ✅ 严格模式 | 因库而异 | ❌ |
 
-**最高提速 92 倍**，完整 TypeScript 支持，零依赖。
+实际性能取决于硬件与运行时环境。建议直接运行仓库自带 benchmark，采集你当前环境中的 CPU / WebGPU 实测结果。
 
 ## 🚀 快速开始
 
@@ -63,25 +62,37 @@ const spectrum = cpuFFT(signal);
 const recovered = cpuIFFT(spectrum);
 ```
 
+### 实值 FFT（RFFT / IRFFT）
+
+```typescript
+import { createFFTEngine, cpuRFFT, cpuIRFFT } from 'webgpu-fft';
+
+const realSignal = new Float32Array([0, 1, 0, -1, 0, 1, 0, -1]);
+
+// CPU 路径
+const cpuSpectrum = cpuRFFT(realSignal); // N / 2 + 1 个复数 bin
+const cpuRecovered = cpuIRFFT(cpuSpectrum);
+
+// GPU 路径
+const engine = await createFFTEngine();
+const gpuSpectrum = await engine.rfft(realSignal);
+const gpuRecovered = await engine.irfft(gpuSpectrum);
+engine.dispose();
+```
+
 ## 📊 性能表现
 
-### 1D FFT 速度
+请直接运行仓库 benchmark，采集当前环境中的实测结果：
 
-| 大小 | GPU | CPU | 加速比 |
-|------|-----|-----|--------|
-| 1,024 | 0.18ms | 2.3ms | **13x** |
-| 4,096 | 0.35ms | 11.5ms | **33x** |
-| 16,384 | 0.89ms | 58.2ms | **65x** |
-| 65,536 | 3.24ms | 298.7ms | **92x** |
+```bash
+npm run benchmark
+```
 
-### 2D FFT 速度
+benchmark 当前遵循：
 
-| 图像大小 | GPU | CPU | 加速比 |
-|----------|-----|-----|--------|
-| 256×256 | 1.56ms | 156ms | **100x** |
-| 1024×1024 | 8.23ms | 2.9s | **358x** |
-
-*测试环境：RTX 3080 + i9-10900K。包含数据传输开销。*
+- 任何环境都会输出 CPU FFT 实测结果
+- 只有 WebGPU 真正可用时才输出 WebGPU FFT 实测结果
+- 不再输出“预期性能”这类静态推测段落
 
 ## 🎯 应用场景
 
@@ -140,8 +151,12 @@ filter.dispose();
 |------|------|----------|
 | `fft(data)` | 1D 正向 FFT | 65,536 |
 | `ifft(data)` | 1D 逆向 FFT | 65,536 |
+| `rfft(data)` | 1D 实值输入 FFT | 65,536 个实值样本 |
+| `irfft(data)` | 1D 实值逆变换 | 65,536 个实值样本 |
 | `fft2d(data, w, h)` | 2D 正向 FFT | 2048×2048 |
 | `ifft2d(data, w, h)` | 2D 逆向 FFT | 2048×2048 |
+| `rfft2d(data, w, h)` | 2D 实值输入 FFT | 2048×2048 个实值样本 |
+| `irfft2d(data, w, h)` | 2D 实值逆变换 | 2048×2048 个实值样本 |
 | `dispose()` | 释放 GPU 资源 | - |
 
 ### 工具函数
@@ -149,20 +164,24 @@ filter.dispose();
 | API | 用途 |
 |-----|------|
 | `cpuFFT()` / `cpuIFFT()` | CPU 回退实现 |
+| `cpuRFFT()` / `cpuIRFFT()` | CPU 实值 FFT 快捷 API |
+| `cpuRFFT2D()` / `cpuIRFFT2D()` | CPU 2D 实值 FFT 快捷 API |
 | `createSpectrumAnalyzer()` | 实时音频分析（CPU 工具） |
 | `createImageFilter()` | 频域滤波（CPU 工具） |
 | `isWebGPUAvailable` | 检测 GPU 支持 |
-| 窗函数 | Hann, Hamming, Blackman, FlatTop |
+| 窗函数 | Hann, Hamming, Blackman, FlatTop, Rectangular |
 | 复数工具 | 加减乘、幅度、旋转因子 |
 
 ### 输入格式
 
-所有 FFT 函数期望**交错复数数据**：
+复数 FFT API 期望**交错复数数据**：
 ```typescript
 // [实部₀, 虚部₀, 实部₁, 虚部₁, 实部₂, 虚部₂, ...]
 const data = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]);
 // 表示：1+0i, 2+0i, 3+0i, 4+0i
 ```
+
+实值 FFT API 直接接受实值 `Float32Array`，并返回压缩后的 half-spectrum 复数数据。
 
 ### 错误处理
 
@@ -244,7 +263,7 @@ npx serve examples/web
 ## 🗺️ 路线图
 
 - [ ] 3D FFT 支持
-- [ ] 实值 FFT 优化 (RFFT)
+- [x] 实值 FFT API（第一阶段 contract-first 实现）
 - [ ] GPU 原生图像滤波
 - [ ] 卷积运算
 - [ ] WASM 回退

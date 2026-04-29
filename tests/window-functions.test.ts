@@ -12,6 +12,12 @@ import {
 
 describe('Window Functions', () => {
   describe('Hann Window', () => {
+    it('returns a finite unity coefficient for size 1', () => {
+      const w = hannWindow(1);
+      expect(w).toEqual(new Float32Array([1]));
+      expect(Number.isNaN(w[0])).toBe(false);
+    });
+
     it('starts and ends near zero', () => {
       const w = hannWindow(256);
       expect(w[0]).toBeLessThan(1e-10);
@@ -33,6 +39,12 @@ describe('Window Functions', () => {
   });
 
   describe('Hamming Window', () => {
+    it('returns a finite unity coefficient for size 1', () => {
+      const w = hammingWindow(1);
+      expect(w).toEqual(new Float32Array([1]));
+      expect(Number.isNaN(w[0])).toBe(false);
+    });
+
     it('has non-zero endpoints (~0.08)', () => {
       const w = hammingWindow(256);
       expect(w[0]).toBeGreaterThan(0.07);
@@ -57,6 +69,12 @@ describe('Window Functions', () => {
   });
 
   describe('Blackman Window', () => {
+    it('returns a finite unity coefficient for size 1', () => {
+      const w = blackmanWindow(1);
+      expect(w).toEqual(new Float32Array([1]));
+      expect(Number.isNaN(w[0])).toBe(false);
+    });
+
     it('starts and ends near zero', () => {
       const w = blackmanWindow(256);
       expect(Math.abs(w[0])).toBeLessThan(1e-4);
@@ -80,6 +98,12 @@ describe('Window Functions', () => {
   });
 
   describe('Flat-Top Window', () => {
+    it('returns a finite unity coefficient for size 1', () => {
+      const w = flatTopWindow(1);
+      expect(w).toEqual(new Float32Array([1]));
+      expect(Number.isNaN(w[0])).toBe(false);
+    });
+
     it('values are symmetric', () => {
       const size = 256;
       const w = flatTopWindow(size);
@@ -95,6 +119,11 @@ describe('Window Functions', () => {
   });
 
   describe('Rectangular Window', () => {
+    it('rejects invalid window sizes', () => {
+      expect(() => rectangularWindow(0)).toThrow(RangeError);
+      expect(() => rectangularWindow(1.5)).toThrow(RangeError);
+    });
+
     it('all values are 1', () => {
       const w = rectangularWindow(256);
       for (let i = 0; i < w.length; i++) {
@@ -104,6 +133,12 @@ describe('Window Functions', () => {
   });
 
   describe('applyWindow', () => {
+    it('rejects signal and window length mismatches', () => {
+      expect(() => applyWindow(new Float32Array([1, 2]), new Float32Array([1]))).toThrow(
+        RangeError
+      );
+    });
+
     it('multiplies signal by window element-wise', () => {
       const signal = new Float32Array([1, 2, 3, 4]);
       const window = new Float32Array([0.5, 1, 0.5, 0]);
@@ -116,6 +151,18 @@ describe('Window Functions', () => {
   });
 
   describe('applyWindowComplex', () => {
+    it('rejects non-interleaved complex data', () => {
+      expect(() => applyWindowComplex(new Float32Array([1, 2, 3]), new Float32Array([1]))).toThrow(
+        RangeError
+      );
+    });
+
+    it('rejects complex signal and window length mismatches', () => {
+      expect(() =>
+        applyWindowComplex(new Float32Array([1, 2, 3, 4]), new Float32Array([1]))
+      ).toThrow(RangeError);
+    });
+
     it('applies window to interleaved complex signal', () => {
       // 2 complex numbers: (1+2i), (3+4i)
       const signal = new Float32Array([1, 2, 3, 4]);

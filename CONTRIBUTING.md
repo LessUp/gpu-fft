@@ -38,8 +38,9 @@ openspec/
 
 1. **Read OpenSpec first** — Before writing code, review relevant docs in `openspec/specs/`
 2. **Propose before implementation** — For non-trivial features, fixes, or interface changes, create/update an OpenSpec change in `openspec/changes/`
-3. **Implement per spec** — Follow spec and design decisions exactly (no gold-plating)
-4. **Test against specs** — Write tests that verify acceptance criteria and documented quality gates
+3. **Implement per spec** — Follow spec and design decisions exactly; do not expand scope opportunistically
+4. **Review cross-cutting work** — Architecture, public API, documentation information architecture, workflow, and governance changes require a `/review`-style checkpoint before merge
+5. **Test against specs** — Write tests that verify acceptance criteria and documented quality gates
 
 When submitting a PR, reference the relevant spec documents in your description.
 
@@ -87,40 +88,44 @@ When submitting a PR, reference the relevant spec documents in your description.
 
 ## Development Workflow
 
-1. **Create a new branch** for your feature or fix:
+1. **Create a short-lived branch** for the change:
    ```bash
-   git checkout -b feature/your-feature-name
-   # or
-   git checkout -b fix/your-fix-name
+   git checkout -b fix/clear-short-name
    ```
 
-2. **Make your changes** following the code style guidelines
+2. **For non-trivial changes, create or update an OpenSpec change** in `openspec/changes/`
 
-3. **Write or update tests** for your changes
+3. **Make focused changes** following the code style guidelines
 
-4. **Run the test suite**:
+4. **Write or update tests** for behavior changes and bug fixes
+
+5. **Run the canonical validation chain**:
    ```bash
+   npm run lint
+   npm run format:check
+   npm run typecheck
    npm test
    ```
 
-5. **Run linting**:
+6. **Run package/docs checks when affected**:
    ```bash
-   npm run lint
+   npm run build
+   npm run smoke:package
+   npm run docs:build
    ```
 
-6. **Format your code**:
+7. **Request review** for architecture, public API, docs IA, workflow, or governance changes
+
+8. **Commit your changes** following the commit message guidelines
+
+9. **Push to your fork**:
    ```bash
-   npm run format
+   git push origin fix/clear-short-name
    ```
 
-7. **Commit your changes** following the commit message guidelines
+10. **Open a Pull Request** on GitHub
 
-8. **Push to your fork**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-9. **Open a Pull Request** on GitHub
+Avoid long-running parallel worktrees unless a change truly needs isolation. The repository is in a low-maintenance closeout phase, so unfinished branches should be merged, closed, or deleted quickly.
 
 ## Code Style
 
@@ -145,7 +150,7 @@ When submitting a PR, reference the relevant spec documents in your description.
 - Keep files focused and single-purpose
 - Group related functionality in directories
 - Export public APIs from `index.ts` files
-- Keep shader code in the `src/shaders/` directory
+- Keep WGSL source strings in `src/shaders/sources.ts`; do not reintroduce standalone `.wgsl` source copies
 
 ### Documentation
 
@@ -229,7 +234,7 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 ### Examples
 
 ```
-feat(fft): add support for 3D FFT
+feat(real-fft): add rectangular RFFT coverage
 
 fix(spectrum): correct dB calculation for zero magnitudes
 
@@ -241,11 +246,12 @@ test(complex): add property tests for complex multiplication
 ## Pull Request Process
 
 1. **Ensure your PR**:
-   - Has a clear, descriptive title
-   - References any related issues
-   - Includes tests for new functionality
-   - Passes all CI checks
-   - Has no merge conflicts
+    - Has a clear, descriptive title
+    - References any related issues
+    - Includes tests for new functionality
+    - Passes all CI checks
+    - Has no merge conflicts
+    - Updates README/docs/OpenSpec when public behavior changes
 
 2. **Fill out the PR template** completely
 
@@ -260,7 +266,7 @@ test(complex): add property tests for complex multiplication
 - [ ] Code follows the project's style guidelines
 - [ ] Tests have been added/updated
 - [ ] Documentation has been updated
-- [ ] All tests pass locally
+- [ ] `npm run lint && npm run format:check && npm run typecheck && npm test` passes locally
 - [ ] Commit messages follow conventions
 - [ ] PR description explains the changes
 - [ ] Relevant spec documents are updated (if applicable)

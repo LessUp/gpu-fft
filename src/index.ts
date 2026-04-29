@@ -45,6 +45,10 @@ export {
   cpuIFFT,
   cpuFFT2D,
   cpuIFFT2D,
+  cpuRFFT,
+  cpuIRFFT,
+  cpuRFFT2D,
+  cpuIRFFT2D,
   validateFFTInput,
   validateFFT2DInput,
 } from './utils/cpu-fft';

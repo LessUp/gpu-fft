@@ -9,6 +9,21 @@
  * - Amplitude accuracy
  */
 
+function validateWindowSize(size: number): void {
+  if (!Number.isInteger(size) || size < 1) {
+    throw new RangeError('Window size must be a positive integer');
+  }
+}
+
+function createWindow(size: number): Float32Array {
+  validateWindowSize(size);
+  const window = new Float32Array(size);
+  if (size === 1) {
+    window[0] = 1;
+  }
+  return window;
+}
+
 /**
  * Hann window: w[n] = 0.5 - 0.5 * cos(2πn/(N-1))
  *
@@ -25,7 +40,10 @@
  * ```
  */
 export function hannWindow(size: number): Float32Array {
-  const window = new Float32Array(size);
+  const window = createWindow(size);
+  if (size === 1) {
+    return window;
+  }
   for (let n = 0; n < size; n++) {
     window[n] = 0.5 - 0.5 * Math.cos((2 * Math.PI * n) / (size - 1));
   }
@@ -47,7 +65,10 @@ export function hannWindow(size: number): Float32Array {
  * ```
  */
 export function hammingWindow(size: number): Float32Array {
-  const window = new Float32Array(size);
+  const window = createWindow(size);
+  if (size === 1) {
+    return window;
+  }
   for (let n = 0; n < size; n++) {
     window[n] = 0.54 - 0.46 * Math.cos((2 * Math.PI * n) / (size - 1));
   }
@@ -69,7 +90,10 @@ export function hammingWindow(size: number): Float32Array {
  * ```
  */
 export function blackmanWindow(size: number): Float32Array {
-  const window = new Float32Array(size);
+  const window = createWindow(size);
+  if (size === 1) {
+    return window;
+  }
   for (let n = 0; n < size; n++) {
     const ratio = (2 * Math.PI * n) / (size - 1);
     window[n] = 0.42 - 0.5 * Math.cos(ratio) + 0.08 * Math.cos(2 * ratio);
@@ -97,7 +121,10 @@ export function flatTopWindow(size: number): Float32Array {
   const a2 = 0.277263158;
   const a3 = 0.083578947;
   const a4 = 0.006947368;
-  const window = new Float32Array(size);
+  const window = createWindow(size);
+  if (size === 1) {
+    return window;
+  }
   for (let n = 0; n < size; n++) {
     const ratio = (2 * Math.PI * n) / (size - 1);
     window[n] =
@@ -126,7 +153,7 @@ export function flatTopWindow(size: number): Float32Array {
  * ```
  */
 export function rectangularWindow(size: number): Float32Array {
-  const window = new Float32Array(size);
+  const window = createWindow(size);
   window.fill(1);
   return window;
 }
@@ -148,6 +175,9 @@ export function rectangularWindow(size: number): Float32Array {
  * ```
  */
 export function applyWindow(signal: Float32Array, window: Float32Array): Float32Array {
+  if (signal.length !== window.length) {
+    throw new RangeError('Signal and window must have the same length');
+  }
   const result = new Float32Array(signal.length);
   for (let i = 0; i < signal.length; i++) {
     result[i] = signal[i] * window[i];
@@ -172,6 +202,12 @@ export function applyWindow(signal: Float32Array, window: Float32Array): Float32
  * ```
  */
 export function applyWindowComplex(signal: Float32Array, window: Float32Array): Float32Array {
+  if (signal.length % 2 !== 0) {
+    throw new RangeError('Complex signal must use interleaved real/imaginary pairs');
+  }
+  if (signal.length / 2 !== window.length) {
+    throw new RangeError('Window length must match the number of complex samples');
+  }
   const result = new Float32Array(signal.length);
   const n = window.length;
   for (let i = 0; i < n; i++) {

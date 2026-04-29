@@ -1,14 +1,14 @@
 # Architecture Overview
 
-The WebGPU FFT Library implements a multi-layer architecture for GPU-accelerated FFT computation.
+The WebGPU FFT Library implements a focused FFT architecture: the core transform engine targets WebGPU, while application utilities such as spectrum analysis and image filtering remain CPU-based.
 
 ## High-Level Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Public API Layer                          │
-│  createFFTEngine() | createSpectrumAnalyzer()               │
-│  cpuFFT() | cpuIFFT() | createImageFilter()                 │
+│  createFFTEngine() | cpuFFT() / cpuRFFT()                   │
+│  createSpectrumAnalyzer() | createImageFilter()             │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -20,7 +20,7 @@ The WebGPU FFT Library implements a multi-layer architecture for GPU-accelerated
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                  GPU Compute Layer (WGSL)                    │
-│  Bit-Reversal Shader | Butterfly Shader | Filter Shader     │
+│  Bit-Reversal Shader | Butterfly Shader | Scale Shader      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -32,15 +32,15 @@ The WebGPU FFT Library implements a multi-layer architecture for GPU-accelerated
 - Regular memory access patterns suitable for GPU parallelization
 - Requires input size to be power of 2
 
-### 2. Dual GPU/CPU Implementation
+### 2. Dual GPU/CPU FFT Implementation
 
 - GPU path for maximum performance (WebGPU required)
 - CPU fallback for environments without WebGPU support
-- CPU implementation is significantly slower for large FFT sizes
+- Application utilities can call the CPU path without implying GPU-native processing
 
 ### 3. Shared Memory with Bank Conflict Padding
 
-- Padding eliminates bank conflicts during butterfly operations
+- Optional padding can reduce bank conflicts during butterfly operations
 - ~3% memory overhead for 32 banks
 - Performance benefit varies by GPU architecture
 
@@ -62,23 +62,21 @@ gpu-fft/
 │   │   ├── api/            # API specifications
 │   │   └── testing/        # Testing specifications
 │   └── changes/            # Proposal / design / task artifacts
-├── docs/                   # Documentation site (VitePress)
-│   ├── setup/              # Environment setup guides
+├── docs/                   # Documentation site source (VitePress)
+│   ├── setup/              # Setup and tooling guides
 │   ├── tutorials/          # User tutorials
 │   ├── architecture/       # Architecture documentation
-│   ├── assets/             # Static assets
-│   ├── api/                # Curated API reference source pages
-│   └── examples/           # Usage examples
+│   └── api/                # Curated API reference source pages
 ├── src/                    # Source code
 │   ├── core/               # Core GPU engine
-│   ├── shaders/            # WGSL shader sources
+│   ├── shaders/            # Canonical WGSL source strings
 │   ├── utils/              # CPU utilities
 │   ├── apps/               # Application-level APIs
 │   └── types.ts            # Type definitions
 ├── tests/                  # Test suite
-├── examples/             # Code examples
-│   ├── node/             # TypeScript examples
-│   └── web/              # HTML/JS demos
+├── examples/               # Code examples
+│   ├── node/               # TypeScript examples
+│   └── web/                # HTML/JS demos
 └── benchmarks/             # Performance benchmarks
 ```
 

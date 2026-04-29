@@ -29,7 +29,7 @@
 - Project-wide agent guidance: `AGENTS.md`
 - Claude-specific guidance: `CLAUDE.md`
 
-顶层 `/specs` 已退役，不再是 source of truth。
+顶层 `/specs` 已移除，不再是 source of truth。
 
 ## 工作流
 
@@ -48,7 +48,7 @@
 
 - `src/shaders/sources.ts` 是 WGSL shader 真源
 - `createSpectrumAnalyzer()` 和 `createImageFilter()` 是 CPU-only
-- `dist/` 构建前不会自动清空
+- `npm run build` 会先清空 `dist/`
 
 ## 质量门禁
 

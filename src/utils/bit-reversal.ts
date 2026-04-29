@@ -79,6 +79,21 @@ export function isPowerOf2(n: number): boolean {
   return n > 0 && (n & (n - 1)) === 0;
 }
 
+function validateInterleavedPowerOf2(data: Float32Array): number {
+  if (data.length % 2 !== 0) {
+    throw new RangeError('Bit-reversal input must use interleaved real/imaginary pairs');
+  }
+
+  const n = data.length / 2;
+  if (!isPowerOf2(n)) {
+    throw new RangeError(
+      'Bit-reversal input must contain a power-of-two number of complex samples'
+    );
+  }
+
+  return n;
+}
+
 /**
  * Perform bit-reversal permutation on a complex array.
  *
@@ -97,7 +112,7 @@ export function isPowerOf2(n: number): boolean {
  * ```
  */
 export function bitReversalPermutation(data: Float32Array): Float32Array {
-  const n = data.length / 2; // Number of complex elements
+  const n = validateInterleavedPowerOf2(data);
   const bits = log2(n);
   const result = new Float32Array(data.length);
 
@@ -127,7 +142,7 @@ export function bitReversalPermutation(data: Float32Array): Float32Array {
  * ```
  */
 export function bitReversalPermutationInPlace(data: Float32Array): void {
-  const n = data.length / 2;
+  const n = validateInterleavedPowerOf2(data);
   const bits = log2(n);
 
   for (let i = 0; i < n; i++) {

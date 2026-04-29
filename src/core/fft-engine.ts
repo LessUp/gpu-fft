@@ -3,11 +3,25 @@ import type { FFTEngineConfig } from '../types';
 import { GPUResourceManager } from './gpu-resource-manager';
 import { FFTError, FFTErrorCode } from './errors';
 import { log2 } from '../utils/bit-reversal';
-import { validateFFT2DInput, validateFFTInput } from '../utils/cpu-fft';
+import {
+  compressHermitianSpectrum,
+  compressHermitianSpectrum2D,
+  expandHermitianSpectrum,
+  expandHermitianSpectrum2D,
+  extractRealSignal,
+  packRealInput,
+  validateFFT2DInput,
+  validateFFTInput,
+  validateRealFFT2DInput,
+  validateRealFFTInput,
+  validateRealIFFT2DInput,
+  validateRealIFFTInput,
+} from '../utils/cpu-fft';
 import { BUTTERFLY_SHADER, BIT_REVERSAL_SHADER, SCALE_SHADER } from '../shaders/sources';
 
 const SUPPORTED_WORKGROUP_SIZE = 256;
 const MAX_GPU_FFT_SIZE = 65536;
+const PLAN_CACHE_CAPACITY = 4;
 const BIT_REVERSAL_PARAM_BUFFER_SIZE = 8;
 const BUTTERFLY_PARAM_BUFFER_SIZE = 16;
 const SCALE_PARAM_BUFFER_SIZE = 8;
@@ -92,7 +106,7 @@ export class FFTEngine {
   private initialized = false;
   private disposed = false;
   private readonly ownsResourceManager: boolean;
-  private sizeCache: SizeCache | null = null;
+  private sizeCaches = new Map<number, SizeCache>();
 
   private constructor(
     resourceManager: GPUResourceManager,
@@ -146,16 +160,28 @@ export class FFTEngine {
   private getBuffersForSize(n: number): SizeCache {
     const bufferSize = n * 2 * 4;
 
-    if (this.sizeCache && this.sizeCache.n === n) {
-      return this.sizeCache;
+    const cached = this.sizeCaches.get(n);
+    if (cached) {
+      this.sizeCaches.delete(n);
+      this.sizeCaches.set(n, cached);
+      return cached;
     }
 
-    this.releaseSizeCache();
+    if (this.sizeCaches.size >= PLAN_CACHE_CAPACITY) {
+      const oldestKey = this.sizeCaches.keys().next().value;
+      if (oldestKey !== undefined) {
+        const oldest = this.sizeCaches.get(oldestKey);
+        if (oldest) {
+          this.releaseSizeCache(oldest);
+        }
+        this.sizeCaches.delete(oldestKey);
+      }
+    }
 
     const storageFlags = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
     const numStages = log2(n);
 
-    this.sizeCache = {
+    const sizeCache: SizeCache = {
       n,
       bufferSize,
       inputBuffer: this.resourceManager.createBuffer(bufferSize, storageFlags),
@@ -177,23 +203,26 @@ export class FFTEngine {
       ),
     };
 
-    return this.sizeCache;
+    this.sizeCaches.set(n, sizeCache);
+    return sizeCache;
   }
 
-  private releaseSizeCache(): void {
-    if (!this.sizeCache) {
-      return;
-    }
-
-    this.resourceManager.releaseBuffer(this.sizeCache.inputBuffer);
-    this.resourceManager.releaseBuffer(this.sizeCache.outputBuffer);
-    this.resourceManager.releaseBuffer(this.sizeCache.tempBuffer);
-    this.resourceManager.releaseBuffer(this.sizeCache.bitReversalParamsBuffer);
-    for (const buffer of this.sizeCache.stageParamBuffers) {
+  private releaseSizeCache(sizeCache: SizeCache): void {
+    this.resourceManager.releaseBuffer(sizeCache.inputBuffer);
+    this.resourceManager.releaseBuffer(sizeCache.outputBuffer);
+    this.resourceManager.releaseBuffer(sizeCache.tempBuffer);
+    this.resourceManager.releaseBuffer(sizeCache.bitReversalParamsBuffer);
+    for (const buffer of sizeCache.stageParamBuffers) {
       this.resourceManager.releaseBuffer(buffer);
     }
-    this.resourceManager.releaseBuffer(this.sizeCache.scaleParamsBuffer);
-    this.sizeCache = null;
+    this.resourceManager.releaseBuffer(sizeCache.scaleParamsBuffer);
+  }
+
+  private releaseAllSizeCaches(): void {
+    for (const sizeCache of this.sizeCaches.values()) {
+      this.releaseSizeCache(sizeCache);
+    }
+    this.sizeCaches.clear();
   }
 
   async fft(input: Float32Array): Promise<Float32Array> {
@@ -204,6 +233,18 @@ export class FFTEngine {
   async ifft(input: Float32Array): Promise<Float32Array> {
     this.assertUsable();
     return this.transform(input, true);
+  }
+
+  async rfft(input: Float32Array): Promise<Float32Array> {
+    this.assertUsable();
+    validateRealFFTInput(input);
+    return compressHermitianSpectrum(await this.fft(packRealInput(input)));
+  }
+
+  async irfft(input: Float32Array): Promise<Float32Array> {
+    this.assertUsable();
+    validateRealIFFTInput(input);
+    return extractRealSignal(await this.ifft(expandHermitianSpectrum(input)));
   }
 
   private async transform(input: Float32Array, inverse: boolean): Promise<Float32Array> {
@@ -300,6 +341,24 @@ export class FFTEngine {
     return this.transform2d(input, width, height, true);
   }
 
+  async rfft2d(input: Float32Array, width: number, height: number): Promise<Float32Array> {
+    this.assertUsable();
+    validateRealFFT2DInput(input, width, height);
+    return compressHermitianSpectrum2D(
+      await this.fft2d(packRealInput(input), width, height),
+      width,
+      height
+    );
+  }
+
+  async irfft2d(input: Float32Array, width: number, height: number): Promise<Float32Array> {
+    this.assertUsable();
+    validateRealIFFT2DInput(input, width, height);
+    return extractRealSignal(
+      await this.ifft2d(expandHermitianSpectrum2D(input, width, height), width, height)
+    );
+  }
+
   private async transform2d(
     input: Float32Array,
     width: number,
@@ -333,7 +392,7 @@ export class FFTEngine {
       return;
     }
 
-    this.releaseSizeCache();
+    this.releaseAllSizeCaches();
 
     if (this.ownsResourceManager) {
       this.resourceManager.dispose();

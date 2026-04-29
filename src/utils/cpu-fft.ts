@@ -9,6 +9,21 @@
 import { isPowerOf2, log2, bitReverse } from './bit-reversal';
 import { FFTError, FFTErrorCode } from '../core/errors';
 
+function validateRealValues(input: Float32Array, label: string): void {
+  if (input === null || input === undefined) {
+    throw new FFTError(`${label} cannot be null or undefined`, FFTErrorCode.INVALID_INPUT_SIZE);
+  }
+
+  for (let i = 0; i < input.length; i++) {
+    if (!Number.isFinite(input[i])) {
+      throw new FFTError(
+        `${label} contains non-finite value (NaN or Infinity) at index ${i}`,
+        FFTErrorCode.INVALID_INPUT_SIZE
+      );
+    }
+  }
+}
+
 /**
  * Validate input for 1D FFT and return the size.
  *
@@ -98,6 +113,183 @@ export function validateFFT2DInput(input: Float32Array, width: number, height: n
       FFTErrorCode.DIMENSION_MISMATCH
     );
   }
+}
+
+export function validateRealFFTInput(input: Float32Array): number {
+  validateRealValues(input, 'Input');
+
+  const n = input.length;
+  if (!isPowerOf2(n)) {
+    throw new FFTError(
+      `Input size must be a power of 2, got ${n}`,
+      FFTErrorCode.INVALID_INPUT_SIZE
+    );
+  }
+  if (n < 2) {
+    throw new FFTError(`Input size must be at least 2, got ${n}`, FFTErrorCode.INVALID_INPUT_SIZE);
+  }
+
+  return n;
+}
+
+export function validateRealIFFTInput(input: Float32Array): number {
+  validateRealValues(input, 'Input');
+
+  if (input.length % 2 !== 0) {
+    throw new FFTError(
+      `Input must contain interleaved complex pairs, got length ${input.length}`,
+      FFTErrorCode.INVALID_INPUT_SIZE
+    );
+  }
+
+  const n = input.length - 2;
+  if (!isPowerOf2(n) || n < 2) {
+    throw new FFTError(
+      `Input half-spectrum does not map to a supported real signal length, got length ${input.length}`,
+      FFTErrorCode.INVALID_INPUT_SIZE
+    );
+  }
+
+  return n;
+}
+
+export function validateRealFFT2DInput(input: Float32Array, width: number, height: number): void {
+  validateRealValues(input, 'Input');
+
+  if (width <= 0 || height <= 0) {
+    throw new FFTError(
+      `2D FFT dimensions must be positive, got ${width}x${height}`,
+      FFTErrorCode.INVALID_INPUT_SIZE
+    );
+  }
+
+  if (!isPowerOf2(width) || !isPowerOf2(height)) {
+    throw new FFTError(
+      `2D FFT dimensions must be powers of 2, got ${width}x${height}`,
+      FFTErrorCode.INVALID_INPUT_SIZE
+    );
+  }
+
+  const expectedLength = width * height;
+  if (input.length !== expectedLength) {
+    throw new FFTError(
+      `Input length ${input.length} does not match expected ${expectedLength} for ${width}x${height}`,
+      FFTErrorCode.DIMENSION_MISMATCH
+    );
+  }
+}
+
+export function validateRealIFFT2DInput(input: Float32Array, width: number, height: number): void {
+  validateRealValues(input, 'Input');
+
+  if (width <= 0 || height <= 0) {
+    throw new FFTError(
+      `2D FFT dimensions must be positive, got ${width}x${height}`,
+      FFTErrorCode.INVALID_INPUT_SIZE
+    );
+  }
+
+  if (!isPowerOf2(width) || !isPowerOf2(height)) {
+    throw new FFTError(
+      `2D FFT dimensions must be powers of 2, got ${width}x${height}`,
+      FFTErrorCode.INVALID_INPUT_SIZE
+    );
+  }
+
+  const expectedLength = height * (width / 2 + 1) * 2;
+  if (input.length !== expectedLength) {
+    throw new FFTError(
+      `Input length ${input.length} does not match expected ${expectedLength} for compressed ${width}x${height} spectrum`,
+      FFTErrorCode.DIMENSION_MISMATCH
+    );
+  }
+}
+
+export function packRealInput(input: Float32Array): Float32Array {
+  const complex = new Float32Array(input.length * 2);
+  for (let i = 0; i < input.length; i++) {
+    complex[i * 2] = input[i];
+  }
+  return complex;
+}
+
+export function extractRealSignal(input: Float32Array): Float32Array {
+  const signal = new Float32Array(input.length / 2);
+  for (let i = 0; i < signal.length; i++) {
+    signal[i] = input[i * 2];
+  }
+  return signal;
+}
+
+export function compressHermitianSpectrum(input: Float32Array): Float32Array {
+  const n = validateFFTInput(input);
+  return input.slice(0, (n / 2 + 1) * 2);
+}
+
+export function expandHermitianSpectrum(input: Float32Array): Float32Array {
+  const n = validateRealIFFTInput(input);
+  const full = new Float32Array(n * 2);
+  const halfBins = n / 2 + 1;
+
+  full.set(input);
+
+  for (let k = 1; k < halfBins - 1; k++) {
+    const srcIdx = k * 2;
+    const dstIdx = (n - k) * 2;
+    full[dstIdx] = input[srcIdx];
+    full[dstIdx + 1] = -input[srcIdx + 1];
+  }
+
+  return full;
+}
+
+export function compressHermitianSpectrum2D(
+  input: Float32Array,
+  width: number,
+  height: number
+): Float32Array {
+  validateFFT2DInput(input, width, height);
+
+  const halfWidth = width / 2 + 1;
+  const compressed = new Float32Array(height * halfWidth * 2);
+
+  for (let row = 0; row < height; row++) {
+    const srcStart = row * width * 2;
+    const dstStart = row * halfWidth * 2;
+    compressed.set(input.subarray(srcStart, srcStart + halfWidth * 2), dstStart);
+  }
+
+  return compressed;
+}
+
+export function expandHermitianSpectrum2D(
+  input: Float32Array,
+  width: number,
+  height: number
+): Float32Array {
+  validateRealIFFT2DInput(input, width, height);
+
+  const halfWidth = width / 2 + 1;
+  const full = new Float32Array(width * height * 2);
+
+  for (let row = 0; row < height; row++) {
+    const srcStart = row * halfWidth * 2;
+    const dstStart = row * width * 2;
+    full.set(input.subarray(srcStart, srcStart + halfWidth * 2), dstStart);
+  }
+
+  for (let row = 0; row < height; row++) {
+    for (let col = halfWidth; col < width; col++) {
+      const mirrorRow = (height - row) % height;
+      const mirrorCol = width - col;
+      const srcIdx = (mirrorRow * halfWidth + mirrorCol) * 2;
+      const dstIdx = (row * width + col) * 2;
+      full[dstIdx] = input[srcIdx];
+      full[dstIdx + 1] = -input[srcIdx + 1];
+    }
+  }
+
+  return full;
 }
 
 /**
@@ -327,4 +519,24 @@ export function cpuFFT2D(input: Float32Array, width: number, height: number): Fl
  */
 export function cpuIFFT2D(input: Float32Array, width: number, height: number): Float32Array {
   return transform2D(input, width, height, cpuIFFT);
+}
+
+export function cpuRFFT(input: Float32Array): Float32Array {
+  validateRealFFTInput(input);
+  return compressHermitianSpectrum(cpuFFT(packRealInput(input)));
+}
+
+export function cpuIRFFT(input: Float32Array): Float32Array {
+  return extractRealSignal(cpuIFFT(expandHermitianSpectrum(input)));
+}
+
+export function cpuRFFT2D(input: Float32Array, width: number, height: number): Float32Array {
+  validateRealFFT2DInput(input, width, height);
+  return compressHermitianSpectrum2D(cpuFFT2D(packRealInput(input), width, height), width, height);
+}
+
+export function cpuIRFFT2D(input: Float32Array, width: number, height: number): Float32Array {
+  return extractRealSignal(
+    cpuIFFT2D(expandHermitianSpectrum2D(input, width, height), width, height)
+  );
 }

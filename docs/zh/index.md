@@ -22,7 +22,7 @@ hero:
 features:
   - icon: ⚡
     title: GPU FFT 内核
-    details: WebGPU 计算着色器用于 FFT 核心计算。大尺寸 1D FFT 可获得最高约 92 倍加速，2D FFT 也能显著受益。
+    details: WebGPU 计算着色器用于 FFT 核心计算。仓库 benchmark 会输出当前环境中的 CPU 实测结果，并在 WebGPU 可用时输出 GPU 实测结果。
   - icon: 📊
     title: 能力边界清晰
     details: 1D/2D FFT 是 GPU 加速能力；`createSpectrumAnalyzer()` 与 `createImageFilter()` 目前仍是 CPU-only 工具。

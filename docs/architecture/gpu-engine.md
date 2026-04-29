@@ -19,18 +19,18 @@ createFFTEngine()
   │
   ├─ 3. Compile shader modules
   │      └─ device.createShaderModule()
-  │
+      │
   ├─ 4. Create compute pipelines
   │      ├─ bit-reversal pipeline
   │      ├─ butterfly pipeline
-  │      └─ complex arithmetic pipeline
+  │      └─ scale pipeline
   │
   └─ 5. Ready for computation
 ```
 
 ## Shader Architecture
 
-The computation uses three main compute shaders:
+The active computation uses three WGSL shader entry points from `src/shaders/sources.ts`:
 
 ### 1. Bit-Reversal Permutation
 - Reorders input data for in-place Cooley-Tukey algorithm
@@ -42,9 +42,9 @@ The computation uses three main compute shaders:
 - Processes pairs of elements in parallel
 - Uses twiddle factors pre-computed on GPU
 
-### 3. Complex Arithmetic
-- Handles complex multiplication and addition
-- Used in both forward and inverse transforms
+### 3. Scaling
+- Applies inverse-transform normalization
+- Reuses the same GPU buffer lifecycle as the FFT stages
 
 ## Memory Management
 
@@ -53,14 +53,15 @@ The computation uses three main compute shaders:
 interface GPUResources {
   inputBuffer: GPUBuffer;     // Input data staging
   outputBuffer: GPUBuffer;    // Output data staging
-  twiddleBuffer: GPUBuffer;   // Pre-computed twiddle factors
+  tempBuffer: GPUBuffer;      // Ping-pong storage
+  paramsBuffer: GPUBuffer;    // Uniform parameters
   stagingBuffer: GPUBuffer;   // Read-back buffer for results
 }
 ```
 
 ### Resource Lifecycle
 1. **Allocation**: Buffers created on first `fft1D`/`fft2D` call
-2. **Reuse**: Buffers reused for subsequent calls of same size
+2. **Reuse**: A bounded multi-size plan cache reuses buffers for repeated sizes
 3. **Cleanup**: Call `engine.dispose()` to release all GPU resources
 
 ## Performance Characteristics

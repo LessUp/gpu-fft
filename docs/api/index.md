@@ -8,8 +8,8 @@ Complete reference for the public APIs exported by `webgpu-fft`.
 
 | API | Description |
 |-----|-------------|
-| [`FFTEngine`](./fft-engine) | Main GPU-accelerated FFT engine |
-| [`cpuFFT`](./cpu-fft) | CPU-based FFT fallback |
+| [`FFTEngine`](./fft-engine) | Main GPU-accelerated FFT engine with complex and real-input APIs |
+| [`cpuFFT`](./cpu-fft) | CPU complex FFT fallback plus real-input helpers |
 
 ## Application APIs
 
@@ -22,7 +22,7 @@ Complete reference for the public APIs exported by `webgpu-fft`.
 
 | API | Description |
 |-----|-------------|
-| [`Window Functions`](./window-functions) | Hann, Hamming, Blackman windows |
+| [`Window Functions`](./window-functions) | Hann, Hamming, Blackman, Flat Top, and Rectangular windows |
 | [`Complex Numbers`](./complex) | Complex arithmetic helpers |
 | [`GPU Detection`](./gpu-detect) | WebGPU availability checks |
 | [`Bit Reversal`](./bit-reversal) | Bit-reversal permutation utilities |

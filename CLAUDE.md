@@ -28,9 +28,9 @@ Claude 在本仓库工作时，先读 `AGENTS.md`，再读相关 `openspec/` 变
 
 - `src/shaders/sources.ts` 是 shader 真源
 - `createSpectrumAnalyzer()`、`createImageFilter()` 是 CPU-only
-- `dist/` 不会自动清空
+- `npm run build` 会先清空 `dist/`
 - 规范真源在 `openspec/specs/`
-- 顶层 `/specs` 已退役，只是迁移 stub
+- 顶层 `/specs` 已移除
 
 ## 5. 验证基线
 
@@ -52,4 +52,4 @@ npm run smoke:package
 - `AGENTS.md`：项目级共识
 - `.github/copilot-instructions.md`：GitHub Copilot 项目指令
 - `CLAUDE.local.md`：仅允许保留个人偏好，不应重复项目事实
-- `QWEN.md`、`AGENTS.md.legacy`：仅保留退役说明，不再维护详细内容
+- `QWEN.md`、`AGENTS.md.legacy`：已移除，不再维护项目事实

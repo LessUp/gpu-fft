@@ -9,22 +9,21 @@
 
 English | [简体中文](README.zh-CN.md)
 
-> **High-performance GPU-accelerated Fast Fourier Transform library** for JavaScript/TypeScript. WebGPU compute shaders deliver up to **92x faster** FFT than CPU for large transforms. The package combines a GPU FFT core with CPU-based utilities for spectrum analysis and frequency-domain image filtering, all with zero runtime dependencies.
+> **High-performance GPU-accelerated Fast Fourier Transform library** for JavaScript/TypeScript. The package combines a WebGPU FFT core, real-input RFFT/IRFFT APIs, and CPU-based utilities for spectrum analysis and frequency-domain image filtering, all with zero runtime dependencies.
 
 ## ⚡ Why WebGPU FFT?
 
 | | **webgpu-fft** | cpu-only libs | Python (numpy) |
 |---|---|---|---|
 | **GPU Acceleration** | ✅ WebGPU shaders | ❌ CPU only | ❌ CPU only |
-| **1D FFT (65K)** | ~3ms | ~300ms | ~50ms |
-| **2D FFT (1024²)** | ~8ms | ~3s | ~100ms |
+| **Real-input FFT APIs** | ✅ RFFT / IRFFT / 2D RFFT | Varies | Varies |
 | **Frequency Filtering** | ✅ Built-in (CPU utility) | Manual | Manual |
 | **Spectrum Analysis** | ✅ Built-in (CPU utility) | Manual | Manual |
 | **Browser Native** | ✅ No WASM | ✅ | ❌ Server |
 | **Zero Dependencies** | ✅ | ✅ | ❌ |
 | **TypeScript** | ✅ Strict mode | Varies | ❌ |
 
-**Up to 92x faster** than CPU for large FFTs, with full TypeScript support and zero dependencies.
+Measured performance depends on your hardware and runtime. Use the repository benchmark to collect CPU and WebGPU results in your current environment.
 
 ## 🚀 Quick Start
 
@@ -63,25 +62,37 @@ const spectrum = cpuFFT(signal);
 const recovered = cpuIFFT(spectrum);
 ```
 
+### Real-Valued FFT (RFFT / IRFFT)
+
+```typescript
+import { createFFTEngine, cpuRFFT, cpuIRFFT } from 'webgpu-fft';
+
+const realSignal = new Float32Array([0, 1, 0, -1, 0, 1, 0, -1]);
+
+// CPU path
+const cpuSpectrum = cpuRFFT(realSignal); // N / 2 + 1 complex bins
+const cpuRecovered = cpuIRFFT(cpuSpectrum);
+
+// GPU path
+const engine = await createFFTEngine();
+const gpuSpectrum = await engine.rfft(realSignal);
+const gpuRecovered = await engine.irfft(gpuSpectrum);
+engine.dispose();
+```
+
 ## 📊 Performance
 
-### 1D FFT Speed
+Run the repository benchmark to collect measured results for your current runtime:
 
-| Size | GPU | CPU | Speedup |
-|------|-----|-----|---------|
-| 1,024 | 0.18ms | 2.3ms | **13x** |
-| 4,096 | 0.35ms | 11.5ms | **33x** |
-| 16,384 | 0.89ms | 58.2ms | **65x** |
-| 65,536 | 3.24ms | 298.7ms | **92x** |
+```bash
+npm run benchmark
+```
 
-### 2D FFT Speed
+The benchmark reports:
 
-| Image Size | GPU | CPU | Speedup |
-|------------|-----|-----|---------|
-| 256×256 | 1.56ms | 156ms | **100x** |
-| 1024×1024 | 8.23ms | 2.9s | **358x** |
-
-*Benchmarked on RTX 3080 + i9-10900K. Includes data transfer overhead.*
+- measured CPU FFT results in every environment
+- measured WebGPU FFT results only when WebGPU is actually available
+- no speculative or static “expected performance” section
 
 ## 🎯 Use Cases
 
@@ -140,8 +151,12 @@ filter.dispose();
 |--------|-------------|----------|
 | `fft(data)` | 1D forward FFT | 65,536 |
 | `ifft(data)` | 1D inverse FFT | 65,536 |
+| `rfft(data)` | 1D real-input FFT | 65,536 real samples |
+| `irfft(data)` | 1D inverse real-input FFT | 65,536 real samples |
 | `fft2d(data, w, h)` | 2D forward FFT | 2048×2048 |
 | `ifft2d(data, w, h)` | 2D inverse FFT | 2048×2048 |
+| `rfft2d(data, w, h)` | 2D real-input FFT | 2048×2048 real samples |
+| `irfft2d(data, w, h)` | 2D inverse real-input FFT | 2048×2048 real samples |
 | `dispose()` | Release GPU resources | - |
 
 ### Utilities
@@ -149,20 +164,24 @@ filter.dispose();
 | API | Purpose |
 |-----|---------|
 | `cpuFFT()` / `cpuIFFT()` | CPU-based FFT fallback |
+| `cpuRFFT()` / `cpuIRFFT()` | CPU real-input FFT shortcuts |
+| `cpuRFFT2D()` / `cpuIRFFT2D()` | CPU 2D real-input FFT shortcuts |
 | `createSpectrumAnalyzer()` | Real-time audio analysis (CPU-only utility) |
 | `createImageFilter()` | Frequency-domain filtering (CPU-only utility) |
 | `isWebGPUAvailable` | Check GPU support |
-| Window functions | Hann, Hamming, Blackman, FlatTop |
+| Window functions | Hann, Hamming, Blackman, FlatTop, Rectangular |
 | Complex utilities | Add, Mul, Magnitude, Twiddle factors |
 
-### Input Format
+### Input Formats
 
-All FFT functions expect **interleaved complex data**:
+Complex FFT APIs expect **interleaved complex data**:
 ```typescript
 // [real₀, imag₀, real₁, imag₁, real₂, imag₂, ...]
 const data = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]);
 // Represents: 1+0i, 2+0i, 3+0i, 4+0i
 ```
+
+Real-input FFT APIs accept plain real-valued `Float32Array` samples and return compressed half-spectrum complex data.
 
 ### Error Handling
 
@@ -244,7 +263,7 @@ npx serve examples/web
 ## 🗺️ Roadmap
 
 - [ ] 3D FFT support
-- [ ] Real-valued FFT optimization (RFFT)
+- [x] Real-valued FFT APIs (initial contract-first implementation)
 - [ ] GPU-native image filtering
 - [ ] Convolution operations
 - [ ] WASM fallback

@@ -7,23 +7,21 @@ Thank you for your interest in contributing to WebGPU FFT Library!
 1. Fork the repository on GitHub
 2. Clone your fork: `git clone https://github.com/your-username/gpu-fft.git`
 3. Install dependencies: `npm install`
-4. Create a branch: `git checkout -b feature/my-feature`
+4. Create a short-lived branch: `git checkout -b fix/clear-short-name`
 
 ## Development Workflow
 
 ```bash
-# Build the library
-npm run build
-
-# Run tests
+# Canonical validation chain
+npm run lint
+npm run format:check
+npm run typecheck
 npm test
 
-# Run with coverage
-npm run test:coverage
-
-# Lint and format
-npm run lint:fix
-npm run format
+# Package/docs checks when affected
+npm run build
+npm run smoke:package
+npm run docs:build
 ```
 
 ## Code Style
@@ -42,7 +40,7 @@ type(scope): description
 
 Examples:
 ```
-feat(fft): add 3D FFT support
+feat(real-fft): add rectangular RFFT coverage
 fix(spectrum): correct dB calculation for zero magnitude
 docs(readme): add browser compatibility section
 test(complex): add property tests for complex multiplication
@@ -50,11 +48,11 @@ test(complex): add property tests for complex multiplication
 
 ## Pull Request Process
 
-1. Update documentation for any API changes
-2. Add tests for new features
-3. Ensure all tests pass: `npm test`
-4. Update the CHANGELOG.md if needed
-5. Submit PR with a clear description of changes
+1. Update README, docs, and OpenSpec for public API or behavior changes
+2. Add tests for new behavior and bug fixes
+3. Run `npm run lint && npm run format:check && npm run typecheck && npm test`
+4. Run `npm run build`, `npm run smoke:package`, or `npm run docs:build` when the change affects package or docs output
+5. Request review for architecture, public API, docs IA, workflow, or governance changes
 
 ## Spec-Driven Development
 
@@ -62,6 +60,7 @@ This project follows OpenSpec-driven development:
 - All feature changes must align with canonical specs in `openspec/specs/`
 - New features require spec updates first
 - See `openspec/specs/` for repository specifications and `openspec/changes/` for active change artifacts
+- Avoid long-running parallel worktrees in the closeout phase; merge, close, or delete short-lived branches quickly
 
 ## Running Examples
 

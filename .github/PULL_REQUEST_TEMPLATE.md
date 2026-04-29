@@ -1,50 +1,24 @@
-## Description
+## Summary
 
-Please include a summary of the changes and the related issue. Please also include relevant motivation and context.
+- What changed:
+- Why:
+- Related issue:
 
-Fixes # (issue)
+## Validation
 
-## Type of Change
+- [ ] `npm run lint`
+- [ ] `npm run format:check`
+- [ ] `npm run typecheck`
+- [ ] `npm test`
+- [ ] `npm run build` and `npm run smoke:package` (package/release-impacting changes)
+- [ ] `npm run docs:build` (docs/Pages-impacting changes)
 
-Please delete options that are not relevant.
+## Risk and scope
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Documentation update
-- [ ] Performance improvement
-- [ ] Code refactoring
-- [ ] Test update
+- Public API changed: yes / no
+- README/docs/OpenSpec updated where needed: yes / no
+- CPU-only vs GPU-accelerated boundaries preserved: yes / no
 
-## How Has This Been Tested?
+## Review notes
 
-Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
-
-- [ ] Unit tests
-- [ ] Property-based tests
-- [ ] Integration tests
-- [ ] Manual testing
-
-**Test Configuration**:
-- Browser:
-- Node.js version:
-- GPU:
-
-## Checklist
-
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published in downstream modules
-
-## Screenshots (if applicable)
-
-Add screenshots to help explain your changes.
-
-## Additional Notes
-
-Add any additional notes or context about the pull request here.
+Call out anything reviewers should focus on, especially architecture, workflow, public API, or documentation-source changes.

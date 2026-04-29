@@ -6,6 +6,9 @@ Signal window functions for spectral analysis.
 
 Window functions reduce spectral leakage when performing FFT on finite-length signals.
 
+All generator functions require `size` to be a positive integer. A size of `1`
+returns `[1]` so single-sample inputs remain finite and unchanged.
+
 ## Window Function Generators
 
 All window functions accept a `size` parameter and return a `Float32Array`.
@@ -61,6 +64,9 @@ function applyWindow(
 ): Float32Array;
 ```
 
+`data.length` and `window.length` must match. A mismatch throws `RangeError`
+instead of silently dropping or zeroing samples.
+
 ### Example
 
 ```ts
@@ -83,6 +89,9 @@ function applyWindowComplex(
   window: Float32Array
 ): Float32Array;
 ```
+
+`data` must contain complete interleaved real/imaginary pairs, and
+`window.length` must equal `data.length / 2`. Invalid shapes throw `RangeError`.
 
 ## Comparison
 

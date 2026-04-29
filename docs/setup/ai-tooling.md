@@ -18,6 +18,7 @@ This project is in a **closeout / stabilization** phase, so the recommended tool
 | Claude / Codex style agents | Multi-file refactors, docs/governance cleanup, cross-cutting reasoning |
 | `/review` | Required checkpoint for architecture, docs IA, workflow, and API-contract changes |
 | `gh` | GitHub metadata, workflow inspection, release/repo operations |
+| CLI skills / local subagents | Focused execution and review without adding persistent repo dependencies |
 
 ## Copilot guidance
 
@@ -57,6 +58,7 @@ Default recommendation for this repository: **do not add extra MCP servers unles
 - Built-in repository tools
 - `gh` for GitHub operations
 - OpenSpec skills / commands
+- Lightweight CLI skills for planning, verification, and code review
 - TypeScript + ESLint + Prettier + tests
 
 ### When MCP is *not* worth it here

@@ -21,7 +21,7 @@ const result = bitReverse(1, 3); // 4
 
 ## `log2()`
 
-Base-2 logarithm.
+Base-2 logarithm for positive power-of-two sizes.
 
 ```ts
 function log2(n: number): number;
@@ -54,10 +54,10 @@ console.log(isPowerOf2(1000)); // false
 
 ## `bitReversalPermutation()`
 
-Returns a permutation array for bit-reversal reordering.
+Returns a new interleaved complex array reordered by bit-reversal.
 
 ```ts
-function bitReversalPermutation(size: number): number[];
+function bitReversalPermutation(data: Float32Array): Float32Array;
 ```
 
 ### Example
@@ -65,16 +65,20 @@ function bitReversalPermutation(size: number): number[];
 ```ts
 import { bitReversalPermutation } from 'webgpu-fft';
 
-const perm = bitReversalPermutation(8);
-// [0, 4, 2, 6, 1, 5, 3, 7]
+const input = new Float32Array([0, 0, 1, 0, 2, 0, 3, 0]);
+const output = bitReversalPermutation(input);
+// output is [0, 0, 2, 0, 1, 0, 3, 0]
 ```
+
+`data` must be interleaved complex data and must contain a power-of-two number
+of complex samples. Invalid input throws `RangeError`.
 
 ## `bitReversalPermutationInPlace()`
 
-Reorders an array in-place using bit-reversal.
+Reorders an interleaved complex array in-place using bit-reversal.
 
 ```ts
-function bitReversalPermutationInPlace<T>(array: T[]): void;
+function bitReversalPermutationInPlace(data: Float32Array): void;
 ```
 
 ### Example
@@ -82,10 +86,13 @@ function bitReversalPermutationInPlace<T>(array: T[]): void;
 ```ts
 import { bitReversalPermutationInPlace } from 'webgpu-fft';
 
-const data = [0, 1, 2, 3, 4, 5, 6, 7];
+const data = new Float32Array([0, 0, 1, 0, 2, 0, 3, 0]);
 bitReversalPermutationInPlace(data);
-// data is now [0, 4, 2, 6, 1, 5, 3, 7]
+// data is now [0, 0, 2, 0, 1, 0, 3, 0]
 ```
+
+Validation is performed before mutation. Invalid input throws `RangeError` and
+leaves the array unchanged.
 
 ## Related
 

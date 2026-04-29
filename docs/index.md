@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "WebGPU FFT"
   text: "Browser-native FFT core"
-  tagline: GPU-accelerated 1D/2D FFT for JavaScript and TypeScript. High-throughput transforms run on WebGPU; spectrum analysis and image filtering are included as CPU-based utilities.
+  tagline: GPU-accelerated 1D/2D FFT and real-input RFFT APIs for JavaScript and TypeScript. High-throughput transforms run on WebGPU; spectrum analysis and image filtering remain CPU-based utilities.
   image:
     src: /hero.svg
     alt: WebGPU FFT
@@ -22,10 +22,10 @@ hero:
 features:
   - icon: ⚡
     title: GPU FFT core
-    details: WebGPU compute shaders accelerate the FFT engine itself, with up to 92x speedup for large 1D transforms and strong gains for large 2D workloads.
+    details: WebGPU compute shaders accelerate the FFT engine itself. The repository includes a benchmark script that reports measured CPU and WebGPU results for the current environment.
   - icon: 📊
     title: Honest capability boundaries
-    details: 1D/2D FFT are GPU-accelerated. Spectrum analysis and image filtering are built-in helpers, but they currently use CPU FFT internally.
+    details: Complex FFT and real-input RFFT APIs are available on both CPU and GPU surfaces. Spectrum analysis and image filtering are built-in helpers, but they currently use CPU FFT internally.
   - icon: 🎵
     title: TypeScript-first package
     details: ESM + CJS exports, no runtime dependencies, and a clean typed API surface for browser or Node-based workflows.
@@ -40,7 +40,7 @@ This site helps you answer four questions quickly:
 
 1. **Is the FFT core actually GPU-accelerated?** Yes — the `FFTEngine` and 2D FFT pipeline are the GPU-centered parts.
 2. **What is CPU-only today?** `createSpectrumAnalyzer()` and `createImageFilter()` are convenience utilities built on the CPU FFT path.
-3. **Is it practical to adopt?** The package is TypeScript-first, has zero runtime dependencies, and ships ESM + CJS.
+3. **Can I benchmark it honestly?** Yes — `npm run benchmark` reports measured CPU results and measured WebGPU results only when WebGPU is actually available.
 4. **Where should I start?** Use Quick Start for usage, API Reference for contracts, and Architecture for internals.
 
 ## Good fit / Not a fit
@@ -49,6 +49,7 @@ This site helps you answer four questions quickly:
 
 - Browser-native FFT workloads where WebGPU is available
 - Large 1D or 2D transforms that justify GPU setup overhead
+- Real-valued signal or image workloads that benefit from compressed half-spectrum APIs
 - Projects that want a typed FFT core without runtime dependency sprawl
 
 ### Not a fit

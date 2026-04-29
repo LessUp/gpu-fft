@@ -1,59 +1,31 @@
 # CPU FFT API
 
-CPU-based FFT fallback for environments without WebGPU.
+CPU-based FFT fallback for environments without WebGPU, including real-input RFFT helpers.
 
-## `cpuFFT()`
+## Complex FFT APIs
 
-Performs a 1D forward FFT on the CPU.
+### `cpuFFT()`
 
-### Signature
+Performs a 1D forward FFT on interleaved complex input.
 
 ```ts
 function cpuFFT(data: Float32Array): Float32Array;
 ```
 
-### Parameters
+- **Input:** interleaved complex data `[Re, Im, Re, Im, ...]`
+- **Return:** interleaved complex frequency-domain data
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `data` | `Float32Array` | Interleaved complex data `[Re, Im, ...]`. Must be power of 2. |
+### `cpuIFFT()`
 
-### Returns
-
-`Float32Array` — Frequency domain data.
-
-### Example
-
-```ts
-import { cpuFFT } from 'webgpu-fft';
-
-const signal = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]);
-const spectrum = cpuFFT(signal);
-```
-
-## `cpuIFFT()`
-
-Performs a 1D inverse FFT.
-
-### Signature
+Performs a 1D inverse FFT on interleaved complex input.
 
 ```ts
 function cpuIFFT(data: Float32Array): Float32Array;
 ```
 
-### Example
+### `cpuFFT2D()`
 
-```ts
-import { cpuIFFT } from 'webgpu-fft';
-
-const reconstructed = cpuIFFT(spectrum);
-```
-
-## `cpuFFT2D()`
-
-Performs a 2D FFT on image data.
-
-### Signature
+Performs a 2D forward FFT on interleaved complex input.
 
 ```ts
 function cpuFFT2D(
@@ -63,19 +35,9 @@ function cpuFFT2D(
 ): Float32Array;
 ```
 
-### Example
+### `cpuIFFT2D()`
 
-```ts
-import { cpuFFT2D } from 'webgpu-fft';
-
-const freqData = cpuFFT2D(imageData, 256, 256);
-```
-
-## `cpuIFFT2D()`
-
-Performs a 2D inverse FFT.
-
-### Signature
+Performs a 2D inverse FFT on interleaved complex input.
 
 ```ts
 function cpuIFFT2D(
@@ -85,23 +47,64 @@ function cpuIFFT2D(
 ): Float32Array;
 ```
 
-## `validateFFTInput()`
+## Real-Input FFT APIs
 
-Validates input data for 1D FFT.
+### `cpuRFFT()`
 
-### Signature
+Performs a 1D FFT for real-valued samples and returns a compressed half-spectrum.
 
 ```ts
-function validateFFTInput(data: Float32Array): void;
+function cpuRFFT(data: Float32Array): Float32Array;
 ```
 
-Throws `FFTError` if input is invalid.
+- **Input:** real-valued samples of length `N`
+- **Return:** interleaved complex half-spectrum containing `N / 2 + 1` bins
 
-## `validateFFT2DInput()`
+### `cpuIRFFT()`
 
-Validates input data for 2D FFT.
+Restores a real-valued signal from a compressed half-spectrum.
 
-### Signature
+```ts
+function cpuIRFFT(data: Float32Array): Float32Array;
+```
+
+### `cpuRFFT2D()`
+
+Performs a 2D FFT for real-valued input data and returns `height × (width / 2 + 1)` compressed complex bins.
+
+```ts
+function cpuRFFT2D(
+  data: Float32Array,
+  width: number,
+  height: number
+): Float32Array;
+```
+
+### `cpuIRFFT2D()`
+
+Restores a real-valued 2D signal from the compressed real-input spectrum.
+
+```ts
+function cpuIRFFT2D(
+  data: Float32Array,
+  width: number,
+  height: number
+): Float32Array;
+```
+
+## Validation Helpers
+
+### `validateFFTInput()`
+
+Validates 1D complex FFT input and returns the transform size.
+
+```ts
+function validateFFTInput(data: Float32Array): number;
+```
+
+### `validateFFT2DInput()`
+
+Validates 2D complex FFT input dimensions.
 
 ```ts
 function validateFFT2DInput(
@@ -111,15 +114,12 @@ function validateFFT2DInput(
 ): void;
 ```
 
-Throws `FFTError` if input is invalid.
+## Notes
 
-## Performance Notes
-
-- CPU FFT is significantly slower than GPU for large sizes
-- Best used for testing or small transforms (< 256 elements)
-- See [CPU Fallback Architecture](/architecture/cpu-fallback) for implementation details
+- CPU real-input APIs currently wrap the complex FFT implementation; they establish the public contract first rather than introducing a separate optimized kernel.
+- Use these APIs as the fallback path in environments where `createFFTEngine()` is unavailable.
 
 ## Related
 
-- [FFTEngine](./fft-engine) — GPU-accelerated FFT
-- [CPU Fallback](/architecture/cpu-fallback) — Architecture deep dive
+- [FFTEngine](./fft-engine) — GPU-accelerated FFT engine
+- [CPU Fallback](/architecture/cpu-fallback) — Architecture details

@@ -1,100 +1,46 @@
 # Introduction
 
-WebGPU FFT Library is a high-performance Fast Fourier Transform (FFT) library for JavaScript and TypeScript, providing GPU acceleration through WebGPU compute shaders with a full CPU fallback implementation.
+WebGPU FFT Library provides GPU-accelerated 1D/2D complex FFT plus real-input RFFT APIs for JavaScript and TypeScript, with a complete CPU fallback path.
 
 ## What is FFT?
 
-The Fast Fourier Transform (FFT) is an algorithm that computes the Discrete Fourier Transform (DFT) of a sequence, or its inverse (IFFT). Fourier analysis converts a signal from its original domain (often time or space) to a representation in the frequency domain and vice versa.
+The Fast Fourier Transform (FFT) converts signals between the time or spatial domain and the frequency domain. Common uses include:
 
-Common applications include:
-- **Digital Signal Processing (DSP)**: Filtering, spectral analysis
-- **Audio Processing**: Spectrum analyzers, equalizers, pitch detection
-- **Image Processing**: Filtering, compression, convolution
-- **Communications**: Modulation/demodulation, channel estimation
-- **Scientific Computing**: Solving differential equations
+- **Digital Signal Processing**: filtering and spectral analysis
+- **Audio Processing**: spectrum analyzers and tone detection
+- **Image Processing**: frequency-domain filtering and inspection
+- **Scientific Computing**: repeated transform workloads on numeric grids
 
-## Why WebGPU FFT?
-
-### 🚀 GPU Acceleration
-
-WebGPU FFT leverages the power of modern GPUs through WebGPU compute shaders. This provides:
-
-- **Parallel Processing**: Thousands of simultaneous butterfly operations
-- **High Memory Bandwidth**: Optimized for large data throughput
-- **Low Latency**: Minimal CPU overhead for GPU operations
-
-### 🔄 Automatic Fallback
-
-When WebGPU is not available, the library seamlessly falls back to a highly optimized CPU implementation:
-
-```typescript
-import { isWebGPUAvailable, createFFTEngine, cpuFFT } from 'webgpu-fft'
-
-if (await isWebGPUAvailable()) {
-  const engine = await createFFTEngine()
-  // Use GPU
-} else {
-  // Use CPU
-  const spectrum = cpuFFT(input)
-}
-```
-
-### 🔷 TypeScript First
-
-Full TypeScript support with:
-- Strict type checking compatibility
-- Detailed type definitions
-- IntelliSense support
-- JSDoc comments
-
-### 📦 Zero Dependencies
-
-No runtime dependencies means:
-- Smaller bundle sizes
-- No dependency conflicts
-- Faster installation
-- Predictable behavior
-
-## Features
+## Library Surfaces
 
 | Feature | Description | GPU | CPU |
 |---------|-------------|-----|-----|
-| 1D FFT | Complex FFT for 1D arrays | ✅ | ✅ |
-| 1D IFFT | Inverse FFT | ✅ | ✅ |
-| 2D FFT | Image/2D data processing | ✅ | ✅ |
-| Spectrum Analysis | Audio frequency analysis | ⚠️¹ | ✅ |
-| Image Filtering | Frequency domain filters | ⚠️¹ | ✅ |
-| Window Functions | Hann, Hamming, Blackman | ✅ | ✅ |
+| 1D FFT / IFFT | Complex FFT for 1D arrays | ✅ | ✅ |
+| 2D FFT / IFFT | Complex FFT for 2D data | ✅ | ✅ |
+| Real-input FFT | RFFT / IRFFT for 1D and 2D real-valued data | ✅ | ✅ |
+| Spectrum Analysis | Audio frequency analysis utility | ❌ | ✅ |
+| Image Filtering | Frequency-domain image filter utility | ❌ | ✅ |
 
-¹ Uses CPU FFT internally
+## Why WebGPU FFT?
+
+- **GPU acceleration** for large transform workloads where setup cost is justified
+- **Contract-first real-input APIs** so callers do not have to manually pack complex buffers
+- **CPU fallback** for environments without WebGPU
+- **Zero runtime dependencies**
+- **TypeScript-first exports**
 
 ## Supported Sizes
 
-### 1D FFT
-- **Range**: 2 to 65,536 elements (power of 2)
-- **Optimal GPU**: 1,024 to 65,536 elements
-- **Optimal CPU**: 2 to 1,024 elements
+- **1D complex FFT:** 2 to 65,536 complex samples
+- **1D real-input FFT:** 2 to 65,536 real samples
+- **2D FFT / RFFT:** up to 2048×2048 with power-of-2 dimensions
 
-### 2D FFT
-- **Maximum**: 2048×2048 pixels
-- **Format**: Interleaved complex numbers
-- **Algorithm**: Row-column decomposition
+## Performance Evaluation
 
-## Performance Comparison
-
-Typical performance on an NVIDIA RTX 3080:
-
-| Size | CPU (ms) | GPU (ms) | Speedup |
-|------|----------|----------|---------|
-| 1,024 | 0.5 | 0.3 | 1.7× |
-| 4,096 | 3.0 | 0.5 | 6× |
-| 16,384 | 15.0 | 1.0 | 15× |
-| 65,536 | 80.0 | 3.0 | 27× |
-
-*Results may vary based on hardware and browser implementation.*
+Use `npm run benchmark` to collect measured CPU results in any environment and measured WebGPU results only when WebGPU is available. The benchmark intentionally avoids static or speculative “expected performance” claims.
 
 ## Next Steps
 
-- [1D FFT Tutorial](./1d-fft)
-- [2D FFT Tutorial](./2d-fft)
-- [API Reference](/api/index) - Complete API documentation
+- [API Reference](/api/index)
+- [Quick Start](/setup/quick-start)
+- [Architecture Overview](/architecture/overview)

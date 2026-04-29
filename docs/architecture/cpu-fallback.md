@@ -1,88 +1,57 @@
 # CPU Fallback Implementation
 
-How the library handles environments without WebGPU support.
+How the library behaves when WebGPU is unavailable.
 
 ## Overview
 
-When WebGPU is unavailable (older browsers, non-WebGPU environments), the library provides a CPU-based FFT implementation as a fallback.
+The library ships a complete CPU FFT path for environments where WebGPU cannot be initialized. This fallback covers:
+
+- 1D and 2D complex FFT / IFFT
+- 1D and 2D real-input RFFT / IRFFT
+- CPU-only utilities such as spectrum analysis and image filtering
 
 ## Detection
 
 ```ts
-import { isWebGPUSupported } from 'webgpu-fft';
+import { createFFTEngine, cpuFFT, isWebGPUAvailable } from 'webgpu-fft';
 
-if (await isWebGPUSupported()) {
-  // Use GPU engine
+if (await isWebGPUAvailable()) {
   const engine = await createFFTEngine();
+  // Use GPU FFT
 } else {
-  // Fall back to CPU
-  const result = cpuFFT(signal);
+  const spectrum = cpuFFT(signal);
+  // Use CPU FFT
 }
 ```
 
-## CPU FFT API
+## CPU APIs
 
 ```ts
-import { cpuFFT, cpuIFFT } from 'webgpu-fft';
+import { cpuFFT, cpuIFFT, cpuRFFT, cpuIRFFT } from 'webgpu-fft';
 
-// Forward FFT
-const spectrum = cpuFFT(signal);
+const spectrum = cpuFFT(complexSignal);
+const restoredComplex = cpuIFFT(spectrum);
 
-// Inverse FFT
-const reconstructed = cpuIFFT(spectrum);
+const halfSpectrum = cpuRFFT(realSignal);
+const restoredReal = cpuIRFFT(halfSpectrum);
 ```
 
-## Implementation Details
+## Implementation Notes
 
-The CPU implementation uses the Cooley-Tukey radix-2 decimation-in-time algorithm:
+- The CPU path uses radix-2 Cooley-Tukey FFT logic.
+- Real-input APIs are implemented as contract-first wrappers around the complex FFT path.
+- `createSpectrumAnalyzer()` and `createImageFilter()` are CPU-only utilities and remain outside the GPU FFT execution path.
 
-```ts
-// Pseudocode of the algorithm
-function recursiveFFT(complexArray, inverse) {
-  const N = complexArray.length;
-  if (N <= 1) return complexArray;
+## Performance Notes
 
-  // Divide
-  const even = recursiveFFT(complexArray.filter((_, i) => i % 2 === 0), inverse);
-  const odd = recursiveFFT(complexArray.filter((_, i) => i % 2 !== 0), inverse);
-
-  // Conquer
-  const result = new Array(N);
-  for (let k = 0; k < N / 2; k++) {
-    const twiddle = exp(-2πi * k / N) * (inverse ? -1 : 1);
-    const t = twiddle * odd[k];
-    result[k] = even[k] + t;
-    result[k + N / 2] = even[k] - t;
-  }
-  return result;
-}
-```
-
-## Performance Comparison
-
-| Size | GPU (ms) | CPU (ms) | Speedup |
-|------|----------|----------|---------|
-| 256 | 0.5 | 2 | 4x |
-| 1024 | 1 | 10 | 10x |
-| 4096 | 3 | 50 | 17x |
-| 16384 | 8 | 250 | 31x |
-
-*Measured on M1 Mac, Chrome 120*
-
-## When to Use CPU FFT
-
-The CPU fallback is useful for:
-- **Testing**: Running tests in Node.js without WebGPU
-- **Compatibility**: Supporting older browsers
-- **Small sizes**: For very small FFTs (< 256), CPU can be competitive
+Run `npm run benchmark` to collect measured CPU results in the current environment. WebGPU results are reported only when WebGPU is actually available during that run.
 
 ## Limitations
 
-- No 2D FFT support in CPU mode
-- Slower for large FFT sizes
-- No GPU-accelerated windowing functions
+- CPU execution is slower for large transforms than the GPU path on supported hardware.
+- Real-input CPU APIs are correctness-first wrappers, not dedicated optimized kernels.
 
 ## Related
 
-- [Architecture Overview](./overview) - High-level architecture
-- [GPU Engine](./gpu-engine) - GPU-accelerated implementation
+- [FFTEngine](../api/fft-engine) — GPU FFT engine
+- [Architecture Overview](./overview) — High-level architecture
