@@ -10,17 +10,18 @@ import {
   expandHermitianSpectrum2D,
   extractRealSignal,
   packRealInput,
-  validateFFT2DInput,
-  validateFFTInput,
+} from './real-fft-transform';
+import {
+  validateGPUFFT,
+  validateGPUFFT2D,
   validateRealFFT2DInput,
   validateRealFFTInput,
   validateRealIFFT2DInput,
   validateRealIFFTInput,
-} from '../utils/cpu-fft';
+} from './validation';
 import { BUTTERFLY_SHADER, BIT_REVERSAL_SHADER, SCALE_SHADER } from '../shaders/sources';
 
 const SUPPORTED_WORKGROUP_SIZE = 256;
-const MAX_GPU_FFT_SIZE = 65536;
 const PLAN_CACHE_CAPACITY = 4;
 const BIT_REVERSAL_PARAM_BUFFER_SIZE = 8;
 const BUTTERFLY_PARAM_BUFFER_SIZE = 16;
@@ -40,17 +41,6 @@ interface SizeCache {
   bitReversalParamsBuffer: GPUBuffer;
   stageParamBuffers: GPUBuffer[];
   scaleParamsBuffer: GPUBuffer;
-}
-
-function validateGPUFFTInput(input: Float32Array): number {
-  const n = validateFFTInput(input);
-  if (n > MAX_GPU_FFT_SIZE) {
-    throw new FFTError(
-      `Input size exceeds maximum of ${MAX_GPU_FFT_SIZE}, got ${n}`,
-      FFTErrorCode.INPUT_TOO_LARGE
-    );
-  }
-  return n;
 }
 
 function validateGPUWorkgroupSize(workgroupSize: number): void {
@@ -250,7 +240,7 @@ export class FFTEngine {
   private async transform(input: Float32Array, inverse: boolean): Promise<Float32Array> {
     this.assertUsable();
 
-    const n = validateGPUFFTInput(input);
+    const n = validateGPUFFT(input);
     const numStages = log2(n);
     const device = this.resourceManager.device;
     const cache = this.getBuffersForSize(n);
@@ -366,7 +356,7 @@ export class FFTEngine {
     inverse: boolean
   ): Promise<Float32Array> {
     this.assertUsable();
-    validateFFT2DInput(input, width, height);
+    validateGPUFFT2D(input, width, height);
 
     const data = new Float32Array(input);
     for (let row = 0; row < height; row++) {

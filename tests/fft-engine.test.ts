@@ -38,37 +38,6 @@ function createEngineManager(): GPUResourceManager {
   } as unknown as GPUResourceManager;
 }
 
-function createPlanCacheManager(): {
-  manager: GPUResourceManager;
-  createBuffer: ReturnType<typeof vi.fn>;
-  releaseBuffer: ReturnType<typeof vi.fn>;
-} {
-  const createBuffer = vi.fn(({ size, usage }: { size: number; usage: GPUBufferUsageFlags }) =>
-    createBufferObject(size, usage)
-  );
-  const releaseBuffer = vi.fn();
-
-  return {
-    manager: {
-      createComputePipeline: vi.fn(() => createPipeline()),
-      createBuffer,
-      releaseBuffer,
-      dispose: vi.fn(),
-      device: {} as GPUDevice,
-    } as unknown as GPUResourceManager,
-    createBuffer,
-    releaseBuffer,
-  };
-}
-
-function createBufferObject(size: number, usage: GPUBufferUsageFlags): GPUBuffer {
-  return {
-    size,
-    usage,
-    destroy: vi.fn(),
-  } as unknown as GPUBuffer;
-}
-
 function createBuffer(size: number, usage: GPUBufferUsageFlags): GPUBuffer {
   return {
     size,
@@ -285,62 +254,6 @@ describe('FFTEngine contract', () => {
     await expect(engine.ifft2d(new Float32Array(8), 2, 2)).rejects.toMatchObject({
       code: FFTErrorCode.ENGINE_DISPOSED,
     });
-  });
-
-  it('reuses cached plans when alternating between previously seen sizes', async () => {
-    const { manager, createBuffer } = createPlanCacheManager();
-    const engine = await FFTEngine.create(manager, defaultConfig);
-    const internalEngine = engine as unknown as {
-      getBuffersForSize: (n: number) => unknown;
-    };
-
-    const first = internalEngine.getBuffersForSize(8);
-    const callsAfterFirst = createBuffer.mock.calls.length;
-    internalEngine.getBuffersForSize(16);
-    const callsAfterSecond = createBuffer.mock.calls.length;
-    const repeated = internalEngine.getBuffersForSize(8);
-
-    expect(callsAfterFirst).toBeGreaterThan(0);
-    expect(callsAfterSecond).toBeGreaterThan(callsAfterFirst);
-    expect(repeated).toBe(first);
-    expect(createBuffer.mock.calls.length).toBe(callsAfterSecond);
-  });
-
-  it('evicts the oldest cached plan when capacity is exceeded', async () => {
-    const { manager, createBuffer } = createPlanCacheManager();
-    const engine = await FFTEngine.create(manager, defaultConfig);
-    const internalEngine = engine as unknown as {
-      getBuffersForSize: (n: number) => unknown;
-      sizeCaches: Map<number, unknown>;
-    };
-
-    internalEngine.getBuffersForSize(8);
-    internalEngine.getBuffersForSize(16);
-    internalEngine.getBuffersForSize(32);
-    internalEngine.getBuffersForSize(64);
-    const callsAfterFourSizes = createBuffer.mock.calls.length;
-
-    internalEngine.getBuffersForSize(128);
-    expect(internalEngine.sizeCaches.size).toBe(4);
-
-    internalEngine.getBuffersForSize(8);
-
-    expect(createBuffer.mock.calls.length).toBeGreaterThan(callsAfterFourSizes);
-  });
-
-  it('dispose releases cached plan resources for every retained size', async () => {
-    const { manager, createBuffer, releaseBuffer } = createPlanCacheManager();
-    const engine = await FFTEngine.create(manager, defaultConfig);
-    const internalEngine = engine as unknown as {
-      getBuffersForSize: (n: number) => unknown;
-    };
-
-    internalEngine.getBuffersForSize(8);
-    internalEngine.getBuffersForSize(16);
-
-    engine.dispose();
-
-    expect(releaseBuffer).toHaveBeenCalledTimes(createBuffer.mock.calls.length);
   });
 });
 

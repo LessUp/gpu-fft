@@ -1,7 +1,9 @@
 // Image Filter - Apply frequency-domain filters to images
 import type { ImageFilterConfig } from '../types';
-import { FFTError, FFTErrorCode } from '../core/errors';
-import { cpuFFT2D, cpuIFFT2D, validateFFT2DInput } from '../utils/cpu-fft';
+import type { FFTBackend } from '../core/backend';
+import { CPUFFTBackend } from '../core/cpu-backend';
+import { validateFFT2D } from '../core/validation';
+import { validateImageFilterConfig } from '../core/validation';
 
 const DEFAULT_BANDWIDTH = 0.1;
 const MIN_GAUSSIAN_SIGMA = 0.01;
@@ -10,66 +12,43 @@ const MIN_GAUSSIAN_SIGMA = 0.01;
  * Apply frequency-domain filters to images (lowpass, highpass, bandpass).
  *
  * @remarks
- * This is a CPU-only implementation and does not use GPU acceleration.
- * For GPU-accelerated FFT, use {@link FFTEngine} directly.
+ * 默认使用 CPU 后端。可通过构造函数注入自定义 FFTBackend，
+ * 例如 GPU 后端或测试用 mock。
  *
  * @example
  * ```typescript
+ * // 使用默认 CPU 后端
  * const filter = await createImageFilter({
  *   type: 'lowpass',
  *   shape: 'gaussian',
  *   cutoffFrequency: 0.3
  * });
- * const filtered = await filter.apply(imageData, 256, 256);
+ *
+ * // 注入自定义后端
+ * const gpuBackend = await createGPUFFTBackend();
+ * const filter = new ImageFilter(config, gpuBackend);
  * ```
  */
 export class ImageFilter {
   private config: ImageFilterConfig;
+  private backend: FFTBackend;
 
-  constructor(config: ImageFilterConfig) {
-    this.validateConfig(config);
+  constructor(config: ImageFilterConfig, backend?: FFTBackend) {
+    validateImageFilterConfig(config);
     this.config = {
       ...config,
       bandwidth: config.bandwidth ?? DEFAULT_BANDWIDTH,
     };
+    this.backend = backend ?? new CPUFFTBackend();
   }
 
   async apply(imageData: Float32Array, width: number, height: number): Promise<Float32Array> {
-    validateFFT2DInput(imageData, width, height);
+    validateFFT2D(imageData, width, height);
 
     // Step 1: FFT
-    const freqData = cpuFFT2D(imageData, width, height);
+    const freqData = await this.backend.fft2d(imageData, width, height);
 
     // Step 2: Apply filter mask in-place using wrapped frequency distance
-    this.applyFilterMask(freqData, width, height);
-
-    // Step 3: IFFT
-    return cpuIFFT2D(freqData, width, height);
-  }
-
-  private validateConfig(config: ImageFilterConfig): void {
-    if (
-      !Number.isFinite(config.cutoffFrequency) ||
-      config.cutoffFrequency < 0 ||
-      config.cutoffFrequency > 1
-    ) {
-      throw new FFTError(
-        `cutoffFrequency must be a finite number in [0, 1], got ${config.cutoffFrequency}`,
-        FFTErrorCode.INVALID_PARAMETER
-      );
-    }
-
-    if (config.bandwidth !== undefined) {
-      if (!Number.isFinite(config.bandwidth) || config.bandwidth <= 0 || config.bandwidth > 1) {
-        throw new FFTError(
-          `bandwidth must be a finite number in (0, 1], got ${config.bandwidth}`,
-          FFTErrorCode.INVALID_PARAMETER
-        );
-      }
-    }
-  }
-
-  private applyFilterMask(freqData: Float32Array, width: number, height: number): void {
     const cx = width / 2;
     const cy = height / 2;
     const maxDist = Math.sqrt(cx * cx + cy * cy);
@@ -90,6 +69,9 @@ export class ImageFilter {
         freqData[idx + 1] *= mask;
       }
     }
+
+    // Step 3: IFFT
+    return this.backend.ifft2d(freqData, width, height);
   }
 
   private getWrappedFrequencyDistance(
@@ -141,7 +123,7 @@ export class ImageFilter {
   }
 
   dispose(): void {
-    // No resources to clean up in CPU version
+    this.backend.dispose?.();
   }
 }
 

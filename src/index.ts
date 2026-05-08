@@ -39,7 +39,36 @@
 export { FFTEngine, createFFTEngine } from './core/fft-engine';
 export { GPUResourceManager } from './core/gpu-resource-manager';
 
-// CPU FFT implementations
+// FFT Backend 接口和实现
+export type { FFTBackend, RealFFTBackend } from './core/backend';
+export { CPUFFTBackend } from './core/cpu-backend';
+
+// Real FFT transform utilities
+export {
+  packRealInput,
+  extractRealSignal,
+  compressHermitianSpectrum,
+  expandHermitianSpectrum,
+  compressHermitianSpectrum2D,
+  expandHermitianSpectrum2D,
+} from './core/real-fft-transform';
+
+// Validation utilities
+export {
+  validateFFT,
+  validateFFT2D,
+  validateGPUFFT,
+  validateGPUFFT2D,
+  validateRealFFTInput,
+  validateRealIFFTInput,
+  validateRealFFT2DInput,
+  validateRealIFFT2DInput,
+  validateSpectrumAnalyzerConfig,
+  validateImageFilterConfig,
+  type ValidationOptions,
+} from './core/validation';
+
+// CPU FFT implementations (fallback for non-WebGPU environments)
 export {
   cpuFFT,
   cpuIFFT,
@@ -49,11 +78,10 @@ export {
   cpuIRFFT,
   cpuRFFT2D,
   cpuIRFFT2D,
-  validateFFTInput,
-  validateFFT2DInput,
 } from './utils/cpu-fft';
 
-// Application-level APIs
+// Application-level APIs (CPU-only implementations)
+// ⚠️ These APIs use CPU-based FFT only. For GPU acceleration, use FFTEngine.
 export { SpectrumAnalyzer, createSpectrumAnalyzer } from './apps/spectrum-analyzer';
 export { ImageFilter, createImageFilter } from './apps/image-filter';
 
@@ -103,10 +131,22 @@ export {
 // Types
 export type {
   Complex,
+  InterleavedComplex,
+  RealSignal,
+  HalfSpectrum,
   FFTEngineConfig,
   SpectrumAnalyzerConfig,
   FilterType,
   FilterShape,
   ImageFilterConfig,
   WindowType,
+} from './types';
+
+export {
+  isInterleavedComplex,
+  isRealSignal,
+  isHalfSpectrum,
+  asInterleavedComplex,
+  asRealSignal,
+  asHalfSpectrum,
 } from './types';

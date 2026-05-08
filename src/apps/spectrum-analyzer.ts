@@ -1,6 +1,7 @@
 // Spectrum Analyzer - Real-time audio frequency spectrum analysis
 import type { SpectrumAnalyzerConfig, WindowType } from '../types';
-import { cpuFFT } from '../utils/cpu-fft';
+import type { FFTBackend } from '../core/backend';
+import { CPUFFTBackend } from '../core/cpu-backend';
 import {
   hannWindow,
   hammingWindow,
@@ -8,7 +9,7 @@ import {
   flatTopWindow,
   rectangularWindow,
 } from '../utils/window-functions';
-import { isPowerOf2 } from '../utils/bit-reversal';
+import { validateSpectrumAnalyzerConfig } from '../core/validation';
 import { FFTError, FFTErrorCode } from '../core/errors';
 
 const DB_FLOOR = -100;
@@ -35,37 +36,32 @@ function getWindowFunction(type: WindowType): (size: number) => Float32Array {
  * Real-time audio frequency spectrum analyzer.
  *
  * @remarks
- * This is a CPU-only implementation and does not use GPU acceleration.
- * For GPU-accelerated FFT, use {@link FFTEngine} directly.
+ * 默认使用 CPU 后端。可通过构造函数注入自定义 FFTBackend，
+ * 例如 GPU 后端或测试用 mock。
  *
  * @example
  * ```typescript
+ * // 使用默认 CPU 后端
  * const analyzer = await createSpectrumAnalyzer({
  *   fftSize: 2048,
  *   sampleRate: 44100
  * });
- * const spectrum = await analyzer.analyze(audioData);
+ *
+ * // 注入自定义后端
+ * const gpuBackend = await createGPUFFTBackend();
+ * const analyzer = new SpectrumAnalyzer(config, gpuBackend);
  * ```
  */
 export class SpectrumAnalyzer {
   private config: SpectrumAnalyzerConfig;
   private window: Float32Array;
   private complexInput: Float32Array;
+  private backend: FFTBackend;
 
-  constructor(config: SpectrumAnalyzerConfig) {
-    if (!isPowerOf2(config.fftSize) || config.fftSize < 2) {
-      throw new FFTError(
-        `fftSize must be a power of 2 and at least 2, got ${config.fftSize}`,
-        FFTErrorCode.INVALID_INPUT_SIZE
-      );
-    }
-    if (!Number.isFinite(config.sampleRate) || config.sampleRate <= 0) {
-      throw new FFTError(
-        `sampleRate must be a finite number greater than 0, got ${config.sampleRate}`,
-        FFTErrorCode.INVALID_INPUT_SIZE
-      );
-    }
+  constructor(config: SpectrumAnalyzerConfig, backend?: FFTBackend) {
+    validateSpectrumAnalyzerConfig(config);
     this.config = { windowType: 'hann', ...config };
+    this.backend = backend ?? new CPUFFTBackend();
     const windowFn = getWindowFunction(this.config.windowType!);
     this.window = windowFn(config.fftSize);
     this.complexInput = new Float32Array(config.fftSize * 2);
@@ -86,7 +82,7 @@ export class SpectrumAnalyzer {
       this.complexInput[i * 2 + 1] = 0;
     }
 
-    const fftResult = cpuFFT(this.complexInput);
+    const fftResult = await this.backend.fft(this.complexInput);
     const numBins = Math.floor(fftSize / 2) + 1;
     const spectrum = new Float32Array(numBins);
 
@@ -123,7 +119,7 @@ export class SpectrumAnalyzer {
   }
 
   dispose(): void {
-    // No resources to clean up in CPU version
+    this.backend.dispose?.();
   }
 }
 

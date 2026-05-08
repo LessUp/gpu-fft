@@ -3,6 +3,156 @@
  * @module webgpu-fft/types
  */
 
+// ============================================================================
+// 格式类型安全（Branded Types）
+// ============================================================================
+
+/**
+ * 交错复数数组的格式标记
+ *
+ * 用于在编译时区分不同格式的 Float32Array，防止误用。
+ */
+declare const __interleaved_complex: unique symbol;
+
+/**
+ * 实信号数组的格式标记
+ */
+declare const __real_signal: unique symbol;
+
+/**
+ * 半频谱数组的格式标记（用于实输入 FFT）
+ */
+declare const __half_spectrum: unique symbol;
+
+/**
+ * 交错复数数组类型
+ *
+ * 格式：[real0, imag0, real1, imag1, ...]
+ * 长度：2N（N 为复数元素数量）
+ *
+ * 用于：
+ * - `fft()` / `ifft()` 的输入和输出
+ * - `fft2d()` / `ifft2d()` 的输入和输出
+ *
+ * @example
+ * ```typescript
+ * // 创建交错复数数组
+ * const input: InterleavedComplex = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]);
+ * const spectrum = fft(input);
+ * ```
+ */
+export type InterleavedComplex = Float32Array & { readonly [__interleaved_complex]: true };
+
+/**
+ * 实信号数组类型
+ *
+ * 格式：[sample0, sample1, sample2, ...]
+ * 长度：N（实数样本数量）
+ *
+ * 用于：
+ * - `rfft()` 的输入
+ * - `irfft()` 的输出
+ *
+ * @example
+ * ```typescript
+ * // 创建实信号数组
+ * const signal: RealSignal = new Float32Array([1, 2, 3, 4, 5, 6, 7, 8]);
+ * const spectrum = rfft(signal);
+ * ```
+ */
+export type RealSignal = Float32Array & { readonly [__real_signal]: true };
+
+/**
+ * 半频谱数组类型
+ *
+ * 格式：[real0, imag0, real1, imag1, ...]（N/2+1 个复数）
+ * 长度：2 * (N/2 + 1) = N + 2
+ *
+ * 用于：
+ * - `rfft()` 的输出
+ * - `irfft()` 的输入
+ *
+ * 利用 Hermitian 对称性，实信号 FFT 的后半部分频谱是前半部分的共轭，
+ * 因此只需存储前 N/2+1 个频率分量。
+ *
+ * @example
+ * ```typescript
+ * const signal: RealSignal = new Float32Array([1, 2, 3, 4, 5, 6, 7, 8]);
+ * const halfSpectrum: HalfSpectrum = rfft(signal);
+ * // halfSpectrum.length = 8 + 2 = 10 (5 个复数)
+ * ```
+ */
+export type HalfSpectrum = Float32Array & { readonly [__half_spectrum]: true };
+
+/**
+ * 类型守卫：检查是否为交错复数数组
+ *
+ * 注意：这是运行时检查，仅在启用调试模式时验证格式。
+ */
+export function isInterleavedComplex(value: Float32Array): value is InterleavedComplex {
+  return value.length % 2 === 0;
+}
+
+/**
+ * 类型守卫：检查是否为实信号数组
+ *
+ * 注意：无法在运行时区分 RealSignal 和普通 Float32Array，
+ * 此函数仅供类型系统使用。
+ */
+export function isRealSignal(_value: Float32Array): _value is RealSignal {
+  return true; // 运行时无法区分
+}
+
+/**
+ * 类型守卫：检查是否为半频谱数组
+ *
+ * 注意：无法在运行时区分 HalfSpectrum 和 InterleavedComplex，
+ * 此函数仅供类型系统使用。
+ */
+export function isHalfSpectrum(value: Float32Array): value is HalfSpectrum {
+  return value.length % 2 === 0;
+}
+
+/**
+ * 类型转换辅助函数：将 Float32Array 标记为 InterleavedComplex
+ *
+ * 用于外部数据源（如文件、网络）创建已知格式的数组。
+ *
+ * @example
+ * ```typescript
+ * const raw = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]);
+ * const interleaved = asInterleavedComplex(raw);
+ * const spectrum = fft(interleaved);
+ * ```
+ */
+export function asInterleavedComplex(array: Float32Array): InterleavedComplex {
+  if (array.length % 2 !== 0) {
+    throw new Error('InterleavedComplex must have even length');
+  }
+  return array as InterleavedComplex;
+}
+
+/**
+ * 类型转换辅助函数：将 Float32Array 标记为 RealSignal
+ */
+export function asRealSignal(array: Float32Array): RealSignal {
+  return array as RealSignal;
+}
+
+/**
+ * 类型转换辅助函数：将 Float32Array 标记为 HalfSpectrum
+ */
+export function asHalfSpectrum(array: Float32Array): HalfSpectrum {
+  if (array.length % 2 !== 0) {
+    throw new Error('HalfSpectrum must have even length');
+  }
+  return array as HalfSpectrum;
+}
+
+// ============================================================================
+// 配置类型
+// ============================================================================
+
 /**
  * Represents a complex number with real and imaginary parts.
  *
@@ -57,6 +207,10 @@ export interface FFTEngineConfig {
 
 /**
  * Configuration options for the spectrum analyzer.
+ *
+ * @remarks
+ * ⚠️ **CPU-Only Implementation**: This API uses CPU-based FFT only.
+ * For GPU-accelerated FFT, use {@link FFTEngine} directly.
  *
  * @example
  * ```typescript
@@ -129,6 +283,10 @@ export type FilterShape = 'ideal' | 'gaussian';
 
 /**
  * Configuration options for the image filter.
+ *
+ * @remarks
+ * ⚠️ **CPU-Only Implementation**: This API uses CPU-based FFT only.
+ * For GPU-accelerated FFT, use {@link FFTEngine} directly.
  *
  * @example
  * ```typescript

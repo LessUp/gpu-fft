@@ -8,6 +8,7 @@ This index tracks all architectural decisions and RFCs for the WebGPU FFT Librar
 |--------|-------|--------|
 | [0001](./0001-webgpu-fft-library-architecture.md) | WebGPU FFT Library Architecture | Accepted |
 | [0002](./0002-project-quality-enhancement-architecture.md) | Project Quality Enhancement Architecture | Accepted |
+| [0003](./0003-2d-fft-transpose-strategy.md) | 2D FFT Transpose Strategy | Accepted (Deferred Optimization) |
 
 ## RFC Process
 

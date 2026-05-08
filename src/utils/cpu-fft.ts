@@ -6,291 +6,35 @@
  * without WebGPU support or for testing purposes.
  */
 
-import { isPowerOf2, log2, bitReverse } from './bit-reversal';
-import { FFTError, FFTErrorCode } from '../core/errors';
+import { log2, bitReverse } from './bit-reversal';
 
-function validateRealValues(input: Float32Array, label: string): void {
-  if (input === null || input === undefined) {
-    throw new FFTError(`${label} cannot be null or undefined`, FFTErrorCode.INVALID_INPUT_SIZE);
-  }
+// 从集中式验证模块导入验证函数
+import {
+  validateFFT,
+  validateFFT2D,
+  validateRealFFTInput,
+  validateRealFFT2DInput,
+} from '../core/validation';
 
-  for (let i = 0; i < input.length; i++) {
-    if (!Number.isFinite(input[i])) {
-      throw new FFTError(
-        `${label} contains non-finite value (NaN or Infinity) at index ${i}`,
-        FFTErrorCode.INVALID_INPUT_SIZE
-      );
-    }
-  }
-}
+// 从实输入 FFT 变换模块导入辅助函数
+import {
+  packRealInput,
+  extractRealSignal,
+  compressHermitianSpectrum,
+  expandHermitianSpectrum,
+  compressHermitianSpectrum2D,
+  expandHermitianSpectrum2D,
+} from '../core/real-fft-transform';
 
-/**
- * Validate input for 1D FFT and return the size.
- *
- * @param input - Interleaved complex data [real, imag, real, imag, ...]
- * @returns Number of complex elements (input.length / 2)
- * @throws FFTError if input is invalid
- *
- * @example
- * ```typescript
- * const input = new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]);
- * const n = validateFFTInput(input); // n = 4
- * ```
- */
-export function validateFFTInput(input: Float32Array): number {
-  if (input === null || input === undefined) {
-    throw new FFTError('Input cannot be null or undefined', FFTErrorCode.INVALID_INPUT_SIZE);
-  }
-
-  if (input.length % 2 !== 0) {
-    throw new FFTError(
-      `Input must contain interleaved complex pairs, got length ${input.length}`,
-      FFTErrorCode.INVALID_INPUT_SIZE
-    );
-  }
-
-  const n = input.length / 2;
-  if (!isPowerOf2(n)) {
-    throw new FFTError(
-      `Input size must be a power of 2, got ${n}`,
-      FFTErrorCode.INVALID_INPUT_SIZE
-    );
-  }
-  if (n < 2) {
-    throw new FFTError(`Input size must be at least 2, got ${n}`, FFTErrorCode.INVALID_INPUT_SIZE);
-  }
-
-  // Check for NaN/Infinity values
-  for (let i = 0; i < input.length; i++) {
-    if (!Number.isFinite(input[i])) {
-      throw new FFTError(
-        `Input contains non-finite value (NaN or Infinity) at index ${i}`,
-        FFTErrorCode.INVALID_INPUT_SIZE
-      );
-    }
-  }
-
-  return n;
-}
-
-/**
- * Validate input for 2D FFT.
- *
- * @param input - Interleaved complex data
- * @param width - Width dimension (must be power of 2)
- * @param height - Height dimension (must be power of 2)
- * @throws FFTError if dimensions are invalid
- *
- * @example
- * ```typescript
- * const input = new Float32Array(16 * 16 * 2); // 16x16 complex matrix
- * validateFFT2DInput(input, 16, 16); // OK
- * ```
- */
-export function validateFFT2DInput(input: Float32Array, width: number, height: number): void {
-  if (input === null || input === undefined) {
-    throw new FFTError('Input cannot be null or undefined', FFTErrorCode.INVALID_INPUT_SIZE);
-  }
-
-  if (width <= 0 || height <= 0) {
-    throw new FFTError(
-      `2D FFT dimensions must be positive, got ${width}x${height}`,
-      FFTErrorCode.INVALID_INPUT_SIZE
-    );
-  }
-
-  if (!isPowerOf2(width) || !isPowerOf2(height)) {
-    throw new FFTError(
-      `2D FFT dimensions must be powers of 2, got ${width}x${height}`,
-      FFTErrorCode.INVALID_INPUT_SIZE
-    );
-  }
-
-  const expectedLength = width * height * 2;
-  if (input.length !== expectedLength) {
-    throw new FFTError(
-      `Input length ${input.length} does not match expected ${expectedLength} for ${width}x${height}`,
-      FFTErrorCode.DIMENSION_MISMATCH
-    );
-  }
-}
-
-export function validateRealFFTInput(input: Float32Array): number {
-  validateRealValues(input, 'Input');
-
-  const n = input.length;
-  if (!isPowerOf2(n)) {
-    throw new FFTError(
-      `Input size must be a power of 2, got ${n}`,
-      FFTErrorCode.INVALID_INPUT_SIZE
-    );
-  }
-  if (n < 2) {
-    throw new FFTError(`Input size must be at least 2, got ${n}`, FFTErrorCode.INVALID_INPUT_SIZE);
-  }
-
-  return n;
-}
-
-export function validateRealIFFTInput(input: Float32Array): number {
-  validateRealValues(input, 'Input');
-
-  if (input.length % 2 !== 0) {
-    throw new FFTError(
-      `Input must contain interleaved complex pairs, got length ${input.length}`,
-      FFTErrorCode.INVALID_INPUT_SIZE
-    );
-  }
-
-  const n = input.length - 2;
-  if (!isPowerOf2(n) || n < 2) {
-    throw new FFTError(
-      `Input half-spectrum does not map to a supported real signal length, got length ${input.length}`,
-      FFTErrorCode.INVALID_INPUT_SIZE
-    );
-  }
-
-  return n;
-}
-
-export function validateRealFFT2DInput(input: Float32Array, width: number, height: number): void {
-  validateRealValues(input, 'Input');
-
-  if (width <= 0 || height <= 0) {
-    throw new FFTError(
-      `2D FFT dimensions must be positive, got ${width}x${height}`,
-      FFTErrorCode.INVALID_INPUT_SIZE
-    );
-  }
-
-  if (!isPowerOf2(width) || !isPowerOf2(height)) {
-    throw new FFTError(
-      `2D FFT dimensions must be powers of 2, got ${width}x${height}`,
-      FFTErrorCode.INVALID_INPUT_SIZE
-    );
-  }
-
-  const expectedLength = width * height;
-  if (input.length !== expectedLength) {
-    throw new FFTError(
-      `Input length ${input.length} does not match expected ${expectedLength} for ${width}x${height}`,
-      FFTErrorCode.DIMENSION_MISMATCH
-    );
-  }
-}
-
-export function validateRealIFFT2DInput(input: Float32Array, width: number, height: number): void {
-  validateRealValues(input, 'Input');
-
-  if (width <= 0 || height <= 0) {
-    throw new FFTError(
-      `2D FFT dimensions must be positive, got ${width}x${height}`,
-      FFTErrorCode.INVALID_INPUT_SIZE
-    );
-  }
-
-  if (!isPowerOf2(width) || !isPowerOf2(height)) {
-    throw new FFTError(
-      `2D FFT dimensions must be powers of 2, got ${width}x${height}`,
-      FFTErrorCode.INVALID_INPUT_SIZE
-    );
-  }
-
-  const expectedLength = height * (width / 2 + 1) * 2;
-  if (input.length !== expectedLength) {
-    throw new FFTError(
-      `Input length ${input.length} does not match expected ${expectedLength} for compressed ${width}x${height} spectrum`,
-      FFTErrorCode.DIMENSION_MISMATCH
-    );
-  }
-}
-
-export function packRealInput(input: Float32Array): Float32Array {
-  const complex = new Float32Array(input.length * 2);
-  for (let i = 0; i < input.length; i++) {
-    complex[i * 2] = input[i];
-  }
-  return complex;
-}
-
-export function extractRealSignal(input: Float32Array): Float32Array {
-  const signal = new Float32Array(input.length / 2);
-  for (let i = 0; i < signal.length; i++) {
-    signal[i] = input[i * 2];
-  }
-  return signal;
-}
-
-export function compressHermitianSpectrum(input: Float32Array): Float32Array {
-  const n = validateFFTInput(input);
-  return input.slice(0, (n / 2 + 1) * 2);
-}
-
-export function expandHermitianSpectrum(input: Float32Array): Float32Array {
-  const n = validateRealIFFTInput(input);
-  const full = new Float32Array(n * 2);
-  const halfBins = n / 2 + 1;
-
-  full.set(input);
-
-  for (let k = 1; k < halfBins - 1; k++) {
-    const srcIdx = k * 2;
-    const dstIdx = (n - k) * 2;
-    full[dstIdx] = input[srcIdx];
-    full[dstIdx + 1] = -input[srcIdx + 1];
-  }
-
-  return full;
-}
-
-export function compressHermitianSpectrum2D(
-  input: Float32Array,
-  width: number,
-  height: number
-): Float32Array {
-  validateFFT2DInput(input, width, height);
-
-  const halfWidth = width / 2 + 1;
-  const compressed = new Float32Array(height * halfWidth * 2);
-
-  for (let row = 0; row < height; row++) {
-    const srcStart = row * width * 2;
-    const dstStart = row * halfWidth * 2;
-    compressed.set(input.subarray(srcStart, srcStart + halfWidth * 2), dstStart);
-  }
-
-  return compressed;
-}
-
-export function expandHermitianSpectrum2D(
-  input: Float32Array,
-  width: number,
-  height: number
-): Float32Array {
-  validateRealIFFT2DInput(input, width, height);
-
-  const halfWidth = width / 2 + 1;
-  const full = new Float32Array(width * height * 2);
-
-  for (let row = 0; row < height; row++) {
-    const srcStart = row * halfWidth * 2;
-    const dstStart = row * width * 2;
-    full.set(input.subarray(srcStart, srcStart + halfWidth * 2), dstStart);
-  }
-
-  for (let row = 0; row < height; row++) {
-    for (let col = halfWidth; col < width; col++) {
-      const mirrorRow = (height - row) % height;
-      const mirrorCol = width - col;
-      const srcIdx = (mirrorRow * halfWidth + mirrorCol) * 2;
-      const dstIdx = (row * width + col) * 2;
-      full[dstIdx] = input[srcIdx];
-      full[dstIdx + 1] = -input[srcIdx + 1];
-    }
-  }
-
-  return full;
-}
+// re-export 实输入 FFT 变换函数（从集中模块导入）
+export {
+  packRealInput,
+  extractRealSignal,
+  compressHermitianSpectrum,
+  expandHermitianSpectrum,
+  compressHermitianSpectrum2D,
+  expandHermitianSpectrum2D,
+};
 
 /**
  * Compute 1D FFT using Cooley-Tukey Radix-2 DIT algorithm.
@@ -329,7 +73,7 @@ export function expandHermitianSpectrum2D(
  * ```
  */
 export function cpuFFT(input: Float32Array): Float32Array {
-  const n = validateFFTInput(input);
+  const n = validateFFT(input);
   const bits = log2(n);
 
   // Copy input and perform bit-reversal permutation
@@ -395,7 +139,7 @@ export function cpuFFT(input: Float32Array): Float32Array {
  * ```
  */
 export function cpuIFFT(input: Float32Array): Float32Array {
-  const n = validateFFTInput(input);
+  const n = validateFFT(input);
   const bits = log2(n);
 
   // Copy input and perform bit-reversal permutation
@@ -454,7 +198,7 @@ function transform2D(
   height: number,
   transform: (input: Float32Array) => Float32Array
 ): Float32Array {
-  validateFFT2DInput(input, width, height);
+  validateFFT2D(input, width, height);
 
   const data = new Float32Array(input);
   const rowData = new Float32Array(width * 2);
