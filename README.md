@@ -65,13 +65,14 @@ const recovered = cpuIFFT(spectrum);
 ### Real-Valued FFT (RFFT / IRFFT)
 
 ```typescript
-import { createFFTEngine, cpuRFFT, cpuIRFFT } from 'webgpu-fft';
+import { createFFTEngine, createRealFFTBackend, CPUFFTBackend } from 'webgpu-fft';
 
 const realSignal = new Float32Array([0, 1, 0, -1, 0, 1, 0, -1]);
 
 // CPU path
-const cpuSpectrum = cpuRFFT(realSignal); // N / 2 + 1 complex bins
-const cpuRecovered = cpuIRFFT(cpuSpectrum);
+const cpuRealFFT = createRealFFTBackend(new CPUFFTBackend());
+const cpuSpectrum = cpuRealFFT.rfft(realSignal); // N / 2 + 1 complex bins
+const cpuRecovered = cpuRealFFT.irfft(cpuSpectrum);
 
 // GPU path
 const engine = await createFFTEngine();
@@ -164,6 +165,7 @@ filter.dispose();
 | API | Purpose |
 |-----|---------|
 | `cpuFFT()` / `cpuIFFT()` | CPU-based FFT fallback |
+| `createRealFFTBackend()` | Upgrade any complex FFT backend to the `RealFFTBackend` seam |
 | `cpuRFFT()` / `cpuIRFFT()` | CPU real-input FFT shortcuts |
 | `cpuRFFT2D()` / `cpuIRFFT2D()` | CPU 2D real-input FFT shortcuts |
 | `createSpectrumAnalyzer()` | Real-time audio analysis (CPU-only utility) |

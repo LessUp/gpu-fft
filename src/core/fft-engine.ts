@@ -1,24 +1,11 @@
 // FFT Engine - Core implementation using WebGPU compute shaders
 import type { FFTEngineConfig } from '../types';
+import type { RealFFTBackend } from './backend';
 import { GPUResourceManager } from './gpu-resource-manager';
 import { FFTError, FFTErrorCode } from './errors';
 import { log2 } from '../utils/bit-reversal';
-import {
-  compressHermitianSpectrum,
-  compressHermitianSpectrum2D,
-  expandHermitianSpectrum,
-  expandHermitianSpectrum2D,
-  extractRealSignal,
-  packRealInput,
-} from './real-fft-transform';
-import {
-  validateGPUFFT,
-  validateGPUFFT2D,
-  validateRealFFT2DInput,
-  validateRealFFTInput,
-  validateRealIFFT2DInput,
-  validateRealIFFTInput,
-} from './validation';
+import { createRealFFTBackend } from './real-fft-backend';
+import { validateGPUFFT, validateGPUFFT2D } from './validation';
 import { BUTTERFLY_SHADER, BIT_REVERSAL_SHADER, SCALE_SHADER } from '../shaders/sources';
 
 const SUPPORTED_WORKGROUP_SIZE = 256;
@@ -97,6 +84,7 @@ export class FFTEngine {
   private disposed = false;
   private readonly ownsResourceManager: boolean;
   private sizeCaches = new Map<number, SizeCache>();
+  private realFFTBackend!: RealFFTBackend;
 
   private constructor(
     resourceManager: GPUResourceManager,
@@ -144,6 +132,7 @@ export class FFTEngine {
       'bit_reversal_permutation'
     );
     this.scalePipeline = this.resourceManager.createComputePipeline(SCALE_SHADER, 'scale');
+    this.realFFTBackend = createRealFFTBackend(this);
     this.initialized = true;
   }
 
@@ -227,14 +216,12 @@ export class FFTEngine {
 
   async rfft(input: Float32Array): Promise<Float32Array> {
     this.assertUsable();
-    validateRealFFTInput(input);
-    return compressHermitianSpectrum(await this.fft(packRealInput(input)));
+    return this.realFFTBackend.rfft(input) as Promise<Float32Array>;
   }
 
   async irfft(input: Float32Array): Promise<Float32Array> {
     this.assertUsable();
-    validateRealIFFTInput(input);
-    return extractRealSignal(await this.ifft(expandHermitianSpectrum(input)));
+    return this.realFFTBackend.irfft(input) as Promise<Float32Array>;
   }
 
   private async transform(input: Float32Array, inverse: boolean): Promise<Float32Array> {
@@ -333,20 +320,12 @@ export class FFTEngine {
 
   async rfft2d(input: Float32Array, width: number, height: number): Promise<Float32Array> {
     this.assertUsable();
-    validateRealFFT2DInput(input, width, height);
-    return compressHermitianSpectrum2D(
-      await this.fft2d(packRealInput(input), width, height),
-      width,
-      height
-    );
+    return this.realFFTBackend.rfft2d(input, width, height) as Promise<Float32Array>;
   }
 
   async irfft2d(input: Float32Array, width: number, height: number): Promise<Float32Array> {
     this.assertUsable();
-    validateRealIFFT2DInput(input, width, height);
-    return extractRealSignal(
-      await this.ifft2d(expandHermitianSpectrum2D(input, width, height), width, height)
-    );
+    return this.realFFTBackend.irfft2d(input, width, height) as Promise<Float32Array>;
   }
 
   private async transform2d(

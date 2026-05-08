@@ -6,17 +6,8 @@
  * 作为 FFTBackend 接口的 CPU 适配器。
  */
 
-import type { RealFFTBackend } from './backend';
-import {
-  cpuFFT,
-  cpuIFFT,
-  cpuFFT2D,
-  cpuIFFT2D,
-  cpuRFFT,
-  cpuIRFFT,
-  cpuRFFT2D,
-  cpuIRFFT2D,
-} from '../utils/cpu-fft';
+import type { FFTBackend } from './backend';
+import { cpuFFT, cpuIFFT, cpuFFT2D, cpuIFFT2D } from '../utils/cpu-fft';
 
 /**
  * CPU FFT 后端
@@ -32,7 +23,7 @@ import {
  * const spectrum = backend.fft(input);
  * ```
  */
-export class CPUFFTBackend implements RealFFTBackend {
+export class CPUFFTBackend implements FFTBackend {
   fft(input: Float32Array): Float32Array {
     return cpuFFT(input);
   }
@@ -47,22 +38,6 @@ export class CPUFFTBackend implements RealFFTBackend {
 
   ifft2d(input: Float32Array, width: number, height: number): Float32Array {
     return cpuIFFT2D(input, width, height);
-  }
-
-  rfft(input: Float32Array): Float32Array {
-    return cpuRFFT(input);
-  }
-
-  irfft(input: Float32Array): Float32Array {
-    return cpuIRFFT(input);
-  }
-
-  rfft2d(input: Float32Array, width: number, height: number): Float32Array {
-    return cpuRFFT2D(input, width, height);
-  }
-
-  irfft2d(input: Float32Array, width: number, height: number): Float32Array {
-    return cpuIRFFT2D(input, width, height);
   }
 
   /**

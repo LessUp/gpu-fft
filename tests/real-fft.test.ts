@@ -4,10 +4,42 @@ import { FFTEngine } from '../src/core/fft-engine';
 import * as api from '../src/index';
 
 type RealApiModule = typeof api & {
+  createRealFFTBackend?: (backend: {
+    fft: (input: Float32Array) => Float32Array | Promise<Float32Array>;
+    ifft: (input: Float32Array) => Float32Array | Promise<Float32Array>;
+    fft2d: (
+      input: Float32Array,
+      width: number,
+      height: number
+    ) => Float32Array | Promise<Float32Array>;
+    ifft2d: (
+      input: Float32Array,
+      width: number,
+      height: number
+    ) => Float32Array | Promise<Float32Array>;
+  }) => {
+    rfft: (input: Float32Array) => Float32Array | Promise<Float32Array>;
+    irfft: (input: Float32Array) => Float32Array | Promise<Float32Array>;
+    rfft2d: (
+      input: Float32Array,
+      width: number,
+      height: number
+    ) => Float32Array | Promise<Float32Array>;
+    irfft2d: (
+      input: Float32Array,
+      width: number,
+      height: number
+    ) => Float32Array | Promise<Float32Array>;
+  };
   cpuRFFT?: (input: Float32Array) => Float32Array;
   cpuIRFFT?: (input: Float32Array) => Float32Array;
   cpuRFFT2D?: (input: Float32Array, width: number, height: number) => Float32Array;
   cpuIRFFT2D?: (input: Float32Array, width: number, height: number) => Float32Array;
+  packRealInput?: unknown;
+  compressHermitianSpectrum?: unknown;
+  expandHermitianSpectrum?: unknown;
+  compressHermitianSpectrum2D?: unknown;
+  expandHermitianSpectrum2D?: unknown;
 };
 
 function createSignal(length: number): Float32Array {
@@ -19,6 +51,38 @@ function createSignal(length: number): Float32Array {
 }
 
 describe('real-input FFT APIs', () => {
+  it('exposes a real FFT backend factory and hides Hermitian helpers from the root API', () => {
+    const realApi = api as RealApiModule;
+
+    expect(typeof realApi.createRealFFTBackend).toBe('function');
+    expect(realApi.packRealInput).toBeUndefined();
+    expect(realApi.compressHermitianSpectrum).toBeUndefined();
+    expect(realApi.expandHermitianSpectrum).toBeUndefined();
+    expect(realApi.compressHermitianSpectrum2D).toBeUndefined();
+    expect(realApi.expandHermitianSpectrum2D).toBeUndefined();
+  });
+
+  it('createRealFFTBackend upgrades a complex backend into a real-input seam', async () => {
+    const realApi = api as RealApiModule;
+    const fft = vi.fn(async () => new Float32Array([10, 0, 2, -3, 4, 5, 2, 3]));
+    const ifft = vi.fn(async () => new Float32Array([1, 0, 2, 1e-7, 3, -1e-7, 4, 0]));
+    const backend = {
+      fft,
+      ifft,
+      fft2d: vi.fn(async () => new Float32Array(0)),
+      ifft2d: vi.fn(async () => new Float32Array(0)),
+    };
+
+    expect(typeof realApi.createRealFFTBackend).toBe('function');
+
+    const realBackend = realApi.createRealFFTBackend!(backend);
+    const spectrum = await realBackend.rfft(new Float32Array([1, 2, 3, 4]));
+    const recovered = await realBackend.irfft(new Float32Array([10, 0, 2, -3, 4, 0]));
+
+    expect(spectrum).toEqual(new Float32Array([10, 0, 2, -3, 4, 5]));
+    expect(recovered).toEqual(new Float32Array([1, 2, 3, 4]));
+  });
+
   it('cpuRFFT returns a half-spectrum for a 1D real signal', () => {
     const { cpuRFFT } = api as RealApiModule;
     const signal = createSignal(8);
@@ -82,15 +146,20 @@ describe('real-input FFT APIs', () => {
 });
 
 describe('FFTEngine real-input wrappers', () => {
-  it('rfft packs real input into complex pairs and returns a half-spectrum', async () => {
-    const fft = vi.fn(async () => new Float32Array([10, 0, 2, -3, 4, 5, 2, 3]));
+  it('rfft delegates through the real FFT backend seam', async () => {
+    const realFFTBackend = {
+      rfft: vi.fn(async () => new Float32Array([10, 0, 2, -3, 4, 5])),
+      irfft: vi.fn(async () => new Float32Array([1, 2, 3, 4])),
+      rfft2d: vi.fn(async () => new Float32Array(0)),
+      irfft2d: vi.fn(async () => new Float32Array(0)),
+    };
     const engine = Object.assign(Object.create(FFTEngine.prototype), {
       initialized: true,
       disposed: false,
-      fft,
+      realFFTBackend,
     }) as FFTEngine & {
       rfft?: (input: Float32Array) => Promise<Float32Array>;
-      fft: typeof fft;
+      realFFTBackend: typeof realFFTBackend;
     };
 
     expect(typeof engine.rfft).toBe('function');
@@ -98,19 +167,24 @@ describe('FFTEngine real-input wrappers', () => {
     const signal = new Float32Array([1, 2, 3, 4]);
     const spectrum = await engine.rfft!(signal);
 
-    expect(fft).toHaveBeenCalledWith(new Float32Array([1, 0, 2, 0, 3, 0, 4, 0]));
+    expect(realFFTBackend.rfft).toHaveBeenCalledWith(signal);
     expect(spectrum).toEqual(new Float32Array([10, 0, 2, -3, 4, 5]));
   });
 
-  it('irfft reconstructs the mirrored spectrum and returns real samples only', async () => {
-    const ifft = vi.fn(async () => new Float32Array([1, 0, 2, 1e-7, 3, -1e-7, 4, 0]));
+  it('irfft delegates through the real FFT backend seam', async () => {
+    const realFFTBackend = {
+      rfft: vi.fn(async () => new Float32Array([10, 0, 2, -3, 4, 5])),
+      irfft: vi.fn(async () => new Float32Array([1, 2, 3, 4])),
+      rfft2d: vi.fn(async () => new Float32Array(0)),
+      irfft2d: vi.fn(async () => new Float32Array(0)),
+    };
     const engine = Object.assign(Object.create(FFTEngine.prototype), {
       initialized: true,
       disposed: false,
-      ifft,
+      realFFTBackend,
     }) as FFTEngine & {
       irfft?: (input: Float32Array) => Promise<Float32Array>;
-      ifft: typeof ifft;
+      realFFTBackend: typeof realFFTBackend;
     };
 
     expect(typeof engine.irfft).toBe('function');
@@ -118,7 +192,7 @@ describe('FFTEngine real-input wrappers', () => {
     const spectrum = new Float32Array([10, 0, 2, -3, 4, 0]);
     const signal = await engine.irfft!(spectrum);
 
-    expect(ifft).toHaveBeenCalledWith(new Float32Array([10, 0, 2, -3, 4, 0, 2, 3]));
+    expect(realFFTBackend.irfft).toHaveBeenCalledWith(spectrum);
     expect(signal).toEqual(new Float32Array([1, 2, 3, 4]));
   });
 });

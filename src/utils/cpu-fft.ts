@@ -26,16 +26,6 @@ import {
   expandHermitianSpectrum2D,
 } from '../core/real-fft-transform';
 
-// re-export 实输入 FFT 变换函数（从集中模块导入）
-export {
-  packRealInput,
-  extractRealSignal,
-  compressHermitianSpectrum,
-  expandHermitianSpectrum,
-  compressHermitianSpectrum2D,
-  expandHermitianSpectrum2D,
-};
-
 /**
  * Compute 1D FFT using Cooley-Tukey Radix-2 DIT algorithm.
  *

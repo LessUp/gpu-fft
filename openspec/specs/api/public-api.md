@@ -51,6 +51,16 @@ function cpuRFFT2D(input: Float32Array, width: number, height: number): Float32A
 function cpuIRFFT2D(input: Float32Array, width: number, height: number): Float32Array;
 ```
 
+## Real-input backend seam
+
+```typescript
+function createRealFFTBackend(backend: FFTBackend): RealFFTBackend;
+```
+
+- Promotes a complex FFT backend to the `RealFFTBackend` seam
+- Encapsulates Hermitian packing and expansion as implementation details
+- Preserves the backend's synchronous or asynchronous execution model
+
 ## Validation Helpers
 
 ```typescript

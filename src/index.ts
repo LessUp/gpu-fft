@@ -42,16 +42,7 @@ export { GPUResourceManager } from './core/gpu-resource-manager';
 // FFT Backend 接口和实现
 export type { FFTBackend, RealFFTBackend } from './core/backend';
 export { CPUFFTBackend } from './core/cpu-backend';
-
-// Real FFT transform utilities
-export {
-  packRealInput,
-  extractRealSignal,
-  compressHermitianSpectrum,
-  expandHermitianSpectrum,
-  compressHermitianSpectrum2D,
-  expandHermitianSpectrum2D,
-} from './core/real-fft-transform';
+export { createRealFFTBackend } from './core/real-fft-backend';
 
 // Validation utilities
 export {
