@@ -9,11 +9,11 @@
  * - Amplitude accuracy
  */
 
-function validateWindowSize(size: number): void {
-  if (!Number.isInteger(size) || size < 1) {
-    throw new RangeError('Window size must be a positive integer');
-  }
-}
+import {
+  validateWindowSize,
+  validateWindowMatch,
+  validateWindowMatchComplex,
+} from '../core/validation';
 
 function createWindow(size: number): Float32Array {
   validateWindowSize(size);
@@ -175,9 +175,7 @@ export function rectangularWindow(size: number): Float32Array {
  * ```
  */
 export function applyWindow(signal: Float32Array, window: Float32Array): Float32Array {
-  if (signal.length !== window.length) {
-    throw new RangeError('Signal and window must have the same length');
-  }
+  validateWindowMatch(signal.length, window.length);
   const result = new Float32Array(signal.length);
   for (let i = 0; i < signal.length; i++) {
     result[i] = signal[i] * window[i];
@@ -202,12 +200,7 @@ export function applyWindow(signal: Float32Array, window: Float32Array): Float32
  * ```
  */
 export function applyWindowComplex(signal: Float32Array, window: Float32Array): Float32Array {
-  if (signal.length % 2 !== 0) {
-    throw new RangeError('Complex signal must use interleaved real/imaginary pairs');
-  }
-  if (signal.length / 2 !== window.length) {
-    throw new RangeError('Window length must match the number of complex samples');
-  }
+  validateWindowMatchComplex(signal.length, window.length);
   const result = new Float32Array(signal.length);
   const n = window.length;
   for (let i = 0; i < n; i++) {

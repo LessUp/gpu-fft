@@ -1,7 +1,7 @@
 // Image Filter - Apply frequency-domain filters to images
 import type { ImageFilterConfig } from '../types';
 import type { FFTBackend } from '../core/backend';
-import { CPUFFTBackend } from '../core/cpu-backend';
+import { CPUFFTBackend } from '../utils/cpu-fft';
 import { validateFFT2D } from '../core/validation';
 import { validateImageFilterConfig } from '../core/validation';
 

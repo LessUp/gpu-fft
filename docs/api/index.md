@@ -4,32 +4,72 @@ Complete reference for the public APIs exported by `webgpu-fft`.
 
 > These API pages are maintained source documentation inside `docs/`. Built site output under `docs/.vitepress/dist` is generated and is not the documentation source of truth.
 
-## Core APIs
+## Package Exports
+
+The library provides three entry points:
+
+| Entry | Description |
+|-------|-------------|
+| `webgpu-fft` | Core FFT APIs (engines, CPU fallback, types, errors) |
+| `webgpu-fft/utils` | Utility functions (complex, bit-reversal, windows) |
+| `webgpu-fft/validation` | Validation helpers |
+
+## Core APIs (`webgpu-fft`)
 
 | API | Description |
 |-----|-------------|
 | [`FFTEngine`](./fft-engine) | Main GPU-accelerated FFT engine with complex and real-input APIs |
 | [`cpuFFT`](./cpu-fft) | CPU complex FFT fallback plus real-input helpers |
+| `SpectrumAnalyzer` | CPU-based real-time audio frequency analysis |
+| `ImageFilter` | CPU-based frequency-domain image filtering |
 
-## Application APIs
+### GPU Detection
 
-| API | Description |
-|-----|-------------|
-| [`SpectrumAnalyzer`](./spectrum-analyzer) | CPU-based real-time audio frequency analysis |
-| [`ImageFilter`](./image-filter) | CPU-based frequency-domain image filtering |
+```ts
+import { isWebGPUAvailable, hasWebGPUSupport } from 'webgpu-fft';
 
-## Utilities
+// Async full check (verifies adapter can be obtained)
+if (await isWebGPUAvailable()) {
+  const engine = await createFFTEngine();
+}
+
+// Sync basic check (only checks navigator.gpu existence)
+if (hasWebGPUSupport()) {
+  console.log('WebGPU API detected');
+}
+```
+
+## Utilities (`webgpu-fft/utils`)
+
+```ts
+import {
+  // Complex operations
+  complexAdd, complexMul, complexMagnitude, complexConj,
+  // Bit-reversal
+  bitReverse, log2, isPowerOf2, bitReversalPermutation,
+  // Window functions
+  hannWindow, hammingWindow, blackmanWindow, applyWindow
+} from 'webgpu-fft/utils';
+```
 
 | API | Description |
 |-----|-------------|
 | [`Window Functions`](./window-functions) | Hann, Hamming, Blackman, Flat Top, and Rectangular windows |
 | [`Complex Numbers`](./complex) | Complex arithmetic helpers |
-| [`GPU Detection`](./gpu-detect) | WebGPU availability checks |
 | [`Bit Reversal`](./bit-reversal) | Bit-reversal permutation utilities |
+
+## Validation (`webgpu-fft/validation`)
+
+```ts
+import {
+  validateFFT, validateFFT2D,
+  validateRealFFTInput, validateRealIFFTInput
+} from 'webgpu-fft/validation';
+```
 
 ## Types
 
-All TypeScript types are exported for use in your applications:
+All TypeScript types are exported from the main entry:
 
 ```ts
 import type {

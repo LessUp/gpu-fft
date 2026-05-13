@@ -3,6 +3,8 @@
  * @module webgpu-fft/bit-reversal
  */
 
+import { validateInterleavedPowerOf2 } from '../core/validation';
+
 /**
  * Compute the bit-reversed index of a number.
  *
@@ -77,21 +79,6 @@ export function log2(n: number): number {
  */
 export function isPowerOf2(n: number): boolean {
   return n > 0 && (n & (n - 1)) === 0;
-}
-
-function validateInterleavedPowerOf2(data: Float32Array): number {
-  if (data.length % 2 !== 0) {
-    throw new RangeError('Bit-reversal input must use interleaved real/imaginary pairs');
-  }
-
-  const n = data.length / 2;
-  if (!isPowerOf2(n)) {
-    throw new RangeError(
-      'Bit-reversal input must contain a power-of-two number of complex samples'
-    );
-  }
-
-  return n;
 }
 
 /**

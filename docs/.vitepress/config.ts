@@ -3,8 +3,7 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
   title: 'WebGPU FFT',
   titleTemplate: ':title | WebGPU FFT Library',
-  description:
-    'WebGPU FFT core with CPU utilities for JavaScript and TypeScript signal processing',
+  description: 'WebGPU FFT core with CPU utilities for JavaScript and TypeScript signal processing',
 
   head: [
     ['meta', { name: 'theme-color', content: '#4f46e5' }],
@@ -172,7 +171,6 @@ export default defineConfig({
             { text: 'Image Filter', link: '/api/image-filter' },
             { text: 'Window Functions', link: '/api/window-functions' },
             { text: 'Complex Numbers', link: '/api/complex' },
-            { text: 'GPU Detection', link: '/api/gpu-detect' },
             { text: 'Bit Reversal', link: '/api/bit-reversal' },
           ],
         },

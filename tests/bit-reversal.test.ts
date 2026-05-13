@@ -9,6 +9,7 @@ import {
   bitReversalPermutation,
   bitReversalPermutationInPlace,
 } from '../src/utils/bit-reversal';
+import { FFTError } from '../src/core/errors';
 
 describe('Bit-Reversal Operations', () => {
   // Property 3: Bit-Reversal Round-Trip
@@ -160,19 +161,17 @@ describe('Bit-Reversal Operations', () => {
     });
 
     it('rejects arrays with an odd interleaved length', () => {
-      expect(() => bitReversalPermutation(new Float32Array([0, 0, 1]))).toThrow(RangeError);
+      expect(() => bitReversalPermutation(new Float32Array([0, 0, 1]))).toThrow(FFTError);
     });
 
     it('rejects arrays whose complex element count is not a power of 2', () => {
-      expect(() => bitReversalPermutation(new Float32Array([0, 0, 1, 0, 2, 0]))).toThrow(
-        RangeError
-      );
+      expect(() => bitReversalPermutation(new Float32Array([0, 0, 1, 0, 2, 0]))).toThrow(FFTError);
     });
 
     it('rejects invalid input for in-place permutation before mutating', () => {
       const data = new Float32Array([0, 0, 1, 0, 2, 0]);
 
-      expect(() => bitReversalPermutationInPlace(data)).toThrow(RangeError);
+      expect(() => bitReversalPermutationInPlace(data)).toThrow(FFTError);
       expect(data).toEqual(new Float32Array([0, 0, 1, 0, 2, 0]));
     });
   });

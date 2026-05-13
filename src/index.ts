@@ -37,29 +37,12 @@
 
 // Core GPU engine
 export { FFTEngine, createFFTEngine } from './core/fft-engine';
-export { GPUResourceManager } from './core/gpu-resource-manager';
 
-// FFT Backend 接口和实现
+// FFT Backend interfaces
 export type { FFTBackend, RealFFTBackend } from './core/backend';
-export { CPUFFTBackend } from './core/cpu-backend';
 export { createRealFFTBackend } from './core/real-fft-backend';
 
-// Validation utilities
-export {
-  validateFFT,
-  validateFFT2D,
-  validateGPUFFT,
-  validateGPUFFT2D,
-  validateRealFFTInput,
-  validateRealIFFTInput,
-  validateRealFFT2DInput,
-  validateRealIFFT2DInput,
-  validateSpectrumAnalyzerConfig,
-  validateImageFilterConfig,
-  type ValidationOptions,
-} from './core/validation';
-
-// CPU FFT implementations (fallback for non-WebGPU environments)
+// CPU FFT implementations
 export {
   cpuFFT,
   cpuIFFT,
@@ -69,10 +52,10 @@ export {
   cpuIRFFT,
   cpuRFFT2D,
   cpuIRFFT2D,
+  CPUFFTBackend,
 } from './utils/cpu-fft';
 
-// Application-level APIs (CPU-only implementations)
-// ⚠️ These APIs use CPU-based FFT only. For GPU acceleration, use FFTEngine.
+// Application APIs (CPU-only)
 export { SpectrumAnalyzer, createSpectrumAnalyzer } from './apps/spectrum-analyzer';
 export { ImageFilter, createImageFilter } from './apps/image-filter';
 
@@ -80,46 +63,23 @@ export { ImageFilter, createImageFilter } from './apps/image-filter';
 export { FFTError, FFTErrorCode } from './core/errors';
 
 // GPU detection
-export { isWebGPUAvailable, hasWebGPUSupport } from './utils/gpu-detect';
+export async function isWebGPUAvailable(): Promise<boolean> {
+  if (typeof navigator === 'undefined' || !navigator.gpu) {
+    return false;
+  }
+  try {
+    const adapter = await navigator.gpu.requestAdapter();
+    return adapter !== null;
+  } catch {
+    return false;
+  }
+}
 
-// Complex number utilities
-export {
-  complexAdd,
-  complexSub,
-  complexMul,
-  complexMagnitude,
-  complexConj,
-  complexScale,
-  twiddleFactor,
-  twiddleFactorInverse,
-  interleavedToComplex,
-  complexToInterleaved,
-  complexApproxEqual,
-  naiveDFT,
-  naiveIDFT,
-} from './utils/complex';
+export function hasWebGPUSupport(): boolean {
+  return typeof navigator !== 'undefined' && !!navigator.gpu;
+}
 
-// Bit-reversal utilities
-export {
-  bitReverse,
-  log2,
-  isPowerOf2,
-  bitReversalPermutation,
-  bitReversalPermutationInPlace,
-} from './utils/bit-reversal';
-
-// Window functions
-export {
-  hannWindow,
-  hammingWindow,
-  blackmanWindow,
-  flatTopWindow,
-  rectangularWindow,
-  applyWindow,
-  applyWindowComplex,
-} from './utils/window-functions';
-
-// Types
+// Core types
 export type {
   Complex,
   InterleavedComplex,

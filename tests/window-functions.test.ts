@@ -9,6 +9,7 @@ import {
   applyWindow,
   applyWindowComplex,
 } from '../src/utils/window-functions';
+import { FFTError } from '../src/core/errors';
 
 describe('Window Functions', () => {
   describe('Hann Window', () => {
@@ -120,8 +121,8 @@ describe('Window Functions', () => {
 
   describe('Rectangular Window', () => {
     it('rejects invalid window sizes', () => {
-      expect(() => rectangularWindow(0)).toThrow(RangeError);
-      expect(() => rectangularWindow(1.5)).toThrow(RangeError);
+      expect(() => rectangularWindow(0)).toThrow(FFTError);
+      expect(() => rectangularWindow(1.5)).toThrow(FFTError);
     });
 
     it('all values are 1', () => {
@@ -134,9 +135,7 @@ describe('Window Functions', () => {
 
   describe('applyWindow', () => {
     it('rejects signal and window length mismatches', () => {
-      expect(() => applyWindow(new Float32Array([1, 2]), new Float32Array([1]))).toThrow(
-        RangeError
-      );
+      expect(() => applyWindow(new Float32Array([1, 2]), new Float32Array([1]))).toThrow(FFTError);
     });
 
     it('multiplies signal by window element-wise', () => {
@@ -153,14 +152,14 @@ describe('Window Functions', () => {
   describe('applyWindowComplex', () => {
     it('rejects non-interleaved complex data', () => {
       expect(() => applyWindowComplex(new Float32Array([1, 2, 3]), new Float32Array([1]))).toThrow(
-        RangeError
+        FFTError
       );
     });
 
     it('rejects complex signal and window length mismatches', () => {
       expect(() =>
         applyWindowComplex(new Float32Array([1, 2, 3, 4]), new Float32Array([1]))
-      ).toThrow(RangeError);
+      ).toThrow(FFTError);
     });
 
     it('applies window to interleaved complex signal', () => {

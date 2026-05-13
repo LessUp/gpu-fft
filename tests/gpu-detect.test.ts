@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { hasWebGPUSupport, isWebGPUAvailable } from '../src/utils/gpu-detect';
+import { hasWebGPUSupport, isWebGPUAvailable } from '../src/index';
 
 const originalNavigator = globalThis.navigator;
 

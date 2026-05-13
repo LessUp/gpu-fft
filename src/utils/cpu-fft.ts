@@ -7,16 +7,7 @@
  */
 
 import { log2, bitReverse } from './bit-reversal';
-
-// 从集中式验证模块导入验证函数
-import {
-  validateFFT,
-  validateFFT2D,
-  validateRealFFTInput,
-  validateRealFFT2DInput,
-} from '../core/validation';
-
-// 从实输入 FFT 变换模块导入辅助函数
+import { validateFFT, validateFFT2D } from '../core/validation';
 import {
   packRealInput,
   extractRealSignal,
@@ -24,7 +15,8 @@ import {
   expandHermitianSpectrum,
   compressHermitianSpectrum2D,
   expandHermitianSpectrum2D,
-} from '../core/real-fft-transform';
+} from '../core/hermitian';
+import type { FFTBackend } from '../core/backend';
 
 /**
  * Compute 1D FFT using Cooley-Tukey Radix-2 DIT algorithm.
@@ -255,22 +247,117 @@ export function cpuIFFT2D(input: Float32Array, width: number, height: number): F
   return transform2D(input, width, height, cpuIFFT);
 }
 
+// ============================================================================
+// Real FFT (同步版本)
+// ============================================================================
+
+/**
+ * 计算实输入 FFT（同步）
+ *
+ * 输入为实数数组，输出为压缩的半频谱（N/2+1 个复数）。
+ * 利用 Hermitian 对称性减少计算量和存储空间。
+ *
+ * @param input - 实数值数组（长度必须为 2 的幂）
+ * @returns 压缩的半频谱（交错复数格式）
+ * @throws FFTError 如果输入无效
+ *
+ * @example
+ * ```typescript
+ * const signal = new Float32Array([1, 2, 3, 4, 5, 6, 7, 8]);
+ * const spectrum = cpuRFFT(signal);
+ * // spectrum.length = (8/2 + 1) * 2 = 10 (5 个复数)
+ * ```
+ */
 export function cpuRFFT(input: Float32Array): Float32Array {
-  validateRealFFTInput(input);
   return compressHermitianSpectrum(cpuFFT(packRealInput(input)));
 }
 
+/**
+ * 计算实输入逆 FFT（同步）
+ *
+ * 从压缩的半频谱恢复实信号。
+ *
+ * @param input - 压缩的半频谱（N/2+1 个复数的交错格式）
+ * @returns 实数值数组
+ * @throws FFTError 如果输入无效
+ *
+ * @example
+ * ```typescript
+ * const signal = new Float32Array([1, 2, 3, 4, 5, 6, 7, 8]);
+ * const spectrum = cpuRFFT(signal);
+ * const recovered = cpuIRFFT(spectrum);
+ * // recovered ≈ signal
+ * ```
+ */
 export function cpuIRFFT(input: Float32Array): Float32Array {
   return extractRealSignal(cpuIFFT(expandHermitianSpectrum(input)));
 }
 
+/**
+ * 计算二维实输入 FFT（同步）
+ *
+ * @param input - 实数值二维数组（行优先，长度 = width × height）
+ * @param width - 列数（必须为 2 的幂）
+ * @param height - 行数（必须为 2 的幂）
+ * @returns 压缩的 2D 半频谱
+ * @throws FFTError 如果输入或维度无效
+ */
 export function cpuRFFT2D(input: Float32Array, width: number, height: number): Float32Array {
-  validateRealFFT2DInput(input, width, height);
   return compressHermitianSpectrum2D(cpuFFT2D(packRealInput(input), width, height), width, height);
 }
 
+/**
+ * 计算二维实输入逆 FFT（同步）
+ *
+ * @param input - 压缩的 2D 半频谱
+ * @param width - 原始实信号宽度
+ * @param height - 原始实信号高度
+ * @returns 实数值二维数组（行优先）
+ * @throws FFTError 如果输入或维度无效
+ */
 export function cpuIRFFT2D(input: Float32Array, width: number, height: number): Float32Array {
   return extractRealSignal(
     cpuIFFT2D(expandHermitianSpectrum2D(input, width, height), width, height)
   );
+}
+
+// ============================================================================
+// FFTBackend Adapter
+// ============================================================================
+
+/**
+ * CPU FFT Backend adapter
+ *
+ * Wraps the CPU FFT functions in the FFTBackend interface for
+ * use in environments without WebGPU support or for testing.
+ *
+ * @example
+ * ```typescript
+ * const backend = new CPUFFTBackend();
+ * const spectrum = await backend.fft(input);
+ * ```
+ */
+export class CPUFFTBackend implements FFTBackend {
+  fft(input: Float32Array): Promise<Float32Array> {
+    return Promise.resolve(cpuFFT(input));
+  }
+
+  ifft(input: Float32Array): Promise<Float32Array> {
+    return Promise.resolve(cpuIFFT(input));
+  }
+
+  fft2d(input: Float32Array, width: number, height: number): Promise<Float32Array> {
+    return Promise.resolve(cpuFFT2D(input, width, height));
+  }
+
+  ifft2d(input: Float32Array, width: number, height: number): Promise<Float32Array> {
+    return Promise.resolve(cpuIFFT2D(input, width, height));
+  }
+
+  /**
+   * CPU backend has no resources to release
+   */
+  dispose(): void {
+    // No-op for CPU backend
+  }
 }

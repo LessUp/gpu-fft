@@ -1,3 +1,10 @@
+/**
+ * 实输入 FFT 后端
+ * @module webgpu-fft/real-fft-backend
+ *
+ * 封装实信号与复频谱之间的转换逻辑（基于 Hermitian 对称性）。
+ */
+
 import type { FFTBackend, RealFFTBackend } from './backend';
 import {
   packRealInput,
@@ -6,7 +13,7 @@ import {
   expandHermitianSpectrum,
   compressHermitianSpectrum2D,
   expandHermitianSpectrum2D,
-} from './real-fft-transform';
+} from './hermitian';
 import {
   validateRealFFTInput,
   validateRealIFFTInput,
@@ -14,13 +21,9 @@ import {
   validateRealIFFT2DInput,
 } from './validation';
 
-function mapResult<T, R>(value: T | Promise<T>, mapper: (resolved: T) => R): R | Promise<R> {
-  if (value instanceof Promise) {
-    return value.then(mapper);
-  }
-
-  return mapper(value);
-}
+// ============================================================================
+// RealFFTBackend 工厂
+// ============================================================================
 
 export function createRealFFTBackend(backend: FFTBackend): RealFFTBackend {
   const realFFTBackend: RealFFTBackend = {
@@ -28,26 +31,29 @@ export function createRealFFTBackend(backend: FFTBackend): RealFFTBackend {
     ifft: backend.ifft.bind(backend),
     fft2d: backend.fft2d.bind(backend),
     ifft2d: backend.ifft2d.bind(backend),
-    rfft(input) {
+    async rfft(input) {
       validateRealFFTInput(input);
-      return mapResult(backend.fft(packRealInput(input)), compressHermitianSpectrum);
+      const spectrum = await backend.fft(packRealInput(input));
+      return compressHermitianSpectrum(spectrum);
     },
-    irfft(input) {
+    async irfft(input) {
       validateRealIFFTInput(input);
-      return mapResult(backend.ifft(expandHermitianSpectrum(input)), extractRealSignal);
+      const signal = await backend.ifft(expandHermitianSpectrum(input));
+      return extractRealSignal(signal);
     },
-    rfft2d(input, width, height) {
+    async rfft2d(input, width, height) {
       validateRealFFT2DInput(input, width, height);
-      return mapResult(backend.fft2d(packRealInput(input), width, height), (spectrum) =>
-        compressHermitianSpectrum2D(spectrum, width, height)
-      );
+      const spectrum = await backend.fft2d(packRealInput(input), width, height);
+      return compressHermitianSpectrum2D(spectrum, width, height);
     },
-    irfft2d(input, width, height) {
+    async irfft2d(input, width, height) {
       validateRealIFFT2DInput(input, width, height);
-      return mapResult(
-        backend.ifft2d(expandHermitianSpectrum2D(input, width, height), width, height),
-        extractRealSignal
+      const signal = await backend.ifft2d(
+        expandHermitianSpectrum2D(input, width, height),
+        width,
+        height
       );
+      return extractRealSignal(signal);
     },
   };
 

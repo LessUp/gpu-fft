@@ -1,7 +1,7 @@
 // Spectrum Analyzer - Real-time audio frequency spectrum analysis
 import type { SpectrumAnalyzerConfig, WindowType } from '../types';
 import type { FFTBackend } from '../core/backend';
-import { CPUFFTBackend } from '../core/cpu-backend';
+import { CPUFFTBackend } from '../utils/cpu-fft';
 import {
   hannWindow,
   hammingWindow,

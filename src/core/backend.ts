@@ -33,7 +33,7 @@ export interface FFTBackend {
    * @param input - 交错复数数据 [real, imag, real, imag, ...]
    * @returns FFT 结果（相同格式）
    */
-  fft(input: Float32Array): Float32Array | Promise<Float32Array>;
+  fft(input: Float32Array): Promise<Float32Array>;
 
   /**
    * 计算一维逆 FFT
@@ -41,7 +41,7 @@ export interface FFTBackend {
    * @param input - 交错复数 FFT 数据
    * @returns 时域信号
    */
-  ifft(input: Float32Array): Float32Array | Promise<Float32Array>;
+  ifft(input: Float32Array): Promise<Float32Array>;
 
   /**
    * 计算二维 FFT
@@ -51,7 +51,7 @@ export interface FFTBackend {
    * @param height - 行数（必须为 2 的幂）
    * @returns 二维 FFT 结果
    */
-  fft2d(input: Float32Array, width: number, height: number): Float32Array | Promise<Float32Array>;
+  fft2d(input: Float32Array, width: number, height: number): Promise<Float32Array>;
 
   /**
    * 计算二维逆 FFT
@@ -61,7 +61,7 @@ export interface FFTBackend {
    * @param height - 行数
    * @returns 时域二维信号
    */
-  ifft2d(input: Float32Array, width: number, height: number): Float32Array | Promise<Float32Array>;
+  ifft2d(input: Float32Array, width: number, height: number): Promise<Float32Array>;
 
   /**
    * 释放后端资源（可选）
@@ -86,7 +86,7 @@ export interface RealFFTBackend extends FFTBackend {
    * @param input - 实数值数组
    * @returns 半频谱交错复数数据
    */
-  rfft(input: Float32Array): Float32Array | Promise<Float32Array>;
+  rfft(input: Float32Array): Promise<Float32Array>;
 
   /**
    * 计算实输入逆 FFT（IRFFT）
@@ -94,7 +94,7 @@ export interface RealFFTBackend extends FFTBackend {
    * @param input - 半频谱交错复数数据
    * @returns 实数值数组
    */
-  irfft(input: Float32Array): Float32Array | Promise<Float32Array>;
+  irfft(input: Float32Array): Promise<Float32Array>;
 
   /**
    * 计算二维实输入 FFT
@@ -104,7 +104,7 @@ export interface RealFFTBackend extends FFTBackend {
    * @param height - 行数
    * @returns 压缩半频谱
    */
-  rfft2d(input: Float32Array, width: number, height: number): Float32Array | Promise<Float32Array>;
+  rfft2d(input: Float32Array, width: number, height: number): Promise<Float32Array>;
 
   /**
    * 计算二维实输入逆 FFT
@@ -114,5 +114,5 @@ export interface RealFFTBackend extends FFTBackend {
    * @param height - 原始实信号高度
    * @returns 实数值二维数组
    */
-  irfft2d(input: Float32Array, width: number, height: number): Float32Array | Promise<Float32Array>;
+  irfft2d(input: Float32Array, width: number, height: number): Promise<Float32Array>;
 }

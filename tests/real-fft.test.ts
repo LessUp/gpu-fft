@@ -5,31 +5,15 @@ import * as api from '../src/index';
 
 type RealApiModule = typeof api & {
   createRealFFTBackend?: (backend: {
-    fft: (input: Float32Array) => Float32Array | Promise<Float32Array>;
-    ifft: (input: Float32Array) => Float32Array | Promise<Float32Array>;
-    fft2d: (
-      input: Float32Array,
-      width: number,
-      height: number
-    ) => Float32Array | Promise<Float32Array>;
-    ifft2d: (
-      input: Float32Array,
-      width: number,
-      height: number
-    ) => Float32Array | Promise<Float32Array>;
+    fft: (input: Float32Array) => Promise<Float32Array>;
+    ifft: (input: Float32Array) => Promise<Float32Array>;
+    fft2d: (input: Float32Array, width: number, height: number) => Promise<Float32Array>;
+    ifft2d: (input: Float32Array, width: number, height: number) => Promise<Float32Array>;
   }) => {
-    rfft: (input: Float32Array) => Float32Array | Promise<Float32Array>;
-    irfft: (input: Float32Array) => Float32Array | Promise<Float32Array>;
-    rfft2d: (
-      input: Float32Array,
-      width: number,
-      height: number
-    ) => Float32Array | Promise<Float32Array>;
-    irfft2d: (
-      input: Float32Array,
-      width: number,
-      height: number
-    ) => Float32Array | Promise<Float32Array>;
+    rfft: (input: Float32Array) => Promise<Float32Array>;
+    irfft: (input: Float32Array) => Promise<Float32Array>;
+    rfft2d: (input: Float32Array, width: number, height: number) => Promise<Float32Array>;
+    irfft2d: (input: Float32Array, width: number, height: number) => Promise<Float32Array>;
   };
   cpuRFFT?: (input: Float32Array) => Float32Array;
   cpuIRFFT?: (input: Float32Array) => Float32Array;

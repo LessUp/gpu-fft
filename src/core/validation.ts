@@ -7,7 +7,20 @@
 
 import type { SpectrumAnalyzerConfig, ImageFilterConfig } from '../types';
 import { FFTError, FFTErrorCode } from './errors';
-import { isPowerOf2 } from '../utils/bit-reversal';
+
+// ============================================================================
+// 基础工具函数（内联以避免循环依赖）
+// ============================================================================
+
+/**
+ * 检查数字是否为 2 的幂
+ *
+ * @param n - 要检查的数字
+ * @returns 如果 n 是正的 2 的幂则返回 true
+ */
+function isPowerOf2(n: number): boolean {
+  return n > 0 && (n & (n - 1)) === 0;
+}
 
 // ============================================================================
 // 基础验证函数（内部使用）
@@ -369,3 +382,85 @@ export const validateFFTInput = validateFFT;
  * @deprecated 使用 validateFFT2D() 代替
  */
 export const validateFFT2DInputAlias = validateFFT2D;
+
+// ============================================================================
+// 工具模块验证（统一入口）
+// ============================================================================
+
+/**
+ * 验证交错复数数据为 2 的幂
+ *
+ * 用于 bit-reversal 操作验证
+ *
+ * @param data - 交错复数数据
+ * @returns 复数元素数量
+ * @throws FFTError 如果数据无效
+ */
+export function validateInterleavedPowerOf2(data: Float32Array): number {
+  validateNotNull(data, 'Input');
+
+  if (data.length % 2 !== 0) {
+    throw new FFTError(
+      'Input must use interleaved real/imaginary pairs',
+      FFTErrorCode.INVALID_INPUT_SIZE
+    );
+  }
+
+  const n = data.length / 2;
+  validatePowerOf2(n, 'Number of complex samples');
+
+  return n;
+}
+
+/**
+ * 验证窗函数尺寸
+ *
+ * @param size - 窗尺寸
+ * @throws FFTError 如果尺寸无效
+ */
+export function validateWindowSize(size: number): void {
+  if (!Number.isInteger(size) || size < 1) {
+    throw new FFTError(
+      `Window size must be a positive integer, got ${size}`,
+      FFTErrorCode.INVALID_INPUT_SIZE
+    );
+  }
+}
+
+/**
+ * 验证信号和窗长度匹配
+ *
+ * @param signalLength - 信号长度
+ * @param windowLength - 窗长度
+ * @throws FFTError 如果不匹配
+ */
+export function validateWindowMatch(signalLength: number, windowLength: number): void {
+  if (signalLength !== windowLength) {
+    throw new FFTError(
+      `Signal length (${signalLength}) must match window length (${windowLength})`,
+      FFTErrorCode.DIMENSION_MISMATCH
+    );
+  }
+}
+
+/**
+ * 验证复数信号和窗长度匹配
+ *
+ * @param signalLength - 交错复数信号长度
+ * @param windowLength - 窗长度
+ * @throws FFTError 如果不匹配
+ */
+export function validateWindowMatchComplex(signalLength: number, windowLength: number): void {
+  if (signalLength % 2 !== 0) {
+    throw new FFTError(
+      'Complex signal must use interleaved real/imaginary pairs',
+      FFTErrorCode.INVALID_INPUT_SIZE
+    );
+  }
+  if (signalLength / 2 !== windowLength) {
+    throw new FFTError(
+      `Window length (${windowLength}) must match number of complex samples (${signalLength / 2})`,
+      FFTErrorCode.DIMENSION_MISMATCH
+    );
+  }
+}

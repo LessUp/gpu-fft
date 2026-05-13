@@ -216,12 +216,12 @@ export class FFTEngine {
 
   async rfft(input: Float32Array): Promise<Float32Array> {
     this.assertUsable();
-    return this.realFFTBackend.rfft(input) as Promise<Float32Array>;
+    return this.realFFTBackend.rfft(input);
   }
 
   async irfft(input: Float32Array): Promise<Float32Array> {
     this.assertUsable();
-    return this.realFFTBackend.irfft(input) as Promise<Float32Array>;
+    return this.realFFTBackend.irfft(input);
   }
 
   private async transform(input: Float32Array, inverse: boolean): Promise<Float32Array> {
@@ -320,12 +320,12 @@ export class FFTEngine {
 
   async rfft2d(input: Float32Array, width: number, height: number): Promise<Float32Array> {
     this.assertUsable();
-    return this.realFFTBackend.rfft2d(input, width, height) as Promise<Float32Array>;
+    return this.realFFTBackend.rfft2d(input, width, height);
   }
 
   async irfft2d(input: Float32Array, width: number, height: number): Promise<Float32Array> {
     this.assertUsable();
-    return this.realFFTBackend.irfft2d(input, width, height) as Promise<Float32Array>;
+    return this.realFFTBackend.irfft2d(input, width, height);
   }
 
   private async transform2d(
