@@ -1,44 +1,65 @@
 # Reference Hub
 
-A curated collection of academic papers, technical specifications, and related projects that inform the design and implementation of this library.
+A curated collection of academic papers, technical specifications, reference implementations, and learning resources that inform the design and implementation of this library.
 
-## Academic Papers
+## Quick Navigation
 
-| Paper | Year | Relevance |
-|-------|------|-----------|
-| Cooley & Tukey, "An Algorithm for the Machine Calculation of Complex Fourier Series" | 1965 | The foundational radix-2 FFT algorithm used in this library |
-| Bluestein, "A Linear Filtering Approach to the Computation of the Discrete Fourier Transform" | 1968 | Algorithm for arbitrary-size DFT (future extension reference) |
-| Rader, "Discrete Fourier Transforms when the Number of Data Samples is Prime" | 1968 | Prime-size FFT via convolution |
+<div class="reference-grid">
+<div class="reference-card">
+<div class="reference-card-title">📚 [Academic Papers](/reference/papers)</div>
+<div class="reference-card-desc">
+Foundational FFT research, GPU computing papers, and DSP textbooks. From Cooley-Tukey (1965) to modern GPU FFT surveys.
+</div>
+</div>
+
+<div class="reference-card">
+<div class="reference-card-title">⚡ [Reference Implementations](/reference/implementations)</div>
+<div class="reference-card-desc">
+FFT libraries across platforms: FFTW3, cuFFT, vkFFT, Kiss FFT, TensorFlow.js, and more. Comparative analysis of algorithms and performance.
+</div>
+</div>
+
+<div class="reference-card">
+<div class="reference-card-title">🎓 [Learning Resources](/reference/learning)</div>
+<div class="reference-card-desc">
+Interactive visualizations, video courses, WebGPU tutorials, and DSP textbooks for deeper understanding.
+</div>
+</div>
+</div>
 
 ## Technical Specifications
 
 | Spec | Link | Relevance |
 |------|------|-----------|
-| WebGPU W3C Spec | [w3.org/TR/webgpu](https://www.w3.org/TR/webgpu/) | The GPU API this library targets |
-| WGSL Spec | [w3.org/TR/WGSL](https://www.w3.org/TR/WGSL/) | Shading language for compute kernels |
-| IEEE 754-2019 | [ieee.org](https://standards.ieee.org/standard/754-2019.html) | Floating-point behavior in shaders |
-
-## Reference Implementations
-
-| Project | Language | Notes |
-|---------|----------|-------|
-| [FFTW3](https://fftw.org/) | C | The de facto standard FFT library. Used as a performance baseline reference. |
-| [Kiss FFT](https://github.com/mborgerding/kissfft) | C | Minimalist FFT designed for embedded systems. Our CPU fallback is conceptually similar in scope. |
-| [TensorFlow.js](https://js.tensorflow.org/) | TypeScript | Provides `tf.spectral.fft` via WebGL. Our WebGPU path targets lower overhead for pure FFT workloads. |
-| [gpu.js](https://gpu.rocks/) | JavaScript | General-purpose GPU computation via WebGL. Less specialized for FFT than our implementation. |
-| [webgpu-utils](https://github.com/greggman/webgpu-utils) | TypeScript | Useful utilities for WebGPU development. |
+| **WebGPU W3C Spec** | [w3.org/TR/webgpu](https://www.w3.org/TR/webgpu/) | The GPU API this library targets |
+| **WGSL Spec** | [w3.org/TR/WGSL](https://www.w3.org/TR/WGSL/) | Shading language for compute kernels |
+| **IEEE 754-2019** | [ieee.org](https://standards.ieee.org/standard/754-2019.html) | Floating-point behavior in shaders |
+| **WebGPU Extensions** | [webgpu.dev](https://webgpu.dev/) | Extension registry and compatibility |
 
 ## WebGPU Ecosystem
 
 | Resource | Link | Purpose |
 |----------|------|---------|
-| WebGPU Report | [webgpureport.org](https://webgpureport.org/) | Check browser feature support |
-| WebGPU DevTools | Chrome DevTools | Inspect GPU buffers, pipelines, and shaders |
-| Three.js WebGPU Renderer | [threejs.org](https://threejs.org/) | Reference for production WebGPU usage patterns |
+| **WebGPU Report** | [webgpureport.org](https://webgpureport.org/) | Check browser feature support |
+| **WebGPU Samples** | [webgpu.github.io](https://webgpu.github.io/webgpu-samples/) | Official code examples |
+| **Dawn** | [dawn.googlesource.com](https://dawn.googlesource.com/dawn) | Chrome's WebGPU implementation |
+| **wgpu-native** | [wgpu.rs](https://wgpu.rs/) | Rust WebGPU implementation |
 
-## Window Functions & DSP
+## Why These References Matter
 
-| Resource | Relevance |
-|----------|-----------|
-| Harris, "On the Use of Windows for Harmonic Analysis with the Discrete Fourier Transform" (1978) | Comprehensive window function reference |
-| Oppenheim & Schafer, *Discrete-Time Signal Processing* | Standard DSP textbook for algorithmic grounding |
+This library is built on decades of research and engineering:
+
+1. **Algorithmic Foundation**: The Cooley-Tukey radix-2 algorithm (1965) remains the basis for our GPU implementation
+2. **GPU Optimization**: Techniques from vkFFT, cuFFT, and GPU Gems inform our shader design
+3. **Numerical Stability**: IEEE 754 considerations guide our floating-point handling
+4. **Window Functions**: Harris's 1978 paper is the definitive reference for our window implementations
+
+---
+
+## Contributing References
+
+Found a relevant paper or resource? Contributions are welcome! Please ensure:
+
+1. The resource is publicly accessible (open access or official documentation)
+2. Include a brief description of its relevance to FFT or GPU computing
+3. Follow the citation format used in [Academic Papers](/reference/papers)

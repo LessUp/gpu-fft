@@ -62,10 +62,8 @@
   --vp-c-border: var(--nv-border);
 
   /* Typography */
-  --vp-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, sans-serif;
-  --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code',
-    monospace;
+  --vp-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
 
   /* Custom shadows */
   --nv-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -190,16 +188,9 @@ body {
    -------------------------------------------------------------------------- */
 
 .VPHero {
-  background: radial-gradient(
-      ellipse 80% 50% at 50% -20%,
-      rgba(118, 185, 0, 0.12),
-      transparent
-    ),
-    radial-gradient(
-      ellipse 60% 40% at 80% 100%,
-      rgba(0, 195, 255, 0.06),
-      transparent
-    );
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(118, 185, 0, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(0, 195, 255, 0.06), transparent);
 }
 
 .VPHero .name {
@@ -253,11 +244,7 @@ body {
 
 /* Hero image background glow */
 .VPHero .image-bg {
-  background: radial-gradient(
-    circle at center,
-    var(--nv-green-glow),
-    transparent 70%
-  );
+  background: radial-gradient(circle at center, var(--nv-green-glow), transparent 70%);
   opacity: 0.5;
 }
 
@@ -280,7 +267,8 @@ body {
 .VPFeatures .item:hover {
   border-color: var(--nv-green);
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(118, 185, 0, 0.15),
+  box-shadow:
+    0 8px 24px rgba(118, 185, 0, 0.15),
     0 0 0 1px rgba(118, 185, 0, 0.2);
 }
 
@@ -309,11 +297,7 @@ body {
 .vp-doc h1 {
   font-weight: 800;
   letter-spacing: -0.02em;
-  background: linear-gradient(
-    120deg,
-    var(--nv-text-primary) 30%,
-    var(--nv-green)
-  );
+  background: linear-gradient(120deg, var(--nv-text-primary) 30%, var(--nv-green));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -392,7 +376,9 @@ body {
   color: var(--nv-green);
   text-decoration: none;
   border-bottom: 1px solid transparent;
-  transition: border-color 0.25s ease, color 0.2s ease;
+  transition:
+    border-color 0.25s ease,
+    color 0.2s ease;
 }
 
 .vp-doc a:hover {
@@ -651,22 +637,10 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(
-    circle at 1px 1px,
-    var(--nv-border) 1px,
-    transparent 0
-  );
+  background-image: radial-gradient(circle at 1px 1px, var(--nv-border) 1px, transparent 0);
   background-size: 32px 32px;
-  mask-image: radial-gradient(
-    ellipse at center,
-    black 30%,
-    transparent 80%
-  );
-  -webkit-mask-image: radial-gradient(
-    ellipse at center,
-    black 30%,
-    transparent 80%
-  );
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
   opacity: 0.4;
   pointer-events: none;
 }
@@ -719,4 +693,139 @@ body {
 
 .VPDocOutlineItem.root .outline-link.active {
   color: var(--nv-green);
+}
+
+/* --------------------------------------------------------------------------
+   22. Quick Start Block (Homepage)
+   -------------------------------------------------------------------------- */
+
+.quick-start-block {
+  margin: 1.5rem 0;
+}
+
+.quick-start-block .command-block {
+  display: inline-block;
+  background: var(--nv-bg-surface);
+  border: 1px solid var(--nv-border);
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.quick-start-block .command-block code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.95rem;
+  color: var(--nv-green);
+  background: transparent;
+  padding: 0;
+}
+
+.quick-start-block div[class*='language-'] {
+  margin-top: 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   23. Feature Cards Enhancement
+   -------------------------------------------------------------------------- */
+
+.VPFeature {
+  border: 1px solid var(--nv-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.VPFeature:hover {
+  border-color: var(--nv-green);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(118, 185, 0, 0.15);
+}
+
+/* --------------------------------------------------------------------------
+   24. Reference Hub Styles
+   -------------------------------------------------------------------------- */
+
+.reference-section {
+  margin: 2rem 0;
+}
+
+.reference-section h3 {
+  color: var(--nv-green);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--nv-border);
+}
+
+.reference-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.reference-card {
+  background: var(--nv-bg-surface);
+  border: 1px solid var(--nv-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  transition: all 0.25s ease;
+}
+
+.reference-card:hover {
+  border-color: var(--nv-green);
+  box-shadow: var(--nv-shadow-md);
+}
+
+.reference-card-title {
+  font-weight: 600;
+  color: var(--nv-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.reference-card-desc {
+  font-size: 0.9rem;
+  color: var(--nv-text-secondary);
+  line-height: 1.6;
+}
+
+.reference-card-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  color: var(--nv-green);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   25. Citation Styles
+   -------------------------------------------------------------------------- */
+
+.citation {
+  padding: 1rem 1.25rem;
+  background: var(--nv-bg-surface);
+  border-left: 3px solid var(--nv-green);
+  border-radius: 0 8px 8px 0;
+  margin: 1rem 0;
+}
+
+.citation-title {
+  font-weight: 600;
+  color: var(--nv-text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.citation-authors {
+  font-size: 0.9rem;
+  color: var(--nv-text-secondary);
+}
+
+.citation-venue {
+  font-size: 0.85rem;
+  color: var(--nv-text-tertiary);
+  font-style: italic;
+}
+
+.citation-year {
+  font-weight: 600;
+  color: var(--nv-cyan);
 }
