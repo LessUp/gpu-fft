@@ -16,10 +16,7 @@ try {
 }
 
 // Normalize version headers: ## [1.1.0] - 2025-01-15 -> ## 1.1.0 (2025-01-15)
-content = content.replace(
-  /^## \[(\d+\.\d+\.?\d*)\] - (\d{4}-\d{2}-\d{2})/gm,
-  '## $1 ($2)'
-);
+content = content.replace(/^## \[(\d+\.\d+\.?\d*)\] - (\d{4}-\d{2}-\d{2})/gm, '## $1 ($2)');
 
 // Remove HTML comments and sub-headers to keep docs clean
 content = content.replace(/<!--[\s\S]*?-->\n*/g, '');

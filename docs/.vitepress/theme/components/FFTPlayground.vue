@@ -101,7 +101,10 @@ function generateSignal(): Float32Array {
         v = Math.random() * 2 - 1;
         break;
       case 'custom': {
-        const vals = customValues.value.split(',').map(s => parseFloat(s.trim())).filter(x => !isNaN(x));
+        const vals = customValues.value
+          .split(',')
+          .map((s) => parseFloat(s.trim()))
+          .filter((x) => !isNaN(x));
         v = i < vals.length ? vals[i] : 0;
         break;
       }

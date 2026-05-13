@@ -14,15 +14,22 @@
       </h1>
 
       <p class="hero-subtitle">
-        High-performance 1D/2D Fast Fourier Transforms in the browser.
-        Compute shaders unlock GPU parallelism; CPU utilities guarantee universal compatibility.
+        High-performance 1D/2D Fast Fourier Transforms in the browser. Compute shaders unlock GPU
+        parallelism; CPU utilities guarantee universal compatibility.
       </p>
 
       <div class="hero-actions">
         <a href="/setup/quick-start" class="hero-btn hero-btn-primary">
           Quick Start
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </a>
         <a href="/api/index" class="hero-btn hero-btn-secondary">View API</a>
@@ -56,51 +63,127 @@
       <svg viewBox="0 0 400 280" class="hero-svg" aria-hidden="true">
         <defs>
           <linearGradient id="hgrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#76b900" stop-opacity="0.7"/>
-            <stop offset="100%" stop-color="#00c3ff" stop-opacity="0.3"/>
+            <stop offset="0%" stop-color="#76b900" stop-opacity="0.7" />
+            <stop offset="100%" stop-color="#00c3ff" stop-opacity="0.3" />
           </linearGradient>
           <filter id="hg" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="4" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            <feGaussianBlur stdDeviation="4" result="b" />
+            <feMerge>
+              <feMergeNode in="b" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
           </filter>
         </defs>
         <!-- Butterfly abstract -->
         <g opacity="0.6">
-          <line x1="40" y1="60" x2="140" y2="60" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-          <line x1="40" y1="220" x2="140" y2="220" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-          <line x1="40" y1="60" x2="140" y2="220" stroke="#00c3ff" stroke-width="1" opacity="0.4"/>
-          <line x1="40" y1="220" x2="140" y2="60" stroke="#00c3ff" stroke-width="1" opacity="0.4"/>
-          <line x1="140" y1="60" x2="240" y2="60" stroke="#76b900" stroke-width="1.5" opacity="0.8"/>
-          <line x1="140" y1="220" x2="240" y2="220" stroke="#76b900" stroke-width="1.5" opacity="0.8"/>
-          <line x1="140" y1="60" x2="240" y2="140" stroke="#00c3ff" stroke-width="1" opacity="0.5"/>
-          <line x1="140" y1="220" x2="240" y2="140" stroke="#00c3ff" stroke-width="1" opacity="0.5"/>
-          <line x1="140" y1="140" x2="240" y2="100" stroke="#76b900" stroke-width="1.5" opacity="0.8"/>
-          <line x1="140" y1="140" x2="240" y2="180" stroke="#76b900" stroke-width="1.5" opacity="0.8"/>
+          <line
+            x1="40"
+            y1="60"
+            x2="140"
+            y2="60"
+            stroke="#76b900"
+            stroke-width="1.5"
+            opacity="0.7"
+          />
+          <line
+            x1="40"
+            y1="220"
+            x2="140"
+            y2="220"
+            stroke="#76b900"
+            stroke-width="1.5"
+            opacity="0.7"
+          />
+          <line x1="40" y1="60" x2="140" y2="220" stroke="#00c3ff" stroke-width="1" opacity="0.4" />
+          <line x1="40" y1="220" x2="140" y2="60" stroke="#00c3ff" stroke-width="1" opacity="0.4" />
+          <line
+            x1="140"
+            y1="60"
+            x2="240"
+            y2="60"
+            stroke="#76b900"
+            stroke-width="1.5"
+            opacity="0.8"
+          />
+          <line
+            x1="140"
+            y1="220"
+            x2="240"
+            y2="220"
+            stroke="#76b900"
+            stroke-width="1.5"
+            opacity="0.8"
+          />
+          <line
+            x1="140"
+            y1="60"
+            x2="240"
+            y2="140"
+            stroke="#00c3ff"
+            stroke-width="1"
+            opacity="0.5"
+          />
+          <line
+            x1="140"
+            y1="220"
+            x2="240"
+            y2="140"
+            stroke="#00c3ff"
+            stroke-width="1"
+            opacity="0.5"
+          />
+          <line
+            x1="140"
+            y1="140"
+            x2="240"
+            y2="100"
+            stroke="#76b900"
+            stroke-width="1.5"
+            opacity="0.8"
+          />
+          <line
+            x1="140"
+            y1="140"
+            x2="240"
+            y2="180"
+            stroke="#76b900"
+            stroke-width="1.5"
+            opacity="0.8"
+          />
         </g>
         <!-- Nodes -->
         <g fill="#76b900" filter="url(#hg)">
-          <circle cx="40" cy="60" r="4"/>
-          <circle cx="40" cy="220" r="4"/>
-          <circle cx="140" cy="60" r="4"/>
-          <circle cx="140" cy="220" r="4"/>
-          <circle cx="140" cy="140" r="4"/>
-          <circle cx="240" cy="60" r="3"/>
-          <circle cx="240" cy="140" r="5"/>
-          <circle cx="240" cy="220" r="3"/>
-          <circle cx="240" cy="100" r="3"/>
-          <circle cx="240" cy="180" r="3"/>
+          <circle cx="40" cy="60" r="4" />
+          <circle cx="40" cy="220" r="4" />
+          <circle cx="140" cy="60" r="4" />
+          <circle cx="140" cy="220" r="4" />
+          <circle cx="140" cy="140" r="4" />
+          <circle cx="240" cy="60" r="3" />
+          <circle cx="240" cy="140" r="5" />
+          <circle cx="240" cy="220" r="3" />
+          <circle cx="240" cy="100" r="3" />
+          <circle cx="240" cy="180" r="3" />
         </g>
         <!-- Cyan accent -->
         <g fill="#00c3ff" opacity="0.7">
-          <circle cx="240" cy="140" r="2"/>
+          <circle cx="240" cy="140" r="2" />
         </g>
         <!-- Spectrum bars -->
         <g transform="translate(280, 40)">
-          <rect x="0" y="160" width="10" height="40" rx="2" fill="#76b900" opacity="0.3"/>
-          <rect x="14" y="120" width="10" height="80" rx="2" fill="#76b900" opacity="0.5"/>
-          <rect x="28" y="60" width="10" height="140" rx="2" fill="#76b900" opacity="0.8" filter="url(#hg)"/>
-          <rect x="42" y="140" width="10" height="60" rx="2" fill="#76b900" opacity="0.4"/>
-          <rect x="56" y="100" width="10" height="100" rx="2" fill="#76b900" opacity="0.6"/>
+          <rect x="0" y="160" width="10" height="40" rx="2" fill="#76b900" opacity="0.3" />
+          <rect x="14" y="120" width="10" height="80" rx="2" fill="#76b900" opacity="0.5" />
+          <rect
+            x="28"
+            y="60"
+            width="10"
+            height="140"
+            rx="2"
+            fill="#76b900"
+            opacity="0.8"
+            filter="url(#hg)"
+          />
+          <rect x="42" y="140" width="10" height="60" rx="2" fill="#76b900" opacity="0.4" />
+          <rect x="56" y="100" width="10" height="100" rx="2" fill="#76b900" opacity="0.6" />
         </g>
       </svg>
     </div>
@@ -174,8 +257,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 .hero-title {
