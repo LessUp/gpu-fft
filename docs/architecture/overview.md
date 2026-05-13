@@ -4,24 +4,29 @@ The WebGPU FFT Library implements a focused FFT architecture: the core transform
 
 ## High-Level Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Public API Layer                          │
-│  createFFTEngine() | cpuFFT() / cpuRFFT()                   │
-│  createSpectrumAnalyzer() | createImageFilter()             │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Core FFT Engine                           │
-│  FFTEngine | GPUResourceManager | Compute Pipelines        │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  GPU Compute Layer (WGSL)                    │
-│  Bit-Reversal Shader | Butterfly Shader | Scale Shader      │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph PublicAPI["Public API Layer"]
+        A1["createFFTEngine()"]
+        A2["cpuFFT() / cpuRFFT()"]
+        A3["createSpectrumAnalyzer()"]
+        A4["createImageFilter()"]
+    end
+
+    subgraph CoreEngine["Core FFT Engine"]
+        B1["FFTEngine"]
+        B2["GPUResourceManager"]
+        B3["Compute Pipelines"]
+    end
+
+    subgraph GPUCompute["GPU Compute Layer (WGSL)"]
+        C1["Bit-Reversal Shader"]
+        C2["Butterfly Shader"]
+        C3["Scale Shader"]
+    end
+
+    PublicAPI --> CoreEngine
+    CoreEngine --> GPUCompute
 ```
 
 ## Key Design Decisions

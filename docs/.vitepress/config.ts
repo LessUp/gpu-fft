@@ -1,12 +1,13 @@
 import { defineConfig } from 'vitepress';
+import { withMermaid } from 'vitepress-plugin-mermaid';
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: 'WebGPU FFT',
   titleTemplate: ':title | WebGPU FFT Library',
   description: 'WebGPU FFT core with CPU utilities for JavaScript and TypeScript signal processing',
 
   head: [
-    ['meta', { name: 'theme-color', content: '#4f46e5' }],
+    ['meta', { name: 'theme-color', content: '#76B900' }],
     [
       'meta',
       {
@@ -111,8 +112,6 @@ export default defineConfig({
 
   srcExclude: ['**/specs/**/*.md'],
 
-  metaChunk: true,
-
   themeConfig: {
     logo: { src: '/logo.svg', width: 24, height: 24 },
     siteTitle: 'WebGPU FFT',
@@ -122,6 +121,9 @@ export default defineConfig({
       { text: 'Tutorials', link: '/tutorials/introduction' },
       { text: 'Architecture', link: '/architecture/overview' },
       { text: 'API', link: '/api/index' },
+      { text: 'Showcase', link: '/showcase/benchmarks' },
+      { text: 'Reference', link: '/reference/index' },
+      { text: 'Playground', link: '/playground/index' },
       { text: 'Contributing', link: '/contributing' },
     ],
 
@@ -175,6 +177,31 @@ export default defineConfig({
           ],
         },
       ],
+      '/showcase/': [
+        {
+          text: 'Showcase',
+          items: [
+            { text: 'Benchmarks', link: '/showcase/benchmarks' },
+            { text: 'Decisions', link: '/showcase/decisions' },
+          ],
+        },
+      ],
+      '/reference/': [
+        {
+          text: 'Reference Hub',
+          items: [
+            { text: 'Overview', link: '/reference/index' },
+          ],
+        },
+      ],
+      '/playground/': [
+        {
+          text: 'Playground',
+          items: [
+            { text: 'FFT Explorer', link: '/playground/index' },
+          ],
+        },
+      ],
     },
 
     socialLinks: [
@@ -221,4 +248,4 @@ export default defineConfig({
       chunkSizeWarningLimit: 1000,
     },
   },
-});
+}));

@@ -260,13 +260,24 @@ npx serve examples/web
 
 > 📖 **完整故障排除指南**：[文档 → 浏览器支持](https://lessup.github.io/gpu-fft/setup/browser-support)
 
+## 📚 文档与资源
+
+[文档站点](https://lessup.github.io/gpu-fft/) 比 README 更详尽：
+
+- [性能基准](https://lessup.github.io/gpu-fft/showcase/benchmarks) — 在你的硬件上实测 CPU vs WebGPU 性能
+- [架构决策](https://lessup.github.io/gpu-fft/showcase/decisions) — 为什么选择 Radix-2、为什么选择 WebGPU 等 ADR
+- [参考资源](https://lessup.github.io/gpu-fft/reference/index) — 学术论文、技术规范与相关项目
+- [FFT 游乐场](https://lessup.github.io/gpu-fft/playground/index) — 浏览器内交互式 FFT 探索器
+
 ## 🗺️ 路线图
+
+以下为探索方向，非承诺交付项：
 
 - [ ] 3D FFT 支持
 - [x] 实值 FFT API（第一阶段 contract-first 实现）
-- [ ] GPU 原生图像滤波
+- [ ] GPU 原生图像滤波（实验性）
 - [ ] 卷积运算
-- [ ] WASM 回退
+- [ ] 非 WebGPU 环境的 WASM 回退
 
 ## 🤝 贡献
 

@@ -6,9 +6,7 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/pages.yml'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'vite.config.ts'
+      - 'CHANGELOG.md'
   workflow_dispatch:
 
 permissions:
@@ -34,18 +32,31 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+
+      - name: Cache docs dependencies
+        uses: actions/cache@v4
+        with:
+          path: docs/node_modules
+          key: ${{ runner.os }}-docs-${{ hashFiles('docs/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-docs-
 
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v6
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install docs dependencies
+        run: npm install
+        working-directory: docs
 
       - name: Build documentation
-        run: npm run docs:build
+        run: npm run build
+        working-directory: docs
         env:
           NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Add .nojekyll
+        run: touch docs/.vitepress/dist/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

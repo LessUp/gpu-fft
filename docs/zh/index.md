@@ -3,11 +3,11 @@ layout: home
 
 hero:
   name: "WebGPU FFT"
-  text: "浏览器原生 FFT 内核"
-  tagline: 面向 JavaScript/TypeScript 的 GPU 加速 1D/2D FFT。高吞吐 FFT 走 WebGPU；频谱分析与图像滤波以 CPU 工具形式提供。
+  text: "GPU 加速傅里叶变换"
+  tagline: 高性能 1D/2D FFT 与实值 RFFT API，面向 JavaScript 与 TypeScript。计算着色器释放浏览器并行能力；CPU 工具函数保证全平台兼容。
   image:
     src: /hero.svg
-    alt: WebGPU FFT
+    alt: WebGPU FFT 蝶形运算可视化
   actions:
     - theme: brand
       text: 快速开始
@@ -16,85 +16,66 @@ hero:
       text: API 参考
       link: /api/index
     - theme: alt
-      text: GitHub 仓库
-      link: https://github.com/LessUp/gpu-fft
+      text: 性能基准
+      link: /showcase/benchmarks
 
 features:
-  - icon: ⚡
-    title: GPU FFT 内核
-    details: WebGPU 计算着色器用于 FFT 核心计算。仓库 benchmark 会输出当前环境中的 CPU 实测结果，并在 WebGPU 可用时输出 GPU 实测结果。
-  - icon: 📊
-    title: 能力边界清晰
-    details: 1D/2D FFT 是 GPU 加速能力；`createSpectrumAnalyzer()` 与 `createImageFilter()` 目前仍是 CPU-only 工具。
-  - icon: 🎵
+  - icon: 🚀
+    title: WebGPU 计算内核
+    details: FFT 引擎基于 WGSL 计算着色器，支持可配置 workgroup 大小与可选的 bank-conflict padding。首次运行着色器编译开销可在复用中摊平。
+  - icon: 🔄
+    title: GPU / CPU 双路径
+    details: 每种变换均提供 WebGPU 快速路径与 CPU 回退路径。代码在所有浏览器中可用，WebGPU 可用时自动加速。
+  - icon: 📐
+    title: 实值与复数 API
+    details: RFFT / IRFFT 针对实值信号压缩半频谱。复数 FFT 与 2D 变体在 GPU 和 CPU 表面均可用。
+  - icon: 🧪
+    title: 诚实的基准测试
+    details: 不做虚假的"预期加速比"宣传。运行 npm run benchmark 即可在你的硬件上采集实测 CPU 与 WebGPU 结果。
+  - icon: 📦
+    title: 零运行时依赖
+    details: ESM + CJS + TypeScript 声明。无依赖膨胀，无需获取 WASM 二进制，无需额外构建插件。
+  - icon: 🔧
     title: TypeScript 优先
-    details: 提供 ESM + CJS 导出、零运行时依赖，以及清晰的类型定义，适合浏览器与 Node 工作流。
-  - icon: 🔍
-    title: 快速评估路径
-    details: 从快速开始进入，先看 API 契约，再看架构页；避免在大量营销文案里兜圈子。
+    details: 严格模式类型、清晰的 API 表面、显式错误码。设计目标是 AI agent 与 IDE 友好。
 ---
 
-## 这个站点的作用
-
-这个站点帮助你快速判断四件事：
-
-1. **FFT 核心是否真的走 GPU？** 是，`FFTEngine` 与 2D FFT 流程是 WebGPU 核心能力。
-2. **哪些能力仍是 CPU-only？** `createSpectrumAnalyzer()` 与 `createImageFilter()` 当前都基于 CPU FFT。
-3. **是否适合接入？** 包体零运行时依赖，导出 ESM + CJS，类型定义完整。
-4. **应该从哪里开始？** 先看快速开始，再看 API，再看架构页。
-
-## 适合 / 不适合
+## 这个库适合你吗？
 
 ### 适合
 
-- 浏览器侧的大尺寸 1D/2D FFT 任务
-- 希望用 TypeScript 调用 GPU FFT，又不想引入额外运行时依赖
-- 需要明确知道 GPU 与 CPU 能力边界的项目
+- 浏览器侧的大尺寸 1D/2D FFT 任务，且 WebGPU 可用
+- 实值信号或图像处理，能从压缩半频谱 API 中受益
+- 希望引入类型化 FFT 内核，同时拒绝运行时依赖膨胀
 
-### 不适合
+### 不适合（当前阶段）
 
 - 需要 GPU 原生频谱分析或 GPU 原生图像滤波的场景
 - 不经过预处理就直接处理任意非 2 的幂大小输入
-- 需要“大而全”DSP 工具箱的项目
+- 需要"大而全"DSP 工具箱的项目
 
-## 建议阅读顺序
+## 开始探索
 
-> **注意**：本站点的详细文档目前仅提供英文版本。以下链接将跳转至英文文档页面。
+| 路径 | 你能获得什么 |
+|------|-------------|
+| [快速开始](/setup/quick-start) | 安装、首个 FFT、CPU 回退、错误处理，5 分钟上手 |
+| [教程](/tutorials/introduction) | 逐步深入：1D FFT、2D FFT、频谱分析、图像滤波 |
+| [架构](/architecture/overview) | 为什么选择 Radix-2、为什么选择 WebGPU、引擎结构 |
+| [API 参考](/api/index) | 完整类型化接口：FFTEngine、CPU FFT、工具函数、窗函数 |
+| [性能基准](/showcase/benchmarks) | 实测性能数据与复现方法 |
+| [游乐场](/playground/index) | 浏览器内交互式 FFT 探索器 |
 
-- **先上手：** [快速开始](/setup/quick-start)
-- **查契约：** [API 参考](/api/index)
-- **看实现：** [架构概览](/architecture/overview)
-- **看协作：** [贡献指南](/contributing)
+> **注意**：本站点的详细文档目前仅提供英文版本。以上部分链接将跳转至英文文档页面。
 
 <style>
-:root {
-  --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #4f46e5 30%, #a78bfa);
-
-  --vp-home-hero-image-background-image: linear-gradient(-45deg, #4f46e5 50%, #a78bfa 50%);
-  --vp-home-hero-image-filter: blur(44px);
-}
-
-@media (min-width: 640px) {
-  :root {
-    --vp-home-hero-image-filter: blur(56px);
-  }
-}
-
-@media (min-width: 960px) {
-  :root {
-    --vp-home-hero-image-filter: blur(68px);
-  }
-}
-
 .VPFeature {
-  border: 1px solid var(--vp-c-divider);
+  border: 1px solid var(--nv-border);
   transition: all 0.3s ease;
 }
 
 .VPFeature:hover {
-  border-color: var(--vp-c-brand);
+  border-color: var(--nv-green);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.15);
+  box-shadow: 0 8px 24px rgba(118, 185, 0, 0.15);
 }
 </style>

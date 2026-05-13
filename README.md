@@ -262,13 +262,24 @@ npx serve examples/web
 
 > 📖 **Full troubleshooting guide**: [Documentation → Troubleshooting](https://lessup.github.io/gpu-fft/setup/browser-support)
 
+## 📚 Documentation & Resources
+
+The [documentation site](https://lessup.github.io/gpu-fft/) goes beyond the README:
+
+- [Benchmarks](https://lessup.github.io/gpu-fft/showcase/benchmarks) — measured CPU vs WebGPU performance for your hardware
+- [Architecture Decisions](https://lessup.github.io/gpu-fft/showcase/decisions) — why Radix-2, why WebGPU, and other ADRs
+- [Reference Hub](https://lessup.github.io/gpu-fft/reference/index) — academic papers, specifications, and related projects
+- [FFT Playground](https://lessup.github.io/gpu-fft/playground/index) — interactive FFT explorer in the browser
+
 ## 🗺️ Roadmap
+
+These are exploratory directions, not committed deliverables:
 
 - [ ] 3D FFT support
 - [x] Real-valued FFT APIs (initial contract-first implementation)
-- [ ] GPU-native image filtering
+- [ ] GPU-native image filtering (experimental)
 - [ ] Convolution operations
-- [ ] WASM fallback
+- [ ] WASM fallback for non-WebGPU environments
 
 ## 🤝 Contributing
 
