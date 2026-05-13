@@ -85,8 +85,39 @@ export default withMermaid(defineConfig({
           { text: '教程', link: '/tutorials/introduction' },
           { text: '架构', link: '/architecture/overview' },
           { text: 'API', link: '/api/index' },
+          { text: '展示', link: '/showcase/benchmarks' },
+          { text: '参考', link: '/reference/index' },
+          { text: '游乐场', link: '/playground/index' },
           { text: '贡献', link: '/contributing' },
         ],
+        sidebar: {
+          '/zh/setup/': [
+            {
+              text: 'Getting Started',
+              collapsed: false,
+              items: [
+                { text: '快速开始', link: '/zh/setup/quick-start' },
+              ],
+            },
+          ],
+          '/zh/architecture/': [
+            {
+              text: '架构',
+              items: [
+                { text: '概览', link: '/zh/architecture/overview' },
+              ],
+            },
+          ],
+          '/zh/showcase/': [
+            {
+              text: '展示',
+              items: [
+                { text: '性能基准', link: '/zh/showcase/benchmarks' },
+                { text: '架构决策', link: '/zh/showcase/decisions' },
+              ],
+            },
+          ],
+        },
         editLink: {
           pattern: 'https://github.com/LessUp/gpu-fft/edit/main/docs/:path',
           text: '在 GitHub 上编辑此页',
@@ -245,7 +276,7 @@ export default withMermaid(defineConfig({
       },
     },
     build: {
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 3000,
     },
   },
 }));

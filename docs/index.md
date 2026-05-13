@@ -1,24 +1,6 @@
 ---
 layout: home
 
-hero:
-  name: "WebGPU FFT"
-  text: "GPU-Accelerated Fourier Transforms"
-  tagline: High-performance 1D/2D FFT and real-input RFFT APIs for JavaScript and TypeScript. Compute shaders unlock parallelism in the browser; CPU utilities guarantee universal compatibility.
-  image:
-    src: /hero.svg
-    alt: WebGPU FFT butterfly computation visualization
-  actions:
-    - theme: brand
-      text: Quick Start
-      link: /setup/quick-start
-    - theme: alt
-      text: View API Reference
-      link: /api/index
-    - theme: alt
-      text: Benchmarks
-      link: /showcase/benchmarks
-
 features:
   - icon: 🚀
     title: WebGPU Compute Core

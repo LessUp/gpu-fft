@@ -1,19 +1,19 @@
-# Performance Benchmarks
+# 性能基准
 
-> All measurements are collected in your local environment. Run `npm run benchmark` to reproduce.
+> 所有测量都在你的本地环境采集。运行 `npm run benchmark` 即可复现。
 
-::: info Honest Benchmarking
-This library does not include speculative "expected speedup" claims. The charts below show **measured CPU results** from the current CI environment (WSL2, Node.js 22, no discrete GPU). When you run `npm run benchmark` on your own hardware with a WebGPU-capable browser, you will also see measured WebGPU results.
+::: info 诚实的基准测试
+本库不包含推测性的"预期加速比"宣传。下方图表展示的是当前 CI 环境（WSL2、Node.js 22、无独立 GPU）的**实测 CPU 结果**。如果你在有 WebGPU 能力的浏览器中运行 `npm run benchmark`，还会看到实测 WebGPU 结果。
 :::
 
-## 1D FFT Performance
+## 1D FFT 性能
 
 <div id="benchmark-1d-chart" style="width:100%;height:400px;margin:1.5rem 0;"></div>
 
-### Raw Data
+### 原始数据
 
-| Size | Mean (ms) | Median (ms) | Min (ms) | Max (ms) | Std Dev |
-|------|-----------|-------------|----------|----------|---------|
+| 尺寸 | 均值 (ms) | 中位数 (ms) | 最小值 (ms) | 最大值 (ms) | 标准差 |
+|------|-----------|-------------|------------|------------|--------|
 | 256 | 0.13 | 0.05 | 0.04 | 2.66 | 0.31 |
 | 512 | 0.16 | 0.13 | 0.11 | 0.58 | 0.07 |
 | 1024 | 0.36 | 0.28 | 0.24 | 3.96 | 0.39 |
@@ -22,24 +22,24 @@ This library does not include speculative "expected speedup" claims. The charts 
 | 8192 | 3.48 | 3.07 | 2.36 | 11.15 | 1.24 |
 | 16384 | 6.95 | 6.71 | 4.84 | 15.86 | 1.45 |
 
-*Environment: WSL2, Node.js v22.22.0, CPU-only (no WebGPU adapter detected).*
+*环境：WSL2，Node.js v22.22.0，纯 CPU（未检测到 WebGPU adapter）。*
 
-### What this means
+### 含义解读
 
-- CPU FFT performance scales roughly linearly with $N \log N$ — doubling the size increases runtime by slightly more than 2×.
-- The spike at small sizes (256–512) is dominated by JavaScript engine overhead rather than algorithmic work.
-- WebGPU measurements were not available in the CI environment. On a typical discrete GPU, WebGPU FFT is expected to be significantly faster for larger sizes (4096+), though the exact ratio depends on your GPU model, driver, and browser.
+- CPU FFT 性能大致随 $N \log N$ 线性增长——尺寸翻倍，运行时间略超 2 倍。
+- 小尺寸（256–512）的波动主要由 JavaScript 引擎开销主导，而非算法本身。
+- WebGPU 测量在当前 CI 环境不可用。在典型独立 GPU 上，WebGPU FFT 在大尺寸（4096+）时预期有显著加速，但具体比例取决于 GPU 型号、驱动和浏览器。
 
-## Reproduce Locally
+## 本地复现
 
 ```bash
 npm run benchmark
 ```
 
-Results include:
-- CPU FFT timing for every tested size
-- WebGPU FFT timing (only when a WebGPU adapter is available)
-- System information for transparency
+结果包含：
+- 每个测试尺寸的 CPU FFT 耗时
+- WebGPU FFT 耗时（仅在 WebGPU adapter 可用时输出）
+- 系统信息以保证透明度
 
 <script setup>
 import { onMounted } from 'vue';
@@ -58,9 +58,9 @@ onMounted(async () => {
   const echarts = await import('echarts');
   const chartDom = document.getElementById('benchmark-1d-chart');
   if (!chartDom) return;
-  
+
   const chart = echarts.init(chartDom, 'dark', { renderer: 'canvas' });
-  
+
   const option = {
     backgroundColor: 'transparent',
     tooltip: {
@@ -70,8 +70,8 @@ onMounted(async () => {
       textStyle: { color: '#c9d1d9', fontFamily: 'JetBrains Mono, monospace' },
       formatter: (params) => {
         const p = params[0];
-        return `<span style="color:#76b900;font-weight:700">Size ${p.name}</span><br/>
-                Mean: <b>${p.value} ms</b>`;
+        return `<span style="color:#76b900;font-weight:700">尺寸 ${p.name}</span><br/>
+                均值: <b>${p.value} ms</b>`;
       }
     },
     grid: {
@@ -83,7 +83,7 @@ onMounted(async () => {
     },
     xAxis: {
       type: 'category',
-      name: 'FFT Size',
+      name: 'FFT 尺寸',
       nameTextStyle: { color: '#8b949e', fontFamily: 'Inter, sans-serif' },
       data: cpuData.map(d => d.size.toString()),
       axisLine: { lineStyle: { color: '#30363d' } },
@@ -91,7 +91,7 @@ onMounted(async () => {
     },
     yAxis: {
       type: 'value',
-      name: 'Mean Time (ms)',
+      name: '均值耗时 (ms)',
       nameTextStyle: { color: '#8b949e', fontFamily: 'Inter, sans-serif' },
       axisLine: { lineStyle: { color: '#30363d' } },
       axisLabel: { color: '#8b949e', fontFamily: 'JetBrains Mono, monospace' },
@@ -119,9 +119,9 @@ onMounted(async () => {
       }
     }]
   };
-  
+
   chart.setOption(option);
-  
+
   const resizeObserver = new ResizeObserver(() => chart.resize());
   resizeObserver.observe(chartDom);
 });
