@@ -56,12 +56,12 @@ export default withMermaid(
         },
       ],
       ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
-      ['link', { rel: 'canonical', href: 'https://lessup.github.io/gpu-fft/' }],
-      ['meta', { property: 'og:image', content: 'https://lessup.github.io/gpu-fft/hero.svg' }],
+      ['link', { rel: 'canonical', href: 'https://aicl-lab.github.io/gpu-fft/' }],
+      ['meta', { property: 'og:image', content: 'https://aicl-lab.github.io/gpu-fft/hero.svg' }],
       ['meta', { property: 'og:image:alt', content: 'WebGPU FFT Library' }],
-      ['meta', { property: 'og:url', content: 'https://lessup.github.io/gpu-fft/' }],
+      ['meta', { property: 'og:url', content: 'https://aicl-lab.github.io/gpu-fft/' }],
       ['meta', { property: 'og:locale:alternate', content: 'zh_CN' }],
-      ['meta', { name: 'twitter:image', content: 'https://lessup.github.io/gpu-fft/hero.svg' }],
+      ['meta', { name: 'twitter:image', content: 'https://aicl-lab.github.io/gpu-fft/hero.svg' }],
       [
         'script',
         { type: 'application/ld+json' },
@@ -71,7 +71,7 @@ export default withMermaid(
           name: 'WebGPU FFT Library',
           description:
             'WebGPU FFT core with CPU utilities for JavaScript and TypeScript signal processing',
-          codeRepository: 'https://github.com/LessUp/gpu-fft',
+          codeRepository: 'https://github.com/AICL-Lab/gpu-fft',
           programmingLanguage: 'TypeScript',
           license: 'https://opensource.org/licenses/MIT',
           author: {
@@ -129,7 +129,7 @@ export default withMermaid(
             ],
           },
           editLink: {
-            pattern: 'https://github.com/LessUp/gpu-fft/edit/main/docs/:path',
+            pattern: 'https://github.com/AICL-Lab/gpu-fft/edit/main/docs/:path',
             text: '在 GitHub 上编辑此页',
           },
         },
@@ -140,7 +140,7 @@ export default withMermaid(
     lastUpdated: true,
 
     sitemap: {
-      hostname: 'https://lessup.github.io/gpu-fft/',
+      hostname: 'https://aicl-lab.github.io/gpu-fft/',
       transformItems(items) {
         return items.map((item) => {
           item.lastmod = new Date().toISOString();
@@ -247,7 +247,7 @@ export default withMermaid(
       },
 
       socialLinks: [
-        { icon: 'github', link: 'https://github.com/LessUp/gpu-fft' },
+        { icon: 'github', link: 'https://github.com/AICL-Lab/gpu-fft' },
         { icon: 'npm', link: 'https://www.npmjs.com/package/webgpu-fft' },
       ],
 
@@ -266,7 +266,7 @@ export default withMermaid(
       outline: 'deep',
 
       editLink: {
-        pattern: 'https://github.com/LessUp/gpu-fft/edit/main/docs/:path',
+        pattern: 'https://github.com/AICL-Lab/gpu-fft/edit/main/docs/:path',
         text: 'Edit this page on GitHub',
       },
 

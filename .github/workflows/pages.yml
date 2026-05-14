@@ -24,7 +24,7 @@ env:
 jobs:
   build:
     # Only run on the original repository, not on forks
-    if: github.repository == 'LessUp/gpu-fft'
+    if: github.repository == 'AICL-Lab/gpu-fft'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
