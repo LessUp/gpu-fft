@@ -2,8 +2,8 @@
 layout: home
 
 hero:
-  name: "WebGPU FFT"
-  text: "GPU 加速傅里叶变换"
+  name: 'WebGPU FFT'
+  text: 'GPU 加速傅里叶变换'
   tagline: 高性能 1D/2D FFT 与实值 RFFT API，面向 JavaScript 与 TypeScript。计算着色器释放浏览器并行能力；CPU 工具函数保证全平台兼容。
   image:
     src: /hero.svg
@@ -11,13 +11,13 @@ hero:
   actions:
     - theme: brand
       text: 快速开始
-      link: /setup/quick-start
+      link: /zh/setup/quick-start
     - theme: alt
       text: API 参考
       link: /api/index
     - theme: alt
       text: 性能基准
-      link: /showcase/benchmarks
+      link: /zh/showcase/benchmarks
 
 features:
   - icon: 🚀
@@ -55,6 +55,7 @@ const input = new Float32Array(2048); // 1024 个复数
 const output = await engine.fft(input);
 console.log(output); // FFT 结果 [实部0, 虚部0, 实部1, 虚部1, ...]
 ```
+
 </div>
 
 ## 这个库适合你吗？
@@ -73,14 +74,18 @@ console.log(output); // FFT 结果 [实部0, 虚部0, 实部1, 虚部1, ...]
 
 ## 开始探索
 
-| 路径 | 你能获得什么 |
-|------|-------------|
-| [快速开始](/setup/quick-start) | 安装、首个 FFT、CPU 回退、错误处理，5 分钟上手 |
-| [教程](/tutorials/introduction) | 逐步深入：1D FFT、2D FFT、频谱分析、图像滤波 |
-| [架构](/architecture/overview) | 为什么选择 Radix-2、为什么选择 WebGPU、引擎结构 |
-| [API 参考](/api/index) | 完整类型化接口：FFTEngine、CPU FFT、工具函数、窗函数 |
-| [性能基准](/showcase/benchmarks) | 实测性能数据与复现方法 |
-| [参考中心](/reference/index) | 学术论文、技术规范、相关项目 |
-| [游乐场](/playground/index) | 浏览器内交互式 FFT 探索器 |
+| 路径                                | 你能获得什么                                    |
+| ----------------------------------- | ----------------------------------------------- |
+| [快速开始](/zh/setup/quick-start)   | 安装、首个 FFT、CPU 回退、错误处理，5 分钟上手  |
+| [架构](/zh/architecture/overview)   | 为什么选择 Radix-2、为什么选择 WebGPU、引擎结构 |
+| [性能基准](/zh/showcase/benchmarks) | 实测性能数据与复现方法                          |
+| [架构决策](/zh/showcase/decisions)  | 关键技术决策与权衡                              |
 
-> **注意**：本站点的详细文档目前仅提供英文版本。以上部分链接将跳转至英文文档页面。
+> **注意**：教程、API 参考、参考中心、游乐场等详细文档目前仅提供英文版本。以下链接将跳转至英文文档页面：
+
+| 路径                            | 你能获得什么                                         |
+| ------------------------------- | ---------------------------------------------------- |
+| [教程](/tutorials/introduction) | 逐步深入：1D FFT、2D FFT、频谱分析、图像滤波         |
+| [API 参考](/api/index)          | 完整类型化接口：FFTEngine、CPU FFT、工具函数、窗函数 |
+| [参考中心](/reference/index)    | 学术论文、技术规范、相关项目                         |
+| [游乐场](/playground/index)     | 浏览器内交互式 FFT 探索器                            |

@@ -95,11 +95,11 @@ export default withMermaid(
         link: '/zh/',
         themeConfig: {
           nav: [
-            { text: '快速开始', link: '/setup/quick-start', activeMatch: '/setup/' },
+            { text: '快速开始', link: '/zh/setup/quick-start', activeMatch: '/zh/setup/' },
             { text: '教程', link: '/tutorials/introduction', activeMatch: '/tutorials/' },
-            { text: '架构', link: '/architecture/overview', activeMatch: '/architecture/' },
+            { text: '架构', link: '/zh/architecture/overview', activeMatch: '/zh/architecture/' },
             { text: 'API', link: '/api/index', activeMatch: '/api/' },
-            { text: '展示', link: '/showcase/benchmarks', activeMatch: '/showcase/' },
+            { text: '展示', link: '/zh/showcase/benchmarks', activeMatch: '/zh/showcase/' },
             { text: '参考', link: '/reference/index', activeMatch: '/reference/' },
             { text: '游乐场', link: '/playground/index', activeMatch: '/playground/' },
             { text: '贡献', link: '/contributing' },
