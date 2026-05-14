@@ -281,6 +281,7 @@ export default withMermaid(
     },
 
     vite: {
+      publicDir: '.vitepress/public',
       plugins: [llmstxt()],
       resolve: {
         alias: {
