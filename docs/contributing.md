@@ -1,6 +1,6 @@
 # Contributing Guide
 
-> **完整版贡献指南**: 根目录 [CONTRIBUTING.md](../CONTRIBUTING.md) 包含完整的贡献流程、代码规范和 PR 检查清单。本文档为快速参考版。
+> **完整版贡献指南**: 根目录 [CONTRIBUTING.md](https://github.com/LessUp/gpu-fft/blob/main/CONTRIBUTING.md) 包含完整的贡献流程、代码规范和 PR 检查清单。本文档为快速参考版。
 
 Thank you for your interest in contributing to WebGPU FFT Library!
 
@@ -29,6 +29,7 @@ npm run docs:build
 ## Code Style
 
 This project uses:
+
 - **TypeScript** strict mode
 - **ESLint** for code quality
 - **Prettier** for formatting (single quotes, semicolons, trailing comma)
@@ -41,6 +42,7 @@ type(scope): description
 ```
 
 Examples:
+
 ```
 feat(real-fft): add rectangular RFFT coverage
 fix(spectrum): correct dB calculation for zero magnitude
@@ -59,6 +61,7 @@ test(complex): add property tests for complex multiplication
 ## Spec-Driven Development
 
 This project follows OpenSpec-driven development:
+
 - All feature changes must align with canonical specs in `openspec/specs/`
 - New features require spec updates first
 - See `openspec/specs/` for repository specifications and `openspec/changes/` for active change artifacts
@@ -87,6 +90,7 @@ npm run docs:dev
 ## Reporting Issues
 
 When reporting issues, please include:
+
 - Browser/Node.js version
 - GPU information (if applicable)
 - Minimal reproduction code

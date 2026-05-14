@@ -1,8 +1,20 @@
 import { defineConfig } from 'vitepress';
 import { withMermaid } from 'vitepress-plugin-mermaid';
+import llmstxt from 'vitepress-plugin-llms';
+
+// Dynamic base path for GitHub Pages deployment
+const rawBase = process.env.VITEPRESS_BASE;
+const base = rawBase
+  ? rawBase.startsWith('/')
+    ? rawBase.endsWith('/')
+      ? rawBase
+      : `${rawBase}/`
+    : `/${rawBase}/`
+  : '/';
 
 export default withMermaid(
   defineConfig({
+    base,
     title: 'WebGPU FFT',
     titleTemplate: ':title | WebGPU FFT Library',
     description:
@@ -83,13 +95,13 @@ export default withMermaid(
         link: '/zh/',
         themeConfig: {
           nav: [
-            { text: '快速开始', link: '/setup/quick-start' },
-            { text: '教程', link: '/tutorials/introduction' },
-            { text: '架构', link: '/architecture/overview' },
-            { text: 'API', link: '/api/index' },
-            { text: '展示', link: '/showcase/benchmarks' },
-            { text: '参考', link: '/reference/index' },
-            { text: '游乐场', link: '/playground/index' },
+            { text: '快速开始', link: '/setup/quick-start', activeMatch: '/setup/' },
+            { text: '教程', link: '/tutorials/introduction', activeMatch: '/tutorials/' },
+            { text: '架构', link: '/architecture/overview', activeMatch: '/architecture/' },
+            { text: 'API', link: '/api/index', activeMatch: '/api/' },
+            { text: '展示', link: '/showcase/benchmarks', activeMatch: '/showcase/' },
+            { text: '参考', link: '/reference/index', activeMatch: '/reference/' },
+            { text: '游乐场', link: '/playground/index', activeMatch: '/playground/' },
             { text: '贡献', link: '/contributing' },
           ],
           sidebar: {
@@ -137,7 +149,7 @@ export default withMermaid(
       },
     },
 
-    ignoreDeadLinks: true,
+    ignoreDeadLinks: ['**/zh/**'],
 
     srcExclude: ['**/specs/**/*.md'],
 
@@ -146,13 +158,13 @@ export default withMermaid(
       siteTitle: 'WebGPU FFT',
 
       nav: [
-        { text: 'Setup', link: '/setup/quick-start' },
-        { text: 'Tutorials', link: '/tutorials/introduction' },
-        { text: 'Architecture', link: '/architecture/overview' },
-        { text: 'API', link: '/api/index' },
-        { text: 'Showcase', link: '/showcase/benchmarks' },
-        { text: 'Reference', link: '/reference/index' },
-        { text: 'Playground', link: '/playground/index' },
+        { text: 'Setup', link: '/setup/quick-start', activeMatch: '/setup/' },
+        { text: 'Tutorials', link: '/tutorials/introduction', activeMatch: '/tutorials/' },
+        { text: 'Architecture', link: '/architecture/overview', activeMatch: '/architecture/' },
+        { text: 'API', link: '/api/index', activeMatch: '/api/' },
+        { text: 'Showcase', link: '/showcase/benchmarks', activeMatch: '/showcase/' },
+        { text: 'Reference', link: '/reference/index', activeMatch: '/reference/' },
+        { text: 'Playground', link: '/playground/index', activeMatch: '/playground/' },
         { text: 'Contributing', link: '/contributing' },
       ],
 
@@ -269,6 +281,7 @@ export default withMermaid(
     },
 
     vite: {
+      plugins: [llmstxt()],
       resolve: {
         alias: {
           '@': '/.vitepress',
