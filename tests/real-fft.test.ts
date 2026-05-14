@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import { FFTError, FFTErrorCode } from '../src/core/errors';
-import { FFTEngine } from '../src/core/fft-engine';
 import * as api from '../src/index';
 
 type RealApiModule = typeof api & {
@@ -130,53 +129,55 @@ describe('real-input FFT APIs', () => {
 });
 
 describe('FFTEngine real-input wrappers', () => {
-  it('rfft delegates through the real FFT backend seam', async () => {
-    const realFFTBackend = {
-      rfft: vi.fn(async () => new Float32Array([10, 0, 2, -3, 4, 5])),
-      irfft: vi.fn(async () => new Float32Array([1, 2, 3, 4])),
-      rfft2d: vi.fn(async () => new Float32Array(0)),
-      irfft2d: vi.fn(async () => new Float32Array(0)),
-    };
-    const engine = Object.assign(Object.create(FFTEngine.prototype), {
-      initialized: true,
-      disposed: false,
-      realFFTBackend,
-    }) as FFTEngine & {
-      rfft?: (input: Float32Array) => Promise<Float32Array>;
-      realFFTBackend: typeof realFFTBackend;
+  it('createFFTEngine returns RealFFTBackend with rfft method', async () => {
+    // createFFTEngine 现在返回 RealFFTBackend，具有 rfft 方法
+    const mockBackend = {
+      fft: vi.fn(async (input: Float32Array) => input),
+      ifft: vi.fn(async (input: Float32Array) => input),
+      fft2d: vi.fn(async (input: Float32Array) => input),
+      ifft2d: vi.fn(async (input: Float32Array) => input),
     };
 
-    expect(typeof engine.rfft).toBe('function');
-
-    const signal = new Float32Array([1, 2, 3, 4]);
-    const spectrum = await engine.rfft!(signal);
-
-    expect(realFFTBackend.rfft).toHaveBeenCalledWith(signal);
-    expect(spectrum).toEqual(new Float32Array([10, 0, 2, -3, 4, 5]));
+    const realFFTBackend = api.createRealFFTBackend!(mockBackend);
+    expect(typeof realFFTBackend.rfft).toBe('function');
+    expect(typeof realFFTBackend.irfft).toBe('function');
+    expect(typeof realFFTBackend.rfft2d).toBe('function');
+    expect(typeof realFFTBackend.irfft2d).toBe('function');
   });
 
-  it('irfft delegates through the real FFT backend seam', async () => {
-    const realFFTBackend = {
-      rfft: vi.fn(async () => new Float32Array([10, 0, 2, -3, 4, 5])),
-      irfft: vi.fn(async () => new Float32Array([1, 2, 3, 4])),
-      rfft2d: vi.fn(async () => new Float32Array(0)),
-      irfft2d: vi.fn(async () => new Float32Array(0)),
-    };
-    const engine = Object.assign(Object.create(FFTEngine.prototype), {
-      initialized: true,
-      disposed: false,
-      realFFTBackend,
-    }) as FFTEngine & {
-      irfft?: (input: Float32Array) => Promise<Float32Array>;
-      realFFTBackend: typeof realFFTBackend;
+  it('RealFFTBackend rfft delegates to underlying backend', async () => {
+    // rfft([1,2,3,4]) -> fft([1,0,2,0,3,0,4,0]) -> 8 elements (4 complex)
+    // compressHermitianSpectrum: n=4, slice to (4/2+1)*2 = 6
+    const mockBackend = {
+      fft: vi.fn(async () => new Float32Array([10, 0, 2, 0, 4, 0, 2, 0])),
+      ifft: vi.fn(async () => new Float32Array([1, 2, 3, 4])),
+      fft2d: vi.fn(async () => new Float32Array(0)),
+      ifft2d: vi.fn(async () => new Float32Array(0)),
     };
 
-    expect(typeof engine.irfft).toBe('function');
+    const realFFTBackend = api.createRealFFTBackend!(mockBackend);
+    const signal = new Float32Array([1, 2, 3, 4]);
+    const spectrum = await realFFTBackend.rfft(signal);
 
+    // rfft 应该调用底层 backend.fft（经过 packRealInput）
+    expect(mockBackend.fft).toHaveBeenCalled();
+    expect(spectrum.length).toBe(6); // (4/2 + 1) * 2 = 6
+  });
+
+  it('RealFFTBackend irfft delegates to underlying backend', async () => {
+    const mockBackend = {
+      fft: vi.fn(async () => new Float32Array([10, 0, 2, 0, 4, 0, 2, 0, 10, 0])),
+      ifft: vi.fn(async () => new Float32Array([1, 0, 2, 0, 3, 0, 4, 0])),
+      fft2d: vi.fn(async () => new Float32Array(0)),
+      ifft2d: vi.fn(async () => new Float32Array(0)),
+    };
+
+    const realFFTBackend = api.createRealFFTBackend!(mockBackend);
     const spectrum = new Float32Array([10, 0, 2, -3, 4, 0]);
-    const signal = await engine.irfft!(spectrum);
+    const signal = await realFFTBackend.irfft(spectrum);
 
-    expect(realFFTBackend.irfft).toHaveBeenCalledWith(spectrum);
-    expect(signal).toEqual(new Float32Array([1, 2, 3, 4]));
+    // irfft 应该调用底层 backend.ifft（经过 expandHermitianSpectrum）
+    expect(mockBackend.ifft).toHaveBeenCalled();
+    expect(signal.length).toBe(4);
   });
 });

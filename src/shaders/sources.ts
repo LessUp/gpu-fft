@@ -1,4 +1,19 @@
-// Canonical WGSL shader source strings for WebGPU compute pipelines.
+/**
+ * Canonical WGSL shader source strings for WebGPU compute pipelines.
+ *
+ * ⚠️ **Algorithm Synchronization Notice**
+ *
+ * This file and `src/utils/cpu-fft.ts` implement the **same** Cooley-Tukey FFT
+ * algorithm in different languages (WGSL vs TypeScript). Any bug fix or
+ * optimization must be applied to both implementations to maintain consistency.
+ *
+ * Key algorithmic components:
+ * - BIT_REVERSAL_SHADER: Initial permutation for DIT FFT
+ * - BUTTERFLY_SHADER: Cooley-Tukey radix-2 butterfly stages
+ * - SCALE_SHADER: IFFT normalization (1/N scaling)
+ *
+ * See `utils/cpu-fft.ts` for the TypeScript (CPU) equivalent.
+ */
 
 export const COMPLEX_OPS = `
 const PI: f32 = 3.14159265358979323846;

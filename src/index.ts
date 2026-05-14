@@ -36,7 +36,12 @@
  */
 
 // Core GPU engine
-export { FFTEngine, createFFTEngine } from './core/fft-engine';
+export { FFTEngine, createFFTEngine, createStandaloneFFTEngine } from './core/fft-engine';
+export { GPUFFTBackend } from './core/gpu-fft-backend';
+
+// Compute context (for testing/mocking)
+export type { FFTComputeContext, BufferSet } from './core/compute-context';
+export { GPUComputeContext } from './core/gpu-compute-context';
 
 // FFT Backend interfaces
 export type { FFTBackend, RealFFTBackend } from './core/backend';

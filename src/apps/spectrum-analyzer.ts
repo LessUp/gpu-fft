@@ -42,7 +42,7 @@ function getWindowFunction(type: WindowType): (size: number) => Float32Array {
  * @example
  * ```typescript
  * // 使用默认 CPU 后端
- * const analyzer = await createSpectrumAnalyzer({
+ * const analyzer = createSpectrumAnalyzer({
  *   fftSize: 2048,
  *   sampleRate: 44100
  * });
@@ -123,8 +123,26 @@ export class SpectrumAnalyzer {
   }
 }
 
-export async function createSpectrumAnalyzer(
-  config: SpectrumAnalyzerConfig
-): Promise<SpectrumAnalyzer> {
-  return new SpectrumAnalyzer(config);
+/**
+ * 创建频谱分析器
+ *
+ * @param config - 配置
+ * @param backend - 可选的自定义 FFT 后端（用于 GPU 加速或测试）
+ * @returns SpectrumAnalyzer 实例
+ *
+ * @example
+ * ```typescript
+ * // 使用默认 CPU 后端
+ * const analyzer = createSpectrumAnalyzer({ fftSize: 2048, sampleRate: 44100 });
+ *
+ * // 使用 GPU 后端
+ * const gpuBackend = await createFFTEngine();
+ * const analyzer = createSpectrumAnalyzer({ fftSize: 2048, sampleRate: 44100 }, gpuBackend);
+ * ```
+ */
+export function createSpectrumAnalyzer(
+  config: SpectrumAnalyzerConfig,
+  backend?: FFTBackend
+): SpectrumAnalyzer {
+  return new SpectrumAnalyzer(config, backend);
 }

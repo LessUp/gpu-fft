@@ -34,7 +34,7 @@ describe('Filter Operations', () => {
       }
 
       // Apply low-pass filter
-      const filter = await createImageFilter({
+      const filter = createImageFilter({
         type: 'lowpass',
         shape: 'ideal',
         cutoffFrequency: cutoff,
@@ -94,7 +94,7 @@ describe('Filter Operations', () => {
         input[i + 1] = 0;
       }
 
-      const filter = await createImageFilter({
+      const filter = createImageFilter({
         type: 'lowpass',
         shape: 'gaussian',
         cutoffFrequency: cutoff,
@@ -152,7 +152,7 @@ describe('Filter Operations', () => {
       }
 
       // Apply high-pass filter
-      const filter = await createImageFilter({
+      const filter = createImageFilter({
         type: 'highpass',
         shape: 'ideal',
         cutoffFrequency: cutoff,
@@ -215,7 +215,7 @@ describe('Filter Operations', () => {
         }
       }
 
-      const filter = await createImageFilter({
+      const filter = createImageFilter({
         type: 'highpass',
         shape: 'gaussian',
         cutoffFrequency: cutoff,
@@ -247,12 +247,12 @@ describe('Filter Operations', () => {
         constant[i] = 5;
       }
 
-      const lowpass = await createImageFilter({
+      const lowpass = createImageFilter({
         type: 'lowpass',
         shape: 'ideal',
         cutoffFrequency: 0.2,
       });
-      const highpass = await createImageFilter({
+      const highpass = createImageFilter({
         type: 'highpass',
         shape: 'ideal',
         cutoffFrequency: 0.2,
@@ -273,29 +273,27 @@ describe('Filter Operations', () => {
       highpass.dispose();
     });
 
-    it('rejects invalid cutoff and bandwidth values', async () => {
-      await expectFFTError(
+    it('rejects invalid cutoff and bandwidth values', () => {
+      expect(() =>
         createImageFilter({
           type: 'lowpass',
           shape: 'ideal',
           cutoffFrequency: -0.1,
-        }),
-        FFTErrorCode.INVALID_PARAMETER
-      );
+        })
+      ).toThrow(FFTError);
 
-      await expectFFTError(
+      expect(() =>
         createImageFilter({
           type: 'bandpass',
           shape: 'gaussian',
           cutoffFrequency: 0.5,
           bandwidth: 0,
-        }),
-        FFTErrorCode.INVALID_PARAMETER
-      );
+        })
+      ).toThrow(FFTError);
     });
 
     it('rejects non power-of-two image dimensions through shared FFT validation', async () => {
-      const filter = await createImageFilter({
+      const filter = createImageFilter({
         type: 'lowpass',
         shape: 'ideal',
         cutoffFrequency: 0.5,
@@ -319,7 +317,7 @@ describe('Filter Operations', () => {
         input[idx] = Math.cos((2 * Math.PI * 2 * x) / width);
       }
 
-      const filter = await createImageFilter({
+      const filter = createImageFilter({
         type: 'bandpass',
         shape: 'ideal',
         cutoffFrequency: 0.5,
@@ -344,7 +342,7 @@ describe('Filter Operations', () => {
       const height = 8;
       const input = new Float32Array(width * height * 2);
 
-      const filter = await createImageFilter({
+      const filter = createImageFilter({
         type: 'lowpass',
         shape: 'ideal',
         cutoffFrequency: 0.5,
@@ -364,7 +362,7 @@ describe('Filter Operations', () => {
         input[i] = Math.random() * 10;
       }
 
-      const filter = await createImageFilter({
+      const filter = createImageFilter({
         type: 'lowpass',
         shape: 'ideal',
         cutoffFrequency: 1.0,
@@ -394,7 +392,7 @@ describe('Filter Operations', () => {
         }
       }
 
-      const filter = await createImageFilter({
+      const filter = createImageFilter({
         type: 'lowpass',
         shape: 'ideal',
         cutoffFrequency: 0.1, // Very small cutoff

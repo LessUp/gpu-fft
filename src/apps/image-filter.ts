@@ -18,7 +18,7 @@ const MIN_GAUSSIAN_SIGMA = 0.01;
  * @example
  * ```typescript
  * // 使用默认 CPU 后端
- * const filter = await createImageFilter({
+ * const filter = createImageFilter({
  *   type: 'lowpass',
  *   shape: 'gaussian',
  *   cutoffFrequency: 0.3
@@ -127,6 +127,27 @@ export class ImageFilter {
   }
 }
 
-export async function createImageFilter(config: ImageFilterConfig): Promise<ImageFilter> {
-  return new ImageFilter(config);
+/**
+ * 创建图像滤波器
+ *
+ * @param config - 配置
+ * @param backend - 可选的自定义 FFT 后端（用于 GPU 加速或测试）
+ * @returns ImageFilter 实例
+ *
+ * @example
+ * ```typescript
+ * // 使用默认 CPU 后端
+ * const filter = createImageFilter({
+ *   type: 'lowpass',
+ *   shape: 'gaussian',
+ *   cutoffFrequency: 0.3
+ * });
+ *
+ * // 使用 GPU 后端
+ * const gpuBackend = await createFFTEngine();
+ * const filter = createImageFilter(config, gpuBackend);
+ * ```
+ */
+export function createImageFilter(config: ImageFilterConfig, backend?: FFTBackend): ImageFilter {
+  return new ImageFilter(config, backend);
 }

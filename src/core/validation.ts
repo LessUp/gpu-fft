@@ -7,20 +7,7 @@
 
 import type { SpectrumAnalyzerConfig, ImageFilterConfig } from '../types';
 import { FFTError, FFTErrorCode } from './errors';
-
-// ============================================================================
-// 基础工具函数（内联以避免循环依赖）
-// ============================================================================
-
-/**
- * 检查数字是否为 2 的幂
- *
- * @param n - 要检查的数字
- * @returns 如果 n 是正的 2 的幂则返回 true
- */
-function isPowerOf2(n: number): boolean {
-  return n > 0 && (n & (n - 1)) === 0;
-}
+import { isPowerOf2 } from '../utils/math';
 
 // ============================================================================
 // 基础验证函数（内部使用）

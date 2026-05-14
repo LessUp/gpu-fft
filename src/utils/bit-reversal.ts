@@ -4,6 +4,9 @@
  */
 
 import { validateInterleavedPowerOf2 } from '../core/validation';
+import { log2 } from './math';
+
+export { isPowerOf2, log2 } from './math';
 
 /**
  * Compute the bit-reversed index of a number.
@@ -34,51 +37,6 @@ export function bitReverse(x: number, bits: number): number {
     val = val >> 1;
   }
   return result;
-}
-
-/**
- * Compute log2 of a power of 2.
- *
- * @param n - A power of 2 (must be > 0)
- * @returns The base-2 logarithm
- * @throws Error if n is 0 or negative
- *
- * @example
- * ```typescript
- * log2(2);   // 1
- * log2(4);   // 2
- * log2(8);   // 3
- * log2(16);  // 4
- * ```
- */
-export function log2(n: number): number {
-  let bits = 0;
-  let val = n;
-  while (val > 1) {
-    val >>= 1;
-    bits++;
-  }
-  return bits;
-}
-
-/**
- * Check if a number is a power of 2.
- *
- * @param n - The number to check
- * @returns `true` if n is a positive power of 2
- *
- * @example
- * ```typescript
- * isPowerOf2(1);   // true  (2^0)
- * isPowerOf2(2);   // true  (2^1)
- * isPowerOf2(3);   // false
- * isPowerOf2(4);   // true  (2^2)
- * isPowerOf2(0);   // false
- * isPowerOf2(-4);  // false
- * ```
- */
-export function isPowerOf2(n: number): boolean {
-  return n > 0 && (n & (n - 1)) === 0;
 }
 
 /**

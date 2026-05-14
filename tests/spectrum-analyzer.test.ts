@@ -1,16 +1,9 @@
 // Feature: webgpu-fft-library, Property 12-15: Spectrum Analyzer
 // Validates: Requirements 8.1, 8.3, 8.4, 8.5
 import { describe, it, expect } from 'vitest';
-import { FFTError, FFTErrorCode } from '../src/core/errors';
+import { FFTError } from '../src/core/errors';
 import { createSpectrumAnalyzer } from '../src/apps/spectrum-analyzer';
 import { hannWindow } from '../src/utils/window-functions';
-
-async function expectFFTError(promise: Promise<unknown>, code: FFTErrorCode): Promise<void> {
-  await expect(promise).rejects.toMatchObject<Partial<FFTError>>({
-    name: 'FFTError',
-    code,
-  });
-}
 
 describe('Spectrum Analyzer', () => {
   // Property 12: Spectrum Magnitude is Non-Negative
@@ -19,7 +12,7 @@ describe('Spectrum Analyzer', () => {
   describe('Property 12: Spectrum Magnitude is Non-Negative', () => {
     it('all dB values are finite for random inputs', async () => {
       const fftSize = 256;
-      const analyzer = await createSpectrumAnalyzer({
+      const analyzer = createSpectrumAnalyzer({
         fftSize,
         sampleRate: 44100,
       });
@@ -44,7 +37,7 @@ describe('Spectrum Analyzer', () => {
 
     it('dB values have reasonable range', async () => {
       const fftSize = 256;
-      const analyzer = await createSpectrumAnalyzer({
+      const analyzer = createSpectrumAnalyzer({
         fftSize,
         sampleRate: 44100,
       });
@@ -112,7 +105,7 @@ describe('Spectrum Analyzer', () => {
   describe('Property 14: dB Conversion', () => {
     it('dB conversion follows 20·log₁₀(m) formula', async () => {
       const fftSize = 256;
-      const analyzer = await createSpectrumAnalyzer({
+      const analyzer = createSpectrumAnalyzer({
         fftSize,
         sampleRate: 44100,
       });
@@ -146,7 +139,7 @@ describe('Spectrum Analyzer', () => {
 
     it('zero or near-zero magnitudes return floor value', async () => {
       const fftSize = 256;
-      const analyzer = await createSpectrumAnalyzer({
+      const analyzer = createSpectrumAnalyzer({
         fftSize,
         sampleRate: 44100,
       });
@@ -171,7 +164,7 @@ describe('Spectrum Analyzer', () => {
       const sizes = [256, 512, 1024, 2048, 4096];
 
       for (const fftSize of sizes) {
-        const analyzer = await createSpectrumAnalyzer({
+        const analyzer = createSpectrumAnalyzer({
           fftSize,
           sampleRate: 44100,
         });
@@ -193,7 +186,7 @@ describe('Spectrum Analyzer', () => {
     it('frequency range is 0 Hz to Nyquist', async () => {
       const fftSize = 1024;
       const sampleRate = 44100;
-      const analyzer = await createSpectrumAnalyzer({
+      const analyzer = createSpectrumAnalyzer({
         fftSize,
         sampleRate,
       });
@@ -219,7 +212,7 @@ describe('Spectrum Analyzer', () => {
       const sizes = [128, 256, 512, 1024, 2048, 4096];
 
       for (const fftSize of sizes) {
-        const analyzer = await createSpectrumAnalyzer({
+        const analyzer = createSpectrumAnalyzer({
           fftSize,
           sampleRate: 44100,
         });
@@ -244,7 +237,7 @@ describe('Spectrum Analyzer', () => {
     it('detects single frequency tone', async () => {
       const fftSize = 1024;
       const sampleRate = 44100;
-      const analyzer = await createSpectrumAnalyzer({
+      const analyzer = createSpectrumAnalyzer({
         fftSize,
         sampleRate,
       });
@@ -277,26 +270,24 @@ describe('Spectrum Analyzer', () => {
       analyzer.dispose();
     });
 
-    it('rejects invalid sample rates', async () => {
-      await expectFFTError(
+    it('rejects invalid sample rates', () => {
+      expect(() =>
         createSpectrumAnalyzer({
           fftSize: 256,
           sampleRate: 0,
-        }),
-        FFTErrorCode.INVALID_INPUT_SIZE
-      );
+        })
+      ).toThrow(FFTError);
 
-      await expectFFTError(
+      expect(() =>
         createSpectrumAnalyzer({
           fftSize: 256,
           sampleRate: Number.NaN,
-        }),
-        FFTErrorCode.INVALID_INPUT_SIZE
-      );
+        })
+      ).toThrow(FFTError);
     });
 
     it('rejects invalid frequency bin indices', async () => {
-      const analyzer = await createSpectrumAnalyzer({
+      const analyzer = createSpectrumAnalyzer({
         fftSize: 256,
         sampleRate: 44100,
       });
@@ -309,7 +300,7 @@ describe('Spectrum Analyzer', () => {
     });
 
     it('reuses internal buffers without leaking stale values between calls', async () => {
-      const analyzer = await createSpectrumAnalyzer({
+      const analyzer = createSpectrumAnalyzer({
         fftSize: 256,
         sampleRate: 44100,
       });

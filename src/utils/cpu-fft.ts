@@ -4,6 +4,19 @@
  *
  * Implements Cooley-Tukey Radix-2 DIT algorithm for environments
  * without WebGPU support or for testing purposes.
+ *
+ * ⚠️ **Algorithm Synchronization Notice**
+ *
+ * This implementation and `src/shaders/sources.ts` implement the **same**
+ * Cooley-Tukey FFT algorithm. Any bug fix or optimization must be applied
+ * to both implementations to maintain consistency.
+ *
+ * Key algorithmic components:
+ * - Bit-reversal permutation (initial reordering)
+ * - Butterfly stages (Cooley-Tukey decomposition)
+ * - IFFT normalization (1/N scaling)
+ *
+ * See `shaders/sources.ts` for the WGSL (GPU) equivalent.
  */
 
 import { log2, bitReverse } from './bit-reversal';

@@ -1,34 +1,28 @@
-// FFT Engine - Core implementation using WebGPU compute shaders
+/**
+ * FFT Engine - Core implementation using WebGPU compute shaders
+ * @module webgpu-fft/fft-engine
+ *
+ * FFTEngine 专注于 FFT 算法编排，GPU 资源管理委托给 FFTComputeContext。
+ * 这种分离使得测试可以注入 mock context，无需真实 GPU 环境。
+ */
+
 import type { FFTEngineConfig } from '../types';
 import type { RealFFTBackend } from './backend';
-import { GPUResourceManager } from './gpu-resource-manager';
+import type { FFTComputeContext } from './compute-context';
 import { FFTError, FFTErrorCode } from './errors';
-import { log2 } from '../utils/bit-reversal';
+import { log2 } from '../utils/math';
 import { createRealFFTBackend } from './real-fft-backend';
 import { validateGPUFFT, validateGPUFFT2D } from './validation';
-import { BUTTERFLY_SHADER, BIT_REVERSAL_SHADER, SCALE_SHADER } from '../shaders/sources';
+import { GPUFFTBackend } from './gpu-fft-backend';
+import { GPUComputeContext } from './gpu-compute-context';
+import { GPUResourceManager } from './gpu-resource-manager';
 
 const SUPPORTED_WORKGROUP_SIZE = 256;
-const PLAN_CACHE_CAPACITY = 4;
-const BIT_REVERSAL_PARAM_BUFFER_SIZE = 8;
-const BUTTERFLY_PARAM_BUFFER_SIZE = 16;
-const SCALE_PARAM_BUFFER_SIZE = 8;
 
 const DEFAULT_CONFIG: FFTEngineConfig = {
   enableBankConflictOptimization: false,
   workgroupSize: SUPPORTED_WORKGROUP_SIZE,
 };
-
-interface SizeCache {
-  n: number;
-  bufferSize: number;
-  inputBuffer: GPUBuffer;
-  outputBuffer: GPUBuffer;
-  tempBuffer: GPUBuffer;
-  bitReversalParamsBuffer: GPUBuffer;
-  stageParamBuffers: GPUBuffer[];
-  scaleParamsBuffer: GPUBuffer;
-}
 
 function validateGPUWorkgroupSize(workgroupSize: number): void {
   if (workgroupSize !== SUPPORTED_WORKGROUP_SIZE) {
@@ -53,7 +47,7 @@ function createButterflyParams(
 }
 
 function createScaleParams(n: number): Uint8Array {
-  const scaleParams = new ArrayBuffer(SCALE_PARAM_BUFFER_SIZE);
+  const scaleParams = new ArrayBuffer(8);
   new Uint32Array(scaleParams, 0, 1)[0] = n;
   new Float32Array(scaleParams, 4, 1)[0] = 1 / n;
   return new Uint8Array(scaleParams);
@@ -74,40 +68,58 @@ function transposeComplexMatrix(input: Float32Array, width: number, height: numb
   return result;
 }
 
+/**
+ * FFT Engine
+ *
+ * 使用 FFTComputeContext 执行 GPU 计算。
+ * 可通过构造函数注入自定义 context（用于测试）。
+ */
 export class FFTEngine {
-  private resourceManager: GPUResourceManager;
+  private context: FFTComputeContext;
   private config: FFTEngineConfig;
-  private butterflyPipeline!: GPUComputePipeline;
-  private bitReversalPipeline!: GPUComputePipeline;
-  private scalePipeline!: GPUComputePipeline;
   private initialized = false;
   private disposed = false;
-  private readonly ownsResourceManager: boolean;
-  private sizeCaches = new Map<number, SizeCache>();
-  private realFFTBackend!: RealFFTBackend;
+  private readonly ownsContext: boolean;
 
-  private constructor(
-    resourceManager: GPUResourceManager,
-    config: FFTEngineConfig,
-    ownsResourceManager: boolean
-  ) {
-    this.resourceManager = resourceManager;
+  private constructor(context: FFTComputeContext, config: FFTEngineConfig, ownsContext: boolean) {
+    this.context = context;
     this.config = config;
-    this.ownsResourceManager = ownsResourceManager;
+    this.ownsContext = ownsContext;
   }
 
+  /**
+   * 从已有的 FFTComputeContext 创建 FFTEngine
+   *
+   * @param context - 计算上下文
+   * @param config - 配置
+   * @param ownsContext - 是否在 dispose 时释放 context
+   */
+  static fromContext(
+    context: FFTComputeContext,
+    config: FFTEngineConfig,
+    ownsContext = false
+  ): FFTEngine {
+    const engine = new FFTEngine(context, config, ownsContext);
+    engine.initialized = true;
+    return engine;
+  }
+
+  /**
+   * 从 GPUResourceManager 创建 FFTEngine（向后兼容）
+   *
+   * @deprecated 使用 `createStandaloneFFTEngine()` 或 `FFTEngine.fromContext()` 代替
+   * @param resourceManager - GPU 资源管理器
+   * @param config - 配置
+   * @param ownsResourceManager - 是否在 dispose 时释放 manager
+   */
   static async create(
     resourceManager: GPUResourceManager,
     config: FFTEngineConfig,
     ownsResourceManager = false
   ): Promise<FFTEngine> {
-    const engine = new FFTEngine(resourceManager, config, ownsResourceManager);
-    await engine.initialize();
-    return engine;
-  }
-
-  private validateConfig(): void {
-    validateGPUWorkgroupSize(this.config.workgroupSize);
+    validateGPUWorkgroupSize(config.workgroupSize);
+    const context = await GPUComputeContext.create(resourceManager);
+    return FFTEngine.fromContext(context, config, ownsResourceManager);
   }
 
   private assertUsable(): void {
@@ -120,90 +132,6 @@ export class FFTEngine {
     }
   }
 
-  private async initialize(): Promise<void> {
-    this.validateConfig();
-
-    this.butterflyPipeline = this.resourceManager.createComputePipeline(
-      BUTTERFLY_SHADER,
-      'butterfly_stage'
-    );
-    this.bitReversalPipeline = this.resourceManager.createComputePipeline(
-      BIT_REVERSAL_SHADER,
-      'bit_reversal_permutation'
-    );
-    this.scalePipeline = this.resourceManager.createComputePipeline(SCALE_SHADER, 'scale');
-    this.realFFTBackend = createRealFFTBackend(this);
-    this.initialized = true;
-  }
-
-  private getBuffersForSize(n: number): SizeCache {
-    const bufferSize = n * 2 * 4;
-
-    const cached = this.sizeCaches.get(n);
-    if (cached) {
-      this.sizeCaches.delete(n);
-      this.sizeCaches.set(n, cached);
-      return cached;
-    }
-
-    if (this.sizeCaches.size >= PLAN_CACHE_CAPACITY) {
-      const oldestKey = this.sizeCaches.keys().next().value;
-      if (oldestKey !== undefined) {
-        const oldest = this.sizeCaches.get(oldestKey);
-        if (oldest) {
-          this.releaseSizeCache(oldest);
-        }
-        this.sizeCaches.delete(oldestKey);
-      }
-    }
-
-    const storageFlags = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
-    const numStages = log2(n);
-
-    const sizeCache: SizeCache = {
-      n,
-      bufferSize,
-      inputBuffer: this.resourceManager.createBuffer(bufferSize, storageFlags),
-      outputBuffer: this.resourceManager.createBuffer(bufferSize, storageFlags),
-      tempBuffer: this.resourceManager.createBuffer(bufferSize, storageFlags),
-      bitReversalParamsBuffer: this.resourceManager.createBuffer(
-        BIT_REVERSAL_PARAM_BUFFER_SIZE,
-        GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-      ),
-      stageParamBuffers: Array.from({ length: numStages }, () =>
-        this.resourceManager.createBuffer(
-          BUTTERFLY_PARAM_BUFFER_SIZE,
-          GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        )
-      ),
-      scaleParamsBuffer: this.resourceManager.createBuffer(
-        SCALE_PARAM_BUFFER_SIZE,
-        GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-      ),
-    };
-
-    this.sizeCaches.set(n, sizeCache);
-    return sizeCache;
-  }
-
-  private releaseSizeCache(sizeCache: SizeCache): void {
-    this.resourceManager.releaseBuffer(sizeCache.inputBuffer);
-    this.resourceManager.releaseBuffer(sizeCache.outputBuffer);
-    this.resourceManager.releaseBuffer(sizeCache.tempBuffer);
-    this.resourceManager.releaseBuffer(sizeCache.bitReversalParamsBuffer);
-    for (const buffer of sizeCache.stageParamBuffers) {
-      this.resourceManager.releaseBuffer(buffer);
-    }
-    this.resourceManager.releaseBuffer(sizeCache.scaleParamsBuffer);
-  }
-
-  private releaseAllSizeCaches(): void {
-    for (const sizeCache of this.sizeCaches.values()) {
-      this.releaseSizeCache(sizeCache);
-    }
-    this.sizeCaches.clear();
-  }
-
   async fft(input: Float32Array): Promise<Float32Array> {
     this.assertUsable();
     return this.transform(input, false);
@@ -214,98 +142,57 @@ export class FFTEngine {
     return this.transform(input, true);
   }
 
-  async rfft(input: Float32Array): Promise<Float32Array> {
-    this.assertUsable();
-    return this.realFFTBackend.rfft(input);
-  }
-
-  async irfft(input: Float32Array): Promise<Float32Array> {
-    this.assertUsable();
-    return this.realFFTBackend.irfft(input);
-  }
-
   private async transform(input: Float32Array, inverse: boolean): Promise<Float32Array> {
     this.assertUsable();
 
     const n = validateGPUFFT(input);
     const numStages = log2(n);
-    const device = this.resourceManager.device;
-    const cache = this.getBuffersForSize(n);
+    const cache = this.context.getBuffers(n);
     const workgroups = Math.ceil(n / this.config.workgroupSize);
 
-    this.resourceManager.uploadData(cache.inputBuffer, input);
-    this.resourceManager.uploadData(
+    // 上传输入数据
+    this.context.uploadData(cache.inputBuffer, input);
+    this.context.uploadData(cache.bitReversalParamsBuffer, createBitReversalParams(n, numStages));
+
+    // Bit-reversal
+    this.context.executeBitReversal(
+      cache.inputBuffer,
+      cache.tempBuffer,
       cache.bitReversalParamsBuffer,
-      createBitReversalParams(n, numStages)
+      workgroups
     );
-
-    const commandEncoder = device.createCommandEncoder();
-
-    const bitReversalBindGroup = device.createBindGroup({
-      layout: this.bitReversalPipeline.getBindGroupLayout(0),
-      entries: [
-        { binding: 0, resource: { buffer: cache.bitReversalParamsBuffer } },
-        { binding: 1, resource: { buffer: cache.inputBuffer } },
-        { binding: 2, resource: { buffer: cache.tempBuffer } },
-      ],
-    });
-
-    let pass = commandEncoder.beginComputePass();
-    pass.setPipeline(this.bitReversalPipeline);
-    pass.setBindGroup(0, bitReversalBindGroup);
-    pass.dispatchWorkgroups(workgroups);
-    pass.end();
 
     let currentInput = cache.tempBuffer;
     let currentOutput = cache.outputBuffer;
 
+    // Butterfly stages
     for (let stage = 0; stage < numStages; stage++) {
-      this.resourceManager.uploadData(
+      this.context.uploadData(
         cache.stageParamBuffers[stage],
         createButterflyParams(n, stage, inverse, this.config.enableBankConflictOptimization)
       );
 
-      const bindGroup = device.createBindGroup({
-        layout: this.butterflyPipeline.getBindGroupLayout(0),
-        entries: [
-          { binding: 0, resource: { buffer: cache.stageParamBuffers[stage] } },
-          { binding: 1, resource: { buffer: currentInput } },
-          { binding: 2, resource: { buffer: currentOutput } },
-        ],
-      });
-
-      pass = commandEncoder.beginComputePass();
-      pass.setPipeline(this.butterflyPipeline);
-      pass.setBindGroup(0, bindGroup);
-      pass.dispatchWorkgroups(workgroups);
-      pass.end();
+      this.context.executeButterfly(
+        currentInput,
+        currentOutput,
+        cache.stageParamBuffers[stage],
+        workgroups
+      );
 
       [currentInput, currentOutput] = [currentOutput, currentInput];
     }
 
     const resultBuffer = currentInput;
 
+    // IFFT scaling
     if (inverse) {
-      this.resourceManager.uploadData(cache.scaleParamsBuffer, createScaleParams(n));
-
-      const scaleBindGroup = device.createBindGroup({
-        layout: this.scalePipeline.getBindGroupLayout(0),
-        entries: [
-          { binding: 0, resource: { buffer: cache.scaleParamsBuffer } },
-          { binding: 1, resource: { buffer: resultBuffer } },
-        ],
-      });
-
-      pass = commandEncoder.beginComputePass();
-      pass.setPipeline(this.scalePipeline);
-      pass.setBindGroup(0, scaleBindGroup);
-      pass.dispatchWorkgroups(workgroups);
-      pass.end();
+      this.context.uploadData(cache.scaleParamsBuffer, createScaleParams(n));
+      this.context.executeScale(resultBuffer, cache.scaleParamsBuffer, workgroups);
     }
 
-    device.queue.submit([commandEncoder.finish()]);
-
-    return this.resourceManager.downloadData(resultBuffer, cache.bufferSize);
+    // 提交并读取结果
+    this.context.submit();
+    return this.context.downloadData(resultBuffer, cache.bufferSize);
   }
 
   async fft2d(input: Float32Array, width: number, height: number): Promise<Float32Array> {
@@ -316,16 +203,6 @@ export class FFTEngine {
   async ifft2d(input: Float32Array, width: number, height: number): Promise<Float32Array> {
     this.assertUsable();
     return this.transform2d(input, width, height, true);
-  }
-
-  async rfft2d(input: Float32Array, width: number, height: number): Promise<Float32Array> {
-    this.assertUsable();
-    return this.realFFTBackend.rfft2d(input, width, height);
-  }
-
-  async irfft2d(input: Float32Array, width: number, height: number): Promise<Float32Array> {
-    this.assertUsable();
-    return this.realFFTBackend.irfft2d(input, width, height);
   }
 
   private async transform2d(
@@ -361,10 +238,8 @@ export class FFTEngine {
       return;
     }
 
-    this.releaseAllSizeCaches();
-
-    if (this.ownsResourceManager) {
-      this.resourceManager.dispose();
+    if (this.ownsContext) {
+      this.context.dispose();
     }
 
     this.initialized = false;
@@ -372,8 +247,29 @@ export class FFTEngine {
   }
 }
 
-export async function createFFTEngine(config?: Partial<FFTEngineConfig>): Promise<FFTEngine> {
-  const fullConfig = { ...DEFAULT_CONFIG, ...config };
+/**
+ * 创建独立的 FFT 引擎（管理自己的 GPU 资源）
+ *
+ * @param config - 配置
+ * @returns FFTEngine 实例
+ */
+export async function createStandaloneFFTEngine(config: FFTEngineConfig): Promise<FFTEngine> {
+  validateGPUWorkgroupSize(config.workgroupSize);
   const resourceManager = await GPUResourceManager.create();
-  return FFTEngine.create(resourceManager, fullConfig, true);
+  return FFTEngine.create(resourceManager, config, true);
+}
+
+/**
+ * 创建 FFT 引擎
+ *
+ * 返回 RealFFTBackend，提供完整的 FFT 功能（包括实输入 FFT）。
+ *
+ * @param config - 可选配置
+ * @returns RealFFTBackend 实例
+ */
+export async function createFFTEngine(config?: Partial<FFTEngineConfig>): Promise<RealFFTBackend> {
+  const fullConfig = { ...DEFAULT_CONFIG, ...config };
+  const engine = await createStandaloneFFTEngine(fullConfig);
+  const gpuBackend = GPUFFTBackend.fromEngine(engine, true);
+  return createRealFFTBackend(gpuBackend);
 }
