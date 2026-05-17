@@ -18,5 +18,5 @@
 
 ## 4. Verification and finish
 
-- [ ] 4.1 Run the canonical repo validation chain plus docs build and address regressions
-- [ ] 4.2 Review public wording against README and OpenSpec so GPU vs CPU-only claims stay accurate
+- [x] 4.1 Run the canonical repo validation chain plus docs build and address regressions
+- [x] 4.2 Review public wording against README and OpenSpec so GPU vs CPU-only claims stay accurate
