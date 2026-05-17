@@ -1,91 +1,105 @@
 ---
 layout: home
-
-hero:
-  name: 'WebGPU FFT'
-  text: 'GPU 加速傅里叶变换'
-  tagline: 高性能 1D/2D FFT 与实值 RFFT API，面向 JavaScript 与 TypeScript。计算着色器释放浏览器并行能力；CPU 工具函数保证全平台兼容。
-  image:
-    src: /hero.svg
-    alt: WebGPU FFT 蝶形运算可视化
-  actions:
-    - theme: brand
-      text: 快速开始
-      link: /zh/setup/quick-start
-    - theme: alt
-      text: API 参考
-      link: /api/index
-    - theme: alt
-      text: 性能基准
-      link: /zh/showcase/benchmarks
-
-features:
-  - icon: 🚀
-    title: WebGPU 计算内核
-    details: FFT 引擎基于 WGSL 计算着色器，支持可配置 workgroup 大小与可选的 bank-conflict padding。首次运行着色器编译开销可在复用中摊平。
-  - icon: 📐
-    title: 实值 FFT
-    details: RFFT / IRFFT 针对实值信号压缩半频谱。利用 Hermitian 对称性，相比复数 FFT 节省约 50% 带宽与内存。
-  - icon: 🔄
-    title: GPU / CPU 双路径
-    details: 每种变换均提供 WebGPU 快速路径与 CPU 回退路径。代码在所有浏览器中可用，WebGPU 可用时自动加速。
-  - icon: 📊
-    title: 2D 变换
-    details: 完整支持 2D FFT / IFFT，采用行列分解算法。支持高达 2048×2048 像素的图像 GPU 加速处理。
-  - icon: 📦
-    title: 零运行时依赖
-    details: ESM + CJS + TypeScript 声明。无依赖膨胀，无需获取 WASM 二进制，无需额外构建插件。
-  - icon: 🔧
-    title: TypeScript 优先
-    details: 严格模式类型、清晰的 API 表面、显式错误码。设计目标是 AI agent 与 IDE 友好。
 ---
 
-## 快速开始
+<div class="whitepaper-home">
+  <section class="paper-cover">
+    <p class="cover-kicker">浏览器 FFT 技术白皮书</p>
+    <h1 class="cover-title">把 WebGPU FFT 核心项目，像架构 dossier 一样讲清楚。</h1>
+    <p class="cover-lead">
+      这里不是 README 的放大版，而是 <code>gpu-fft</code> 的公开导读前台：它说明项目真正提供什么、边界停在哪里、WebGPU 与 CPU 各自负责什么，以及如何用架构页、证据页和参考页去核对这些说法。
+    </p>
+    <div class="cover-actions">
+      <a class="action-pill action-pill--brand" href="./guides/getting-started">开始导读</a>
+      <a class="action-pill" href="/zh/architecture/overview">查看系统结构</a>
+      <a class="action-pill" href="/zh/showcase/benchmarks">查看证据页</a>
+    </div>
+    <p class="cover-note">
+      GPU FFT 核心、CPU-only 分析工具、显式 real-input 契约、零运行时依赖，这些边界会在整站持续保持一致。
+    </p>
+  </section>
 
-<div class="quick-start-block">
-<div class="command-block">
-<code>npm install webgpu-fft</code>
+  <section class="paper-grid paper-grid--hero">
+    <article class="paper-panel">
+      <p class="panel-kicker">当前产品切片</p>
+      <h2>今天这个库真正交付什么</h2>
+      <ul class="signal-points">
+        <li>1D / 2D 复数 FFT 与 IFFT，覆盖 WebGPU 主路径与 CPU 回退</li>
+        <li>1D / 2D 实值 FFT API，明确采用 half-spectrum 契约</li>
+        <li>CPU-only 的频谱分析与频域图像滤波工具</li>
+        <li>TypeScript 优先的导出表面和轻量包体</li>
+      </ul>
+    </article>
+    <CapabilityMatrix locale="zh" />
+  </section>
 </div>
 
-```typescript
-import { createFFTEngine } from 'webgpu-fft';
+## 按层阅读项目
 
-const engine = await createFFTEngine(navigator.gpu, 1024);
-const input = new Float32Array(2048); // 1024 个复数
-const output = await engine.fft(input);
-console.log(output); // FFT 结果 [实部0, 虚部0, 实部1, 虚部1, ...]
-```
-
+<div class="chapter-grid">
+  <article class="chapter-card">
+    <p class="chapter-index">指南</p>
+    <h3>先看适配边界，再决定要不要继续。</h3>
+    <p>这条路径最适合面试官、评估者和第一次接触仓库的读者。</p>
+    <a class="chapter-link" href="./guides/getting-started">打开指南</a>
+  </article>
+  <article class="chapter-card">
+    <p class="chapter-index">导读</p>
+    <h3>把页面当作课程大纲来读。</h3>
+    <p>为评估、学习和贡献分别准备不同的阅读顺序。</p>
+    <a class="chapter-link" href="./academy/reading-map">打开阅读地图</a>
+  </article>
+  <article class="chapter-card">
+    <p class="chapter-index">架构</p>
+    <h3>看公开 API 如何落到 GPU pass。</h3>
+    <p>重点理解 execution planner、WGSL pass 和 CPU-only utility 的边界。</p>
+    <a class="chapter-link" href="/zh/architecture/overview">打开架构页</a>
+  </article>
+  <article class="chapter-card">
+    <p class="chapter-index">证据</p>
+    <h3>把 benchmark 和 ADR 当证据而不是宣传。</h3>
+    <p>所有性能与设计说法都应该能回到实测或决策记录。</p>
+    <a class="chapter-link" href="/zh/showcase/benchmarks">打开证据页</a>
+  </article>
+  <article class="chapter-card">
+    <p class="chapter-index">参考</p>
+    <h3>把项目放回 FFT 研究和工程生态里看。</h3>
+    <p>论文、相关实现和学习资源会告诉你这个项目刻意做窄在哪里。</p>
+    <a class="chapter-link" href="/reference/index">打开参考中心</a>
+  </article>
 </div>
 
-## 这个库适合你吗？
+## 系统读图
 
-### 适合
+<ArchitectureAtlas locale="zh" />
 
-- 浏览器侧的大尺寸 1D/2D FFT 任务，且 WebGPU 可用
-- 实值信号或图像处理，能从压缩半频谱 API 中受益
-- 希望引入类型化 FFT 内核，同时拒绝运行时依赖膨胀
+## 为什么首页要这么“较真”
 
-### 不适合（当前阶段）
+<div class="paper-grid paper-grid--hero">
+  <article class="paper-panel">
+    <p class="panel-kicker">这页真正优化什么</p>
+    <h2>理解速度、表述可信度、以及后续维护成本。</h2>
+    <p>
+      这个站点的目的不是把项目包装得更大，而是让技术读者在最短时间内理解真实切片，随后能把注意力花在“为什么这样设计”而不是“到底支持什么”上。
+    </p>
+  </article>
+  <article class="paper-panel">
+    <p class="panel-kicker">不要误读的地方</p>
+    <h2>这不是一个“大而全”的 DSP 工具箱。</h2>
+    <ul class="signal-points">
+      <li>它不会把 CPU-only 的分析工具包装成 GPU-native 功能。</li>
+      <li>它不会对任意大小 FFT 给出未实现的承诺。</li>
+      <li>它不会在没有 benchmark 证据时发布夸张性能口径。</li>
+    </ul>
+  </article>
+</div>
 
-- 需要 GPU 原生频谱分析或 GPU 原生图像滤波的场景（这些是 CPU 工具函数）
-- 不经过预处理就直接处理任意非 2 的幂大小输入
-- 需要"大而全"DSP 工具箱的项目
+## 继续阅读的正确入口
 
-## 开始探索
-
-| 路径                                | 你能获得什么                                    |
-| ----------------------------------- | ----------------------------------------------- |
-| [快速开始](/zh/setup/quick-start)   | 安装、首个 FFT、CPU 回退、错误处理，5 分钟上手  |
-| [架构](/zh/architecture/overview)   | 为什么选择 Radix-2、为什么选择 WebGPU、引擎结构 |
-| [性能基准](/zh/showcase/benchmarks) | 实测性能数据与复现方法                          |
-| [架构决策](/zh/showcase/decisions)  | 关键技术决策与权衡                              |
-
-> **注意**：教程、API 参考、参考中心、游乐场等详细文档目前仅提供英文版本。以下链接将跳转至英文文档页面：
-
-| 路径                            | 你能获得什么                                         |
-| ------------------------------- | ---------------------------------------------------- |
-| [教程](/tutorials/introduction) | 逐步深入：1D FFT、2D FFT、频谱分析、图像滤波         |
-| [API 参考](/api/index)          | 完整类型化接口：FFTEngine、CPU FFT、工具函数、窗函数 |
-| [参考中心](/reference/index)    | 学术论文、技术规范、相关项目                         |
-| [游乐场](/playground/index)     | 浏览器内交互式 FFT 探索器                            |
+| 如果你要解决的是 | 从这里开始 |
+| --- | --- |
+| 快速技术评估 | [起步导读](./guides/getting-started) |
+| 面试 / 代码审查阅读顺序 | [阅读地图](./academy/reading-map) |
+| 看执行模型和能力边界 | [架构总览](/zh/architecture/overview) |
+| 看实测和证据 | [性能基准](/zh/showcase/benchmarks) |
+| 看论文和生态脉络 | [参考中心](/reference/index) |

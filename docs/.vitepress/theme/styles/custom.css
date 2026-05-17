@@ -1,161 +1,84 @@
-/* ==========================================================================
-   WebGPU FFT Docs — NVIDIA Developer Style System
-   ========================================================================== */
-
-/* --------------------------------------------------------------------------
-   1. Brand Color System
-   -------------------------------------------------------------------------- */
-
 :root {
-  /* NVIDIA Green family */
-  --nv-green: #76b900;
-  --nv-green-bright: #8ecf00;
-  --nv-green-dim: #5a8c00;
-  --nv-green-glow: rgba(118, 185, 0, 0.35);
-  --nv-green-soft: rgba(118, 185, 0, 0.12);
-
-  /* Accent: Tech Cyan */
-  --nv-cyan: #00c3ff;
-  --nv-cyan-soft: rgba(0, 195, 255, 0.12);
-
-  /* Backgrounds (GitHub Dark inspired) */
-  --nv-bg-base: #0d1117;
-  --nv-bg-surface: #161b22;
-  --nv-bg-elevated: #1c2128;
-  --nv-bg-soft: #21262d;
-
-  /* Borders & dividers */
-  --nv-border: #30363d;
-  --nv-border-subtle: #21262d;
-
-  /* Text hierarchy */
-  --nv-text-primary: #c9d1d9;
-  --nv-text-secondary: #8b949e;
-  --nv-text-tertiary: #484f58;
-  --nv-text-inverse: #0d1117;
-
-  /* Semantic overlays */
-  --nv-danger: #ff5454;
-  --nv-warning: #ffc517;
-  --nv-info: #00c3ff;
-  --nv-success: #76b900;
-
-  /* VitePress brand mapping */
-  --vp-c-brand-1: var(--nv-green);
-  --vp-c-brand-2: var(--nv-green-bright);
-  --vp-c-brand-3: var(--nv-green-dim);
-  --vp-c-brand-soft: var(--nv-green-soft);
-
-  /* VitePress background mapping */
-  --vp-c-bg: var(--nv-bg-base);
-  --vp-c-bg-alt: var(--nv-bg-surface);
-  --vp-c-bg-elv: var(--nv-bg-elevated);
-  --vp-c-bg-soft: var(--nv-bg-soft);
-
-  /* VitePress text mapping */
-  --vp-c-text-1: var(--nv-text-primary);
-  --vp-c-text-2: var(--nv-text-secondary);
-  --vp-c-text-3: var(--nv-text-tertiary);
-
-  /* Dividers */
-  --vp-c-divider: var(--nv-border);
-  --vp-c-border: var(--nv-border);
-
-  /* Typography */
-  --vp-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
-
-  /* Custom shadows */
-  --nv-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --nv-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --nv-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
-  --nv-shadow-glow: 0 0 20px var(--nv-green-glow);
+  color-scheme: light;
+  --fft-bg: oklch(0.985 0.004 95);
+  --fft-bg-soft: oklch(0.965 0.007 95);
+  --fft-surface: oklch(0.945 0.01 95);
+  --fft-surface-strong: oklch(0.905 0.014 95);
+  --fft-border: oklch(0.84 0.01 95);
+  --fft-border-strong: oklch(0.73 0.014 95);
+  --fft-text-1: oklch(0.26 0.02 250);
+  --fft-text-2: oklch(0.46 0.018 250);
+  --fft-text-3: oklch(0.61 0.014 250);
+  --fft-accent: oklch(0.66 0.18 138);
+  --fft-accent-strong: oklch(0.57 0.16 138);
+  --fft-cyan: oklch(0.63 0.12 222);
+  --fft-shadow: 0 18px 44px rgba(34, 43, 56, 0.08);
+  --fft-shadow-soft: 0 8px 20px rgba(34, 43, 56, 0.06);
+  --fft-code-bg: oklch(0.93 0.011 95);
+  --fft-canvas-bg: oklch(0.97 0.008 95);
+  --fft-chart-grid: oklch(0.88 0.01 95);
+  --fft-chart-text: var(--fft-text-2);
+  --vp-layout-max-width: 1480px;
+  --vp-c-brand-1: var(--fft-accent-strong);
+  --vp-c-brand-2: var(--fft-accent);
+  --vp-c-brand-3: oklch(0.74 0.16 138);
+  --vp-c-brand-soft: color-mix(in srgb, var(--fft-accent) 18%, transparent);
+  --vp-c-bg: var(--fft-bg);
+  --vp-c-bg-alt: var(--fft-bg-soft);
+  --vp-c-bg-elv: var(--fft-surface);
+  --vp-c-bg-soft: var(--fft-surface);
+  --vp-c-text-1: var(--fft-text-1);
+  --vp-c-text-2: var(--fft-text-2);
+  --vp-c-text-3: var(--fft-text-3);
+  --vp-c-border: var(--fft-border);
+  --vp-c-divider: var(--fft-border);
+  --vp-code-block-bg: var(--fft-code-bg);
+  --vp-home-hero-image-background-image: none;
+  --vp-home-hero-image-filter: none;
+  --vp-font-family-base:
+    'Segoe UI', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --vp-font-family-mono:
+    'Iosevka', 'JetBrains Mono', 'SFMono-Regular', 'Cascadia Code', 'Consolas', monospace;
 }
 
-/* Light mode overrides */
-.light {
-  /* Brand colors for light mode */
-  --nv-green-glow: rgba(90, 140, 0, 0.2);
-  --nv-green-soft: rgba(90, 140, 0, 0.08);
-
-  /* Backgrounds (GitHub Light inspired) */
-  --nv-bg-base: #ffffff;
-  --nv-bg-surface: #f6f8fa;
-  --nv-bg-elevated: #ffffff;
-  --nv-bg-soft: #f3f4f6;
-
-  /* Borders & dividers */
-  --nv-border: #d0d7de;
-  --nv-border-subtle: #e5e7eb;
-
-  /* Text hierarchy */
-  --nv-text-primary: #1f2328;
-  --nv-text-secondary: #656d76;
-  --nv-text-tertiary: #8c959f;
-  --nv-text-inverse: #ffffff;
-
-  /* Shadows for light mode */
-  --nv-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --nv-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --nv-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-  --nv-shadow-glow: 0 0 20px rgba(90, 140, 0, 0.15);
-
-  /* VitePress brand mapping */
-  --vp-c-brand-1: #5a8c00;
-  --vp-c-brand-2: #76b900;
-  --vp-c-brand-3: #8ecf00;
-  --vp-c-bg: #ffffff;
-  --vp-c-bg-alt: #f6f8fa;
-  --vp-c-bg-elv: #ffffff;
-  --vp-c-bg-soft: #f6f8fa;
-  --vp-c-text-1: #1f2328;
-  --vp-c-text-2: #656d76;
-  --vp-c-text-3: #8c959f;
-  --vp-c-divider: #d0d7de;
-  --vp-c-border: #d0d7de;
+.dark {
+  color-scheme: dark;
+  --fft-bg: oklch(0.18 0.016 252);
+  --fft-bg-soft: oklch(0.22 0.018 252);
+  --fft-surface: oklch(0.26 0.018 252);
+  --fft-surface-strong: oklch(0.31 0.02 252);
+  --fft-border: oklch(0.38 0.016 252);
+  --fft-border-strong: oklch(0.48 0.018 252);
+  --fft-text-1: oklch(0.93 0.01 250);
+  --fft-text-2: oklch(0.8 0.012 250);
+  --fft-text-3: oklch(0.66 0.012 250);
+  --fft-accent: oklch(0.72 0.17 138);
+  --fft-accent-strong: oklch(0.67 0.16 138);
+  --fft-cyan: oklch(0.75 0.11 222);
+  --fft-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+  --fft-shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.22);
+  --fft-code-bg: oklch(0.23 0.014 252);
+  --fft-canvas-bg: oklch(0.22 0.014 252);
+  --fft-chart-grid: oklch(0.32 0.015 252);
+  --fft-chart-text: var(--fft-text-2);
 }
-
-/* --------------------------------------------------------------------------
-   2. Base & Typography
-   -------------------------------------------------------------------------- */
 
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  font-feature-settings: 'liga', 'calt', 'ss01';
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--fft-cyan) 10%, transparent), transparent 32%),
+    radial-gradient(circle at bottom right, color-mix(in srgb, var(--fft-accent) 12%, transparent), transparent 30%),
+    var(--vp-c-bg);
 }
-
-/* --------------------------------------------------------------------------
-   3. Navigation Bar
-   -------------------------------------------------------------------------- */
 
 .VPNav {
-  background: rgba(13, 17, 23, 0.85) !important;
-  backdrop-filter: blur(12px) saturate(180%);
-  border-bottom: 1px solid var(--nv-border);
-}
-
-.VPNav::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--nv-green) 20%,
-    var(--nv-cyan) 80%,
-    transparent 100%
-  );
-  opacity: 0.6;
-}
-
-.VPNavBar {
-  border-bottom: none !important;
+  backdrop-filter: blur(20px);
+  background: color-mix(in srgb, var(--fft-bg) 88%, transparent) !important;
+  border-bottom: 1px solid var(--fft-border);
 }
 
 .VPNavBar .title {
@@ -163,697 +86,340 @@ body {
   letter-spacing: -0.02em;
 }
 
-.VPNavBarMenuLink {
-  font-weight: 500;
-  color: var(--nv-text-secondary);
-  transition: color 0.2s ease;
-}
-
-.VPNavBarMenuLink:hover {
-  color: var(--nv-green);
-}
-
+.VPNavBarMenuLink,
 .VPNavBarMenuGroup .button {
-  color: var(--nv-text-secondary);
+  color: var(--fft-text-2);
 }
 
-/* --------------------------------------------------------------------------
-   4. Sidebar
-   -------------------------------------------------------------------------- */
+.VPNavBarMenuLink:hover,
+.VPNavBarMenuLink.active {
+  color: var(--fft-text-1);
+}
 
 .VPSidebar {
-  background: var(--nv-bg-base) !important;
-  border-right: 1px solid var(--nv-border);
+  background: color-mix(in srgb, var(--fft-bg) 92%, transparent) !important;
+  border-right: 1px solid var(--fft-border);
 }
 
+.VPSidebarItem.is-active .text,
 .VPSidebarItem.is-active .indicator {
-  background-color: var(--nv-green);
-  width: 3px;
-  border-radius: 0 2px 2px 0;
+  color: var(--fft-accent-strong);
+  background-color: var(--fft-accent-strong);
 }
 
-.VPSidebarItem.is-active .text {
-  color: var(--nv-green);
-  font-weight: 600;
+.VPContent.is-home {
+  background: transparent;
 }
 
-.VPSidebarItem .text {
-  color: var(--nv-text-secondary);
-  transition: color 0.2s ease;
+.VPHome {
+  padding-inline: clamp(1.25rem, 3vw, 2.5rem);
 }
 
-.VPSidebarItem .text:hover {
-  color: var(--nv-text-primary);
+.whitepaper-home {
+  display: grid;
+  gap: 2.5rem;
+  padding-block: 1.5rem 3rem;
 }
 
-.VPSidebarItem.collapsible > .item > .text {
-  color: var(--nv-text-primary);
-  font-weight: 600;
-}
-
-/* --------------------------------------------------------------------------
-   5. Hero Section (Homepage)
-   -------------------------------------------------------------------------- */
-
-.VPHero {
+.paper-cover {
+  display: grid;
+  gap: 1rem;
+  max-width: 76rem;
+  padding: clamp(1.4rem, 2vw, 2rem);
+  border: 1px solid color-mix(in srgb, var(--fft-border) 80%, transparent);
+  border-radius: 1.5rem;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(118, 185, 0, 0.12), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(0, 195, 255, 0.06), transparent);
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--fft-surface) 95%, transparent),
+      color-mix(in srgb, var(--fft-bg-soft) 92%, transparent)
+    );
+  box-shadow: var(--fft-shadow-soft);
 }
 
-.VPHero .name {
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-}
-
-.VPHero .text {
+.cover-kicker,
+.panel-kicker,
+.chapter-index {
+  color: var(--fft-text-3);
+  font-size: 0.78rem;
   font-weight: 700;
-  color: var(--nv-text-primary);
-}
-
-.VPHero .tagline {
-  font-size: 1.125rem;
-  line-height: 1.75;
-  color: var(--nv-text-secondary);
-  max-width: 560px;
-}
-
-.VPHero .actions {
-  margin-top: 2rem;
-}
-
-.VPHero .VPButton {
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.VPHero .VPButton.brand {
-  background: linear-gradient(135deg, var(--nv-green), var(--nv-green-dim));
-  border: none;
-  box-shadow: 0 4px 14px rgba(118, 185, 0, 0.3);
-}
-
-.VPHero .VPButton.brand:hover {
-  box-shadow: 0 6px 20px rgba(118, 185, 0, 0.45);
-  transform: translateY(-1px);
-}
-
-.VPHero .VPButton.alt {
-  border: 1px solid var(--nv-border);
-  background: var(--nv-bg-surface);
-}
-
-.VPHero .VPButton.alt:hover {
-  border-color: var(--nv-green);
-  color: var(--nv-green);
-}
-
-/* Hero image background glow */
-.VPHero .image-bg {
-  background: radial-gradient(circle at center, var(--nv-green-glow), transparent 70%);
-  opacity: 0.5;
-}
-
-/* --------------------------------------------------------------------------
-   6. Features Grid (Homepage)
-   -------------------------------------------------------------------------- */
-
-.VPFeatures {
-  padding: 2rem 0;
-}
-
-.VPFeatures .item {
-  background: var(--nv-bg-surface);
-  border: 1px solid var(--nv-border);
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.VPFeatures .item:hover {
-  border-color: var(--nv-green);
-  transform: translateY(-4px);
-  box-shadow:
-    0 8px 24px rgba(118, 185, 0, 0.15),
-    0 0 0 1px rgba(118, 185, 0, 0.2);
-}
-
-.VPFeatures .icon {
-  font-size: 2rem;
-  margin-bottom: 0.75rem;
-}
-
-.VPFeatures .title {
-  font-weight: 700;
-  color: var(--nv-text-primary);
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-}
-
-.VPFeatures .details {
-  color: var(--nv-text-secondary);
-  line-height: 1.6;
-  font-size: 0.95rem;
-}
-
-/* --------------------------------------------------------------------------
-   7. Content Typography
-   -------------------------------------------------------------------------- */
-
-.vp-doc h1 {
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  background: linear-gradient(120deg, var(--nv-text-primary) 30%, var(--nv-green));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.vp-doc h2 {
-  font-weight: 700;
-  border-top: 1px solid var(--nv-border);
-  padding-top: 1.5rem;
-  margin-top: 2rem;
-}
-
-.vp-doc h3 {
-  font-weight: 600;
-  color: var(--nv-text-primary);
-}
-
-.vp-doc p {
-  color: var(--nv-text-secondary);
-  line-height: 1.75;
-}
-
-/* --------------------------------------------------------------------------
-   8. Code Blocks
-   -------------------------------------------------------------------------- */
-
-.vp-doc div[class*='language-'] {
-  border-radius: 10px;
-  border: 1px solid var(--nv-border);
-  background: var(--nv-bg-surface);
-  box-shadow: var(--nv-shadow-sm);
-}
-
-.vp-doc div[class*='language-']::before {
-  content: attr(data-lang);
-  position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
-  font-size: 0.7rem;
-  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--nv-text-tertiary);
-  font-family: var(--vp-font-family-mono);
 }
 
-.vp-doc pre {
-  background: transparent !important;
+.cover-title {
+  margin: 0;
+  max-width: 14ch;
+  color: var(--fft-text-1);
+  font-size: clamp(2.8rem, 6vw, 5.4rem);
+  line-height: 0.96;
+  letter-spacing: -0.05em;
 }
 
-.vp-doc code {
-  font-family: var(--vp-font-family-mono);
-  font-size: 0.9em;
-  color: var(--nv-cyan);
-  background: var(--nv-bg-soft);
-  padding: 0.15em 0.4em;
-  border-radius: 4px;
+.cover-lead {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--fft-text-2);
+  font-size: 1.08rem;
+  line-height: 1.8;
 }
 
-.vp-doc pre code {
-  color: var(--nv-text-primary);
-  background: transparent;
-  padding: 0;
+.cover-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
-/* Inline code inside links */
-.vp-doc a code {
-  color: var(--nv-green);
-}
-
-/* --------------------------------------------------------------------------
-   9. Links
-   -------------------------------------------------------------------------- */
-
-.vp-doc a {
-  color: var(--nv-green);
+.action-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--fft-border-strong);
+  padding: 0.72rem 1.1rem;
+  color: var(--fft-text-1);
+  font-weight: 600;
   text-decoration: none;
-  border-bottom: 1px solid transparent;
   transition:
-    border-color 0.25s ease,
-    color 0.2s ease;
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background-color 0.18s ease;
 }
 
-.vp-doc a:hover {
-  border-bottom-color: var(--nv-green);
+.action-pill:hover {
+  transform: translateY(-1px);
+  border-color: var(--fft-accent);
 }
 
-/* --------------------------------------------------------------------------
-   10. Tables
-   -------------------------------------------------------------------------- */
-
-.vp-doc table {
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--nv-border);
-  border-collapse: separate;
-  border-spacing: 0;
-  width: 100%;
+.action-pill--brand {
+  background: color-mix(in srgb, var(--fft-accent) 14%, transparent);
+  border-color: color-mix(in srgb, var(--fft-accent) 48%, var(--fft-border-strong));
 }
 
-.vp-doc th {
-  background: var(--nv-bg-surface);
-  color: var(--nv-green);
+.cover-note {
+  margin: 0;
+  color: var(--fft-text-3);
+  font-size: 0.94rem;
+}
+
+.paper-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.paper-grid--hero {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: stretch;
+}
+
+.paper-panel,
+.chapter-card,
+.guide-callout,
+.shared-language-note,
+.reference-card,
+.citation {
+  border: 1px solid var(--fft-border);
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--fft-surface) 96%, transparent);
+  box-shadow: var(--fft-shadow-soft);
+}
+
+.paper-panel,
+.guide-callout,
+.shared-language-note,
+.reference-card,
+.citation {
+  padding: 1.2rem 1.25rem;
+}
+
+.paper-panel h2,
+.paper-panel h3,
+.chapter-card h3 {
+  margin-top: 0.2rem;
+  margin-bottom: 0.7rem;
+  letter-spacing: -0.02em;
+}
+
+.signal-points,
+.fit-list {
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--fft-text-2);
+}
+
+.signal-points li,
+.fit-list li {
+  margin: 0.5rem 0;
+  line-height: 1.65;
+}
+
+.chapter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin: 1.2rem 0 1.8rem;
+}
+
+.chapter-card {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.2rem 1.15rem;
+}
+
+.chapter-card p {
+  margin: 0;
+  color: var(--fft-text-2);
+  line-height: 1.6;
+}
+
+.chapter-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--fft-accent-strong);
   font-weight: 600;
-  border-bottom: 1px solid var(--nv-border);
-  padding: 0.75rem 1rem;
-  text-align: left;
+  text-decoration: none;
 }
 
-.vp-doc td {
-  padding: 0.65rem 1rem;
-  border-bottom: 1px solid var(--nv-border-subtle);
-  color: var(--nv-text-secondary);
+.chapter-link:hover {
+  text-decoration: underline;
 }
 
-.vp-doc tr:last-child td {
-  border-bottom: none;
+.guide-summary {
+  margin: 1.1rem 0 1.6rem;
+  padding: 1rem 1.1rem;
+  border-left: 3px solid var(--fft-accent);
+  background: color-mix(in srgb, var(--fft-accent) 8%, var(--fft-surface));
+  color: var(--fft-text-2);
+  border-radius: 0.9rem;
 }
 
-.vp-doc tr:hover td {
-  background: var(--nv-bg-soft);
-  color: var(--nv-text-primary);
+.fit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0 1.5rem;
 }
 
-/* --------------------------------------------------------------------------
-   11. Custom Blocks (tip/warning/danger/info)
-   -------------------------------------------------------------------------- */
-
-.vp-doc .custom-block {
-  border-radius: 10px;
-  border: 1px solid var(--nv-border);
-  background: var(--nv-bg-surface);
-  position: relative;
-  overflow: hidden;
+.fit-negative {
+  border-color: color-mix(in srgb, var(--fft-cyan) 45%, var(--fft-border));
 }
 
-.vp-doc .custom-block::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-}
-
-.vp-doc .custom-block .custom-block-title {
-  font-weight: 700;
-  color: var(--nv-text-primary);
-}
-
-.vp-doc .custom-block.tip::before {
-  background: var(--nv-green);
-}
-.vp-doc .custom-block.tip {
-  border-left-color: var(--nv-green);
-}
-.vp-doc .custom-block.tip .custom-block-title {
-  color: var(--nv-green-bright);
-}
-
-.vp-doc .custom-block.warning::before {
-  background: var(--nv-warning);
-}
-.vp-doc .custom-block.warning {
-  border-left-color: var(--nv-warning);
-}
-.vp-doc .custom-block.warning .custom-block-title {
-  color: var(--nv-warning);
-}
-
-.vp-doc .custom-block.danger::before {
-  background: var(--nv-danger);
-}
-.vp-doc .custom-block.danger {
-  border-left-color: var(--nv-danger);
-}
-.vp-doc .custom-block.danger .custom-block-title {
-  color: var(--nv-danger);
-}
-
-.vp-doc .custom-block.info::before {
-  background: var(--nv-cyan);
-}
-.vp-doc .custom-block.info {
-  border-left-color: var(--nv-cyan);
-}
-.vp-doc .custom-block.info .custom-block-title {
-  color: var(--nv-cyan);
-}
-
-/* --------------------------------------------------------------------------
-   12. Scrollbar
-   -------------------------------------------------------------------------- */
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--nv-border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--nv-green);
-}
-
-/* --------------------------------------------------------------------------
-   13. Footer
-   -------------------------------------------------------------------------- */
-
-.VPFooter {
-  background: var(--nv-bg-surface) !important;
-  border-top: 1px solid var(--nv-border);
-}
-
-.VPFooter .message,
-.VPFooter .copyright {
-  color: var(--nv-text-tertiary);
-}
-
-/* --------------------------------------------------------------------------
-   14. Search
-   -------------------------------------------------------------------------- */
-
-.DocSearch-Button {
-  border-radius: 8px;
-  border: 1px solid var(--nv-border);
-  background: var(--nv-bg-surface);
-}
-
-.DocSearch-Button:hover {
-  border-color: var(--nv-green);
-}
-
-/* --------------------------------------------------------------------------
-   15. Animations
-   -------------------------------------------------------------------------- */
-
-@media (prefers-reduced-motion: no-preference) {
-  .VPFeatures .item {
-    animation: fadeInUp 0.5s ease-out both;
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .VPHero .actions .VPButton {
-    animation: fadeInUp 0.6s ease-out 0.2s both;
-  }
-}
-
-/* --------------------------------------------------------------------------
-   16. Badges & Tags
-   -------------------------------------------------------------------------- */
-
-.badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: var(--nv-green-soft);
-  color: var(--nv-green);
-  border: 1px solid rgba(118, 185, 0, 0.25);
-}
-
-.badge.green {
-  background: rgba(118, 185, 0, 0.15);
-  color: var(--nv-green);
-}
-
-.badge.cyan {
-  background: var(--nv-cyan-soft);
-  color: var(--nv-cyan);
-}
-
-.badge.orange {
-  background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
-}
-
-/* --------------------------------------------------------------------------
-   17. Mermaid Diagrams
-   -------------------------------------------------------------------------- */
-
-.mermaid {
-  background: transparent !important;
-}
-
-/* --------------------------------------------------------------------------
-   18. Homepage Specific Styles
-   -------------------------------------------------------------------------- */
-
-:root {
-  --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: -webkit-linear-gradient(
-    120deg,
-    var(--nv-green) 30%,
-    var(--nv-cyan)
-  );
-  --vp-home-hero-image-background-image: linear-gradient(
-    -45deg,
-    var(--nv-green) 50%,
-    var(--nv-cyan) 50%
-  );
-  --vp-home-hero-image-filter: blur(44px);
-}
-
-@media (min-width: 640px) {
-  :root {
-    --vp-home-hero-image-filter: blur(56px);
-  }
-}
-
-@media (min-width: 960px) {
-  :root {
-    --vp-home-hero-image-filter: blur(68px);
-  }
-}
-
-/* Custom grid background for homepage hero */
-.VPHero .container::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle at 1px 1px, var(--nv-border) 1px, transparent 0);
-  background-size: 32px 32px;
-  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-/* --------------------------------------------------------------------------
-   19. Responsive Adjustments
-   -------------------------------------------------------------------------- */
-
-@media (max-width: 640px) {
-  .VPHero .name {
-    font-size: 2.25rem;
-  }
-
-  .VPFeatures .item {
-    padding: 1rem;
-  }
-
-  .vp-doc h1 {
-    font-size: 1.75rem;
-  }
-}
-
-/* --------------------------------------------------------------------------
-   20. Edit Link & Last Updated
-   -------------------------------------------------------------------------- */
-
-.VPLastUpdated {
-  color: var(--nv-text-tertiary);
-}
-
-.VPEditLink .link {
-  color: var(--nv-text-tertiary);
-}
-
-.VPEditLink .link:hover {
-  color: var(--nv-green);
-}
-
-/* --------------------------------------------------------------------------
-   21. Outline / On-This-Page
-   -------------------------------------------------------------------------- */
-
-.VPDocOutlineItem.root {
-  border-left: 2px solid var(--nv-border);
-}
-
-.VPDocOutlineItem.root .outline-link:hover {
-  color: var(--nv-green);
-}
-
-.VPDocOutlineItem.root .outline-link.active {
-  color: var(--nv-green);
-}
-
-/* --------------------------------------------------------------------------
-   22. Quick Start Block (Homepage)
-   -------------------------------------------------------------------------- */
-
-.quick-start-block {
-  margin: 1.5rem 0;
-}
-
-.quick-start-block .command-block {
-  display: inline-block;
-  background: var(--nv-bg-surface);
-  border: 1px solid var(--nv-border);
-  border-radius: 8px;
-  padding: 0.75rem 1.25rem;
-  margin-bottom: 1rem;
-}
-
-.quick-start-block .command-block code {
-  font-family: var(--vp-font-family-mono);
-  font-size: 0.95rem;
-  color: var(--nv-green);
-  background: transparent;
-  padding: 0;
-}
-
-.quick-start-block div[class*='language-'] {
-  margin-top: 1rem;
-}
-
-/* --------------------------------------------------------------------------
-   23. Feature Cards Enhancement
-   -------------------------------------------------------------------------- */
-
-.VPFeature {
-  border: 1px solid var(--nv-border);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.VPFeature:hover {
-  border-color: var(--nv-green);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(118, 185, 0, 0.15);
-}
-
-/* --------------------------------------------------------------------------
-   24. Reference Hub Styles
-   -------------------------------------------------------------------------- */
-
-.reference-section {
-  margin: 2rem 0;
-}
-
-.reference-section h3 {
-  color: var(--nv-green);
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--nv-border);
+.shared-language-note p:last-child,
+.guide-callout p:last-child,
+.paper-panel p:last-child {
+  margin-bottom: 0;
 }
 
 .reference-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1rem;
-  margin: 1.5rem 0;
+  margin: 1rem 0 1.5rem;
 }
 
-.reference-card {
-  background: var(--nv-bg-surface);
-  border: 1px solid var(--nv-border);
-  border-radius: 10px;
-  padding: 1.25rem;
-  transition: all 0.25s ease;
+.reference-card-title,
+.citation-title {
+  color: var(--fft-text-1);
+  font-weight: 700;
+  line-height: 1.4;
 }
 
-.reference-card:hover {
-  border-color: var(--nv-green);
-  box-shadow: var(--nv-shadow-md);
+.reference-card-desc,
+.citation,
+.citation p {
+  color: var(--fft-text-2);
+  line-height: 1.65;
 }
-
-.reference-card-title {
-  font-weight: 600;
-  color: var(--nv-text-primary);
-  margin-bottom: 0.5rem;
-}
-
-.reference-card-desc {
-  font-size: 0.9rem;
-  color: var(--nv-text-secondary);
-  line-height: 1.6;
-}
-
-.reference-card-link {
-  display: inline-block;
-  margin-top: 0.75rem;
-  color: var(--nv-green);
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-/* --------------------------------------------------------------------------
-   25. Citation Styles
-   -------------------------------------------------------------------------- */
 
 .citation {
-  padding: 1rem 1.25rem;
-  background: var(--nv-bg-surface);
-  border-left: 3px solid var(--nv-green);
-  border-radius: 0 8px 8px 0;
   margin: 1rem 0;
 }
 
-.citation-title {
-  font-weight: 600;
-  color: var(--nv-text-primary);
-  margin-bottom: 0.25rem;
+.citation-authors,
+.citation-venue,
+.reference-card-link {
+  margin-top: 0.45rem;
+  color: var(--fft-text-3);
+  font-size: 0.92rem;
 }
 
-.citation-authors {
-  font-size: 0.9rem;
-  color: var(--nv-text-secondary);
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3 {
+  letter-spacing: -0.03em;
 }
 
-.citation-venue {
-  font-size: 0.85rem;
-  color: var(--nv-text-tertiary);
-  font-style: italic;
+.vp-doc h1 {
+  margin-top: 0.25rem;
+  font-size: clamp(2rem, 4vw, 3rem);
 }
 
-.citation-year {
-  font-weight: 600;
-  color: var(--nv-cyan);
+.vp-doc p,
+.vp-doc li {
+  max-width: 75ch;
+}
+
+.vp-doc blockquote {
+  border-left: 2px solid color-mix(in srgb, var(--fft-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--fft-accent) 6%, var(--fft-surface));
+}
+
+.vp-doc table {
+  display: table;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0 1.5rem;
+  border: 1px solid var(--fft-border);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.vp-doc th,
+.vp-doc td {
+  border: 1px solid var(--fft-border);
+  padding: 0.8rem 0.9rem;
+}
+
+.vp-doc th {
+  background: color-mix(in srgb, var(--fft-surface-strong) 88%, transparent);
+  color: var(--fft-text-1);
+}
+
+.vp-doc td {
+  color: var(--fft-text-2);
+}
+
+.vp-doc a {
+  color: var(--fft-accent-strong);
+}
+
+.vp-doc code {
+  color: var(--fft-text-1);
+}
+
+@media (max-width: 960px) {
+  .paper-grid--hero {
+    grid-template-columns: 1fr;
+  }
+
+  .cover-title {
+    max-width: 12ch;
+  }
+}
+
+@media (max-width: 640px) {
+  .whitepaper-home {
+    gap: 1.5rem;
+  }
+
+  .paper-cover,
+  .paper-panel,
+  .guide-callout,
+  .shared-language-note,
+  .reference-card,
+  .citation,
+  .chapter-card {
+    border-radius: 1rem;
+  }
 }

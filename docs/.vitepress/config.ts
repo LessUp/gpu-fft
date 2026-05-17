@@ -2,7 +2,6 @@ import { defineConfig } from 'vitepress';
 import { withMermaid } from 'vitepress-plugin-mermaid';
 import llmstxt from 'vitepress-plugin-llms';
 
-// Dynamic base path for GitHub Pages deployment
 const rawBase = process.env.VITEPRESS_BASE;
 const base = rawBase
   ? rawBase.startsWith('/')
@@ -12,115 +11,133 @@ const base = rawBase
     : `/${rawBase}/`
   : '/';
 
+const siteUrl = 'https://lessup.github.io/gpu-fft/';
+
 export default withMermaid(
   defineConfig({
     base,
     title: 'WebGPU FFT',
-    titleTemplate: ':title | WebGPU FFT Library',
-    description:
-      'WebGPU FFT core with CPU utilities for JavaScript and TypeScript signal processing',
+    titleTemplate: ':title | WebGPU FFT',
+    description: 'Technical whitepaper and architecture guide for a browser-native WebGPU FFT core',
 
     head: [
-      ['meta', { name: 'theme-color', content: '#76B900' }],
+      ['meta', { name: 'theme-color', content: '#5d8f00' }],
       [
         'meta',
         {
           name: 'keywords',
           content:
-            'WebGPU, FFT, GPU, signal processing, image processing, JavaScript, TypeScript, Fourier transform, spectrum analyzer, audio analysis',
+            'WebGPU, FFT, GPU compute, signal processing, TypeScript, WGSL, real-input FFT, architecture',
         },
       ],
-      ['meta', { name: 'author', content: 'WebGPU FFT Library Contributors' }],
-      ['meta', { name: 'googlebot', content: 'index, follow' }],
+      ['meta', { name: 'author', content: 'WebGPU FFT Contributors' }],
       ['meta', { name: 'robots', content: 'index, follow' }],
       ['meta', { property: 'og:type', content: 'website' }],
-      ['meta', { property: 'og:locale', content: 'en' }],
-      ['meta', { property: 'og:title', content: 'WebGPU FFT Library' }],
+      ['meta', { property: 'og:site_name', content: 'WebGPU FFT' }],
+      ['meta', { property: 'og:title', content: 'WebGPU FFT' }],
       [
         'meta',
         {
           property: 'og:description',
           content:
-            'Browser-native WebGPU FFT core with complex and real-input transforms. Spectrum analysis and image filtering are CPU utilities.',
+            'A technical whitepaper for a browser-native WebGPU FFT core with explicit CPU-only utility boundaries.',
         },
       ],
-      ['meta', { property: 'og:site_name', content: 'WebGPU FFT Library' }],
+      ['meta', { property: 'og:image', content: `${siteUrl}hero.svg` }],
+      ['meta', { property: 'og:url', content: siteUrl }],
       ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
-      ['meta', { name: 'twitter:site', content: '@webgpu_fft' }],
-      ['meta', { name: 'twitter:title', content: 'WebGPU FFT Library' }],
+      ['meta', { name: 'twitter:title', content: 'WebGPU FFT' }],
       [
         'meta',
         {
           name: 'twitter:description',
-          content: 'Browser-native WebGPU FFT core with CPU-based signal and image utilities',
+          content:
+            'Whitepaper-style documentation for a browser-native WebGPU FFT core with CPU-only analysis utilities.',
         },
       ],
+      ['meta', { name: 'twitter:image', content: `${siteUrl}hero.svg` }],
       ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
-      ['link', { rel: 'canonical', href: 'https://aicl-lab.github.io/gpu-fft/' }],
-      ['meta', { property: 'og:image', content: 'https://aicl-lab.github.io/gpu-fft/hero.svg' }],
-      ['meta', { property: 'og:image:alt', content: 'WebGPU FFT Library' }],
-      ['meta', { property: 'og:url', content: 'https://aicl-lab.github.io/gpu-fft/' }],
-      ['meta', { property: 'og:locale:alternate', content: 'zh_CN' }],
-      ['meta', { name: 'twitter:image', content: 'https://aicl-lab.github.io/gpu-fft/hero.svg' }],
+      ['link', { rel: 'canonical', href: siteUrl }],
       [
         'script',
         { type: 'application/ld+json' },
         JSON.stringify({
           '@context': 'https://schema.org',
           '@type': 'SoftwareSourceCode',
-          name: 'WebGPU FFT Library',
+          name: 'WebGPU FFT',
           description:
-            'WebGPU FFT core with CPU utilities for JavaScript and TypeScript signal processing',
-          codeRepository: 'https://github.com/AICL-Lab/gpu-fft',
+            'Technical whitepaper and architecture guide for a browser-native WebGPU FFT core',
+          codeRepository: 'https://github.com/LessUp/gpu-fft',
           programmingLanguage: 'TypeScript',
+          runtimePlatform: 'WebGPU',
           license: 'https://opensource.org/licenses/MIT',
-          author: {
-            '@type': 'Organization',
-            name: 'WebGPU FFT Library Contributors',
-          },
-          keywords: 'WebGPU, FFT, GPU, signal processing, image processing, TypeScript',
-          version: '1.1.0',
+          keywords: [
+            'WebGPU',
+            'FFT',
+            'WGSL',
+            'signal processing',
+            'browser-native GPU compute',
+          ],
         }),
       ],
     ],
 
+    cleanUrls: true,
+    lastUpdated: true,
+    srcExclude: ['**/specs/**/*.md', 'superpowers/**'],
+
+    sitemap: {
+      hostname: siteUrl,
+    },
+
     locales: {
-      root: {
-        label: 'English',
-        lang: 'en',
-      },
       zh: {
         label: '简体中文',
-        lang: 'zh',
+        lang: 'zh-CN',
         link: '/zh/',
+        title: 'WebGPU FFT',
+        description: '面向架构评估与项目导读的 WebGPU FFT 技术白皮书',
         themeConfig: {
           nav: [
-            { text: '快速开始', link: '/zh/setup/quick-start', activeMatch: '/zh/setup/' },
-            { text: '教程', link: '/tutorials/introduction', activeMatch: '/tutorials/' },
+            { text: '指南', link: '/zh/guides/getting-started', activeMatch: '/zh/guides/' },
+            { text: '导读', link: '/zh/academy/reading-map', activeMatch: '/zh/academy/' },
             { text: '架构', link: '/zh/architecture/overview', activeMatch: '/zh/architecture/' },
-            { text: 'API', link: '/api/index', activeMatch: '/api/' },
-            { text: '展示', link: '/zh/showcase/benchmarks', activeMatch: '/zh/showcase/' },
+            { text: '证据', link: '/zh/showcase/benchmarks', activeMatch: '/zh/showcase/' },
             { text: '参考', link: '/reference/index', activeMatch: '/reference/' },
             { text: '游乐场', link: '/playground/index', activeMatch: '/playground/' },
-            { text: '贡献', link: '/contributing' },
           ],
           sidebar: {
-            '/zh/setup/': [
+            '/zh/guides/': [
               {
-                text: 'Getting Started',
-                collapsed: false,
-                items: [{ text: '快速开始', link: '/zh/setup/quick-start' }],
+                text: '指南',
+                items: [
+                  { text: '起步导读', link: '/zh/guides/getting-started' },
+                  { text: '快速开始', link: '/zh/setup/quick-start' },
+                  { text: 'Browser Support (EN)', link: '/setup/browser-support' },
+                  { text: 'AI Tooling (EN)', link: '/setup/ai-tooling' },
+                ],
+              },
+            ],
+            '/zh/academy/': [
+              {
+                text: '导读',
+                items: [
+                  { text: '阅读地图', link: '/zh/academy/reading-map' },
+                  { text: '教程入口 (EN)', link: '/tutorials/introduction' },
+                  { text: 'API 参考 (EN)', link: '/api/index' },
+                  { text: '参考中心 (EN)', link: '/reference/index' },
+                ],
               },
             ],
             '/zh/architecture/': [
               {
                 text: '架构',
-                items: [{ text: '概览', link: '/zh/architecture/overview' }],
+                items: [{ text: '总览', link: '/zh/architecture/overview' }],
               },
             ],
             '/zh/showcase/': [
               {
-                text: '展示',
+                text: '证据',
                 items: [
                   { text: '性能基准', link: '/zh/showcase/benchmarks' },
                   { text: '架构决策', link: '/zh/showcase/decisions' },
@@ -129,147 +146,114 @@ export default withMermaid(
             ],
           },
           editLink: {
-            pattern: 'https://github.com/AICL-Lab/gpu-fft/edit/main/docs/:path',
+            pattern: 'https://github.com/LessUp/gpu-fft/edit/master/docs/:path',
             text: '在 GitHub 上编辑此页',
+          },
+          docFooter: {
+            prev: '上一页',
+            next: '下一页',
+          },
+          outlineTitle: '本页目录',
+          returnToTopLabel: '回到顶部',
+          sidebarMenuLabel: '目录',
+          darkModeSwitchLabel: '外观',
+        },
+      },
+      en: {
+        label: 'English',
+        lang: 'en-US',
+        link: '/en/',
+        title: 'WebGPU FFT',
+        description: 'Technical whitepaper and architecture guide for a browser-native WebGPU FFT core',
+        themeConfig: {
+          nav: [
+            { text: 'Guides', link: '/en/guides/getting-started', activeMatch: '/en/guides/' },
+            { text: 'Academy', link: '/en/academy/reading-map', activeMatch: '/en/academy/' },
+            { text: 'Architecture', link: '/architecture/overview', activeMatch: '/architecture/' },
+            { text: 'Evidence', link: '/showcase/benchmarks', activeMatch: '/showcase/' },
+            { text: 'Reference', link: '/reference/index', activeMatch: '/reference/' },
+            { text: 'Playground', link: '/playground/index', activeMatch: '/playground/' },
+          ],
+          sidebar: {
+            '/en/guides/': [
+              {
+                text: 'Guides',
+                items: [
+                  { text: 'Guided Start', link: '/en/guides/getting-started' },
+                  { text: 'Quick Start', link: '/setup/quick-start' },
+                  { text: 'Browser Support', link: '/setup/browser-support' },
+                  { text: 'AI Tooling & LSP', link: '/setup/ai-tooling' },
+                ],
+              },
+            ],
+            '/en/academy/': [
+              {
+                text: 'Academy',
+                items: [
+                  { text: 'Reading Map', link: '/en/academy/reading-map' },
+                  { text: 'Tutorials', link: '/tutorials/introduction' },
+                  { text: 'API Reference', link: '/api/index' },
+                  { text: 'Reference Hub', link: '/reference/index' },
+                ],
+              },
+            ],
+            '/architecture/': [
+              {
+                text: 'Architecture',
+                items: [{ text: 'Overview', link: '/architecture/overview' }],
+              },
+            ],
+            '/showcase/': [
+              {
+                text: 'Evidence',
+                items: [
+                  { text: 'Benchmarks', link: '/showcase/benchmarks' },
+                  { text: 'Architecture Decisions', link: '/showcase/decisions' },
+                ],
+              },
+            ],
+            '/reference/': [
+              {
+                text: 'Reference',
+                items: [
+                  { text: 'Reference Hub', link: '/reference/index' },
+                  { text: 'Academic Papers', link: '/reference/papers' },
+                  { text: 'Implementations', link: '/reference/implementations' },
+                  { text: 'Learning Resources', link: '/reference/learning' },
+                ],
+              },
+            ],
+          },
+          editLink: {
+            pattern: 'https://github.com/LessUp/gpu-fft/edit/master/docs/:path',
+            text: 'Edit this page on GitHub',
           },
         },
       },
     },
 
-    cleanUrls: true,
-    lastUpdated: true,
-
-    sitemap: {
-      hostname: 'https://aicl-lab.github.io/gpu-fft/',
-      transformItems(items) {
-        return items.map((item) => {
-          item.lastmod = new Date().toISOString();
-          return item;
-        });
-      },
-    },
-
-    ignoreDeadLinks: ['**/zh/**'],
-
-    srcExclude: ['**/specs/**/*.md'],
-
     themeConfig: {
-      logo: { src: '/logo.svg', width: 24, height: 24 },
+      logo: { src: '/logo.svg', width: 28, height: 28 },
       siteTitle: 'WebGPU FFT',
-
-      nav: [
-        { text: 'Setup', link: '/setup/quick-start', activeMatch: '/setup/' },
-        { text: 'Tutorials', link: '/tutorials/introduction', activeMatch: '/tutorials/' },
-        { text: 'Architecture', link: '/architecture/overview', activeMatch: '/architecture/' },
-        { text: 'API', link: '/api/index', activeMatch: '/api/' },
-        { text: 'Showcase', link: '/showcase/benchmarks', activeMatch: '/showcase/' },
-        { text: 'Reference', link: '/reference/index', activeMatch: '/reference/' },
-        { text: 'Playground', link: '/playground/index', activeMatch: '/playground/' },
-        { text: 'Contributing', link: '/contributing' },
-      ],
-
-      sidebar: {
-        '/setup/': [
-          {
-            text: 'Getting Started',
-            collapsed: false,
-            items: [
-              { text: 'Quick Start', link: '/setup/quick-start' },
-              { text: 'Browser Support', link: '/setup/browser-support' },
-              { text: 'AI Tooling & LSP', link: '/setup/ai-tooling' },
-            ],
-          },
-        ],
-        '/tutorials/': [
-          {
-            text: 'Tutorials',
-            collapsed: false,
-            items: [
-              { text: 'Introduction', link: '/tutorials/introduction' },
-              { text: '1D FFT', link: '/tutorials/1d-fft' },
-              { text: '2D FFT', link: '/tutorials/2d-fft' },
-              { text: 'Spectrum Analysis', link: '/tutorials/spectrum-analysis' },
-              { text: 'Image Filtering', link: '/tutorials/image-filtering' },
-            ],
-          },
-        ],
-        '/architecture/': [
-          {
-            text: 'Architecture',
-            items: [
-              { text: 'Overview', link: '/architecture/overview' },
-              { text: 'GPU Engine', link: '/architecture/gpu-engine' },
-              { text: 'CPU Fallback', link: '/architecture/cpu-fallback' },
-            ],
-          },
-        ],
-        '/api/': [
-          {
-            text: 'API Reference',
-            items: [
-              { text: 'Overview', link: '/api/index' },
-              { text: 'FFTEngine', link: '/api/fft-engine' },
-              { text: 'CPU FFT', link: '/api/cpu-fft' },
-              { text: 'Spectrum Analyzer', link: '/api/spectrum-analyzer' },
-              { text: 'Image Filter', link: '/api/image-filter' },
-              { text: 'Window Functions', link: '/api/window-functions' },
-              { text: 'Complex Numbers', link: '/api/complex' },
-              { text: 'Bit Reversal', link: '/api/bit-reversal' },
-            ],
-          },
-        ],
-        '/showcase/': [
-          {
-            text: 'Showcase',
-            items: [
-              { text: 'Benchmarks', link: '/showcase/benchmarks' },
-              { text: 'Decisions', link: '/showcase/decisions' },
-            ],
-          },
-        ],
-        '/reference/': [
-          {
-            text: 'Reference Hub',
-            items: [
-              { text: 'Overview', link: '/reference/index' },
-              { text: 'Academic Papers', link: '/reference/papers' },
-              { text: 'Implementations', link: '/reference/implementations' },
-              { text: 'Learning Resources', link: '/reference/learning' },
-            ],
-          },
-        ],
-        '/playground/': [
-          {
-            text: 'Playground',
-            items: [{ text: 'FFT Explorer', link: '/playground/index' }],
-          },
-        ],
-      },
-
-      socialLinks: [
-        { icon: 'github', link: 'https://github.com/AICL-Lab/gpu-fft' },
-        { icon: 'npm', link: 'https://www.npmjs.com/package/webgpu-fft' },
-      ],
-
+      outline: [2, 3],
       search: {
         provider: 'local',
         options: {
           detailedView: true,
         },
       },
-
+      socialLinks: [
+        { icon: 'github', link: 'https://github.com/LessUp/gpu-fft' },
+        { icon: 'npm', link: 'https://www.npmjs.com/package/webgpu-fft' },
+      ],
       footer: {
         message: 'Released under the MIT License.',
         copyright: 'Copyright © 2024-2026 WebGPU FFT Contributors',
       },
-
-      outline: 'deep',
-
       editLink: {
-        pattern: 'https://github.com/AICL-Lab/gpu-fft/edit/main/docs/:path',
+        pattern: 'https://github.com/LessUp/gpu-fft/edit/master/docs/:path',
         text: 'Edit this page on GitHub',
       },
-
       sidebarMenuLabel: 'Menu',
       returnToTopLabel: 'Return to top',
       darkModeSwitchLabel: 'Appearance',
@@ -292,5 +276,5 @@ export default withMermaid(
         chunkSizeWarningLimit: 3000,
       },
     },
-  })
+  }),
 );

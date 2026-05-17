@@ -6,9 +6,9 @@
 
 ## 2. Docs shell rebuild
 
-- [ ] 2.1 Rewrite `docs/.vitepress/config.ts` to adopt the locale gateway structure and new sidebar / nav model
-- [ ] 2.2 Simplify `docs/.vitepress/theme/index.ts` and rebuild `docs/.vitepress/theme/styles/custom.css` around dual-theme tokens
-- [ ] 2.3 Add or refactor shared diagram / matrix / visual components that the new pages depend on
+- [x] 2.1 Rewrite `docs/.vitepress/config.ts` to adopt the locale gateway structure and new sidebar / nav model
+- [x] 2.2 Simplify `docs/.vitepress/theme/index.ts` and rebuild `docs/.vitepress/theme/styles/custom.css` around dual-theme tokens
+- [x] 2.3 Add or refactor shared diagram / matrix / visual components that the new pages depend on
 
 ## 3. Content and asset reconstruction
 
