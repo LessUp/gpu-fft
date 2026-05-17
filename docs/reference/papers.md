@@ -1,6 +1,12 @@
 # Academic Papers
 
-A curated collection of foundational and contemporary papers on FFT algorithms, GPU computing, and digital signal processing.
+> This bibliography is meant to answer “what is this project standing on?” rather than “what APIs does it expose?”. Use it to place `gpu-fft` inside the longer arc of FFT theory, GPU implementation practice, and DSP tooling.
+
+## How to read this canon
+
+1. Start with the foundational FFT papers if you want the algorithmic lineage.
+2. Move to the GPU section if you care about memory access, work distribution, and modern accelerator practice.
+3. Use the DSP and numerical sections to understand why seemingly simple API decisions still have mathematical consequences.
 
 ## FFT Theory & Algorithms
 

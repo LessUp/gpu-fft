@@ -4,13 +4,14 @@
       <div class="pg-header">
         <h3>FFT Explorer</h3>
         <p class="pg-desc">
-          Select a signal preset or enter custom values, then run FFT to see the frequency spectrum.
+          Inspect the same signal in the time domain and the frequency domain. This teaching widget
+          runs entirely on the CPU so the behavior is easy to inspect in any browser.
         </p>
       </div>
 
       <div class="pg-controls">
         <div class="pg-row">
-          <label>Signal:</label>
+          <label>Signal</label>
           <select v-model="signalType" @change="onPresetChange">
             <option value="sine">Sine Wave (1 cycle)</option>
             <option value="sine4">Sine Wave (4 cycles)</option>
@@ -22,7 +23,7 @@
         </div>
 
         <div class="pg-row">
-          <label>Size (power of 2):</label>
+          <label>Size</label>
           <select v-model.number="signalSize">
             <option :value="64">64</option>
             <option :value="128">128</option>
@@ -32,39 +33,57 @@
         </div>
 
         <div v-if="signalType === 'custom'" class="pg-row pg-fullwidth">
-          <label>Values (comma-separated):</label>
+          <label>Values</label>
           <input v-model="customValues" type="text" placeholder="0, 1, 0, -1, 0, 1..." />
         </div>
 
         <div class="pg-actions">
           <button class="pg-btn pg-btn-primary" @click="runFFT">Run FFT</button>
-          <button class="pg-btn pg-btn-secondary" @click="runIFFT">Run Inverse FFT</button>
+          <button class="pg-btn pg-btn-secondary" @click="runIFFT">Run inverse</button>
         </div>
       </div>
 
       <div class="pg-canvases">
         <div class="pg-canvas-block">
-          <h4>Time Domain</h4>
+          <h4>Time domain</h4>
           <canvas ref="timeCanvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         </div>
         <div class="pg-canvas-block">
-          <h4>Magnitude Spectrum</h4>
+          <h4>Magnitude spectrum</h4>
           <canvas ref="freqCanvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         </div>
       </div>
 
-      <div class="pg-stats" v-if="stats">
-        <span class="pg-stat">Samples: {{ stats.samples }}</span>
-        <span class="pg-stat">Peak Bin: {{ stats.peakBin }}</span>
-        <span class="pg-stat">Peak Mag: {{ stats.peakMag }}</span>
-        <span class="pg-stat">DC: {{ stats.dc }}</span>
+      <div v-if="stats" class="pg-stats">
+        <span class="pg-stat">samples {{ stats.samples }}</span>
+        <span class="pg-stat">peak bin {{ stats.peakBin }}</span>
+        <span class="pg-stat">peak {{ stats.peakMag }}</span>
+        <span class="pg-stat">dc {{ stats.dc }}</span>
       </div>
     </div>
   </ClientOnly>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+
+type Stats = {
+  samples: number;
+  peakBin: number;
+  peakMag: string;
+  dc: string;
+};
+
+type Palette = {
+  canvasBg: string;
+  grid: string;
+  axis: string;
+  text: string;
+  line: string;
+  accent: string;
+  border: string;
+  surface: string;
+};
 
 const signalType = ref('sine');
 const signalSize = ref(256);
@@ -73,17 +92,49 @@ const canvasWidth = 600;
 const canvasHeight = 220;
 const timeCanvas = ref<HTMLCanvasElement | null>(null);
 const freqCanvas = ref<HTMLCanvasElement | null>(null);
-const stats = ref<{ samples: number; peakBin: number; peakMag: string; dc: string } | null>(null);
+const stats = ref<Stats | null>(null);
 
 let currentSignal = new Float32Array(0);
 let currentSpectrum = new Float32Array(0);
+let themeObserver: MutationObserver | null = null;
+
+function cssVar(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function readPalette(): Palette {
+  return {
+    canvasBg: cssVar('--fft-canvas-bg-raster'),
+    grid: cssVar('--fft-grid-raster'),
+    axis: cssVar('--fft-muted-raster'),
+    text: cssVar('--fft-text-raster'),
+    line: cssVar('--fft-accent-raster'),
+    accent: cssVar('--fft-cyan-raster'),
+    border: cssVar('--fft-border-raster'),
+    surface: cssVar('--fft-surface-raster'),
+  };
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  const normalized = hex.replace('#', '');
+  if (normalized.length !== 6) {
+    return hex;
+  }
+  const value = Number.parseInt(normalized, 16);
+  const r = (value >> 16) & 255;
+  const g = (value >> 8) & 255;
+  const b = value & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 function generateSignal(): Float32Array {
   const n = signalSize.value;
   const data = new Float32Array(n * 2);
+
   for (let i = 0; i < n; i++) {
     const t = i / n;
     let v = 0;
+
     switch (signalType.value) {
       case 'sine':
         v = Math.sin(2 * Math.PI * t);
@@ -101,29 +152,33 @@ function generateSignal(): Float32Array {
         v = Math.random() * 2 - 1;
         break;
       case 'custom': {
-        const vals = customValues.value
+        const values = customValues.value
           .split(',')
-          .map((s) => parseFloat(s.trim()))
-          .filter((x) => !isNaN(x));
-        v = i < vals.length ? vals[i] : 0;
+          .map((item) => Number.parseFloat(item.trim()))
+          .filter((item) => !Number.isNaN(item));
+        v = i < values.length ? values[i] : 0;
         break;
       }
     }
+
     data[i * 2] = v;
     data[i * 2 + 1] = 0;
   }
+
   return data;
 }
 
-// Inline simplified Cooley-Tukey Radix-2 DIT FFT
 function fft(input: Float32Array): Float32Array {
   const n2 = input.length;
   const n = n2 / 2;
-  if ((n & (n - 1)) !== 0) throw new Error('Size must be power of 2');
+
+  if ((n & (n - 1)) !== 0) {
+    throw new Error('Size must be power of 2');
+  }
 
   const out = new Float32Array(n2);
-  // Bit-reverse copy
   const bits = Math.log2(n);
+
   for (let i = 0; i < n; i++) {
     let j = 0;
     for (let b = 0; b < bits; b++) {
@@ -133,59 +188,74 @@ function fft(input: Float32Array): Float32Array {
     out[j * 2 + 1] = input[i * 2 + 1];
   }
 
-  // Butterfly stages
   for (let stage = 1; stage < n; stage <<= 1) {
     const wmReal = Math.cos(-Math.PI / stage);
     const wmImag = Math.sin(-Math.PI / stage);
+
     for (let group = 0; group < n; group += stage << 1) {
       let wReal = 1;
       let wImag = 0;
+
       for (let k = 0; k < stage; k++) {
         const i1 = (group + k) * 2;
         const i2 = (group + k + stage) * 2;
         const tReal = wReal * out[i2] - wImag * out[i2 + 1];
         const tImag = wReal * out[i2 + 1] + wImag * out[i2];
+
         out[i2] = out[i1] - tReal;
         out[i2 + 1] = out[i1 + 1] - tImag;
         out[i1] += tReal;
         out[i1 + 1] += tImag;
+
         const nextWReal = wmReal * wReal - wmImag * wImag;
         wImag = wmReal * wImag + wmImag * wReal;
         wReal = nextWReal;
       }
     }
   }
+
   return out;
 }
 
 function ifft(input: Float32Array): Float32Array {
   const n2 = input.length;
-  const conj = new Float32Array(n2);
+  const conjugated = new Float32Array(n2);
+
   for (let i = 0; i < n2; i += 2) {
-    conj[i] = input[i];
-    conj[i + 1] = -input[i + 1];
+    conjugated[i] = input[i];
+    conjugated[i + 1] = -input[i + 1];
   }
-  const transformed = fft(conj);
+
+  const transformed = fft(conjugated);
   const n = n2 / 2;
+
   for (let i = 0; i < n2; i++) {
     transformed[i] /= n;
   }
+
   return transformed;
 }
 
 function magnitudeSpectrum(spectrum: Float32Array): Float32Array {
   const n = spectrum.length / 2;
   const mag = new Float32Array(n);
+
   for (let i = 0; i < n; i++) {
-    const r = spectrum[i * 2];
-    const im = spectrum[i * 2 + 1];
-    mag[i] = Math.sqrt(r * r + im * im);
+    const real = spectrum[i * 2];
+    const imag = spectrum[i * 2 + 1];
+    mag[i] = Math.sqrt(real * real + imag * imag);
   }
+
   return mag;
 }
 
 function drawSignal(canvas: HTMLCanvasElement, data: Float32Array) {
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return;
+  }
+
+  const colors = readPalette();
   const w = canvas.width;
   const h = canvas.height;
   const padding = 20;
@@ -194,13 +264,10 @@ function drawSignal(canvas: HTMLCanvasElement, data: Float32Array) {
   const n = data.length / 2;
 
   ctx.clearRect(0, 0, w, h);
-
-  // Background
-  ctx.fillStyle = '#161b22';
+  ctx.fillStyle = colors.canvasBg;
   ctx.fillRect(0, 0, w, h);
 
-  // Grid
-  ctx.strokeStyle = '#21262d';
+  ctx.strokeStyle = colors.grid;
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let i = 0; i <= 4; i++) {
@@ -210,53 +277,59 @@ function drawSignal(canvas: HTMLCanvasElement, data: Float32Array) {
   }
   ctx.stroke();
 
-  // Zero line
-  ctx.strokeStyle = '#484f58';
+  ctx.strokeStyle = colors.axis;
   ctx.beginPath();
   ctx.moveTo(padding, padding + plotH / 2);
   ctx.lineTo(w - padding, padding + plotH / 2);
   ctx.stroke();
 
-  // Find range
   let maxVal = 0;
   for (let i = 0; i < n; i++) {
     maxVal = Math.max(maxVal, Math.abs(data[i * 2]));
   }
   maxVal = Math.max(maxVal, 0.01);
 
-  // Signal line
-  ctx.strokeStyle = '#76b900';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  for (let i = 0; i < n; i++) {
-    const x = padding + (i / (n - 1)) * plotW;
-    const y = padding + plotH / 2 - (data[i * 2] / maxVal) * (plotH / 2.2);
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
-
-  // Glow effect
-  ctx.strokeStyle = 'rgba(118, 185, 0, 0.3)';
+  ctx.strokeStyle = hexToRgba(colors.line, 0.26);
   ctx.lineWidth = 6;
   ctx.beginPath();
   for (let i = 0; i < n; i++) {
     const x = padding + (i / (n - 1)) * plotW;
     const y = padding + plotH / 2 - (data[i * 2] / maxVal) * (plotH / 2.2);
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
   }
   ctx.stroke();
 
-  // Labels
-  ctx.fillStyle = '#8b949e';
-  ctx.font = '11px JetBrains Mono, monospace';
+  ctx.strokeStyle = colors.line;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const x = padding + (i / (n - 1)) * plotW;
+    const y = padding + plotH / 2 - (data[i * 2] / maxVal) * (plotH / 2.2);
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = colors.axis;
+  ctx.font = '11px Iosevka, JetBrains Mono, monospace';
   ctx.fillText(`n = ${n}`, padding, h - 4);
-  ctx.fillText(`max = ${maxVal.toFixed(3)}`, w - padding - 80, h - 4);
+  ctx.fillText(`max = ${maxVal.toFixed(3)}`, w - padding - 88, h - 4);
 }
 
 function drawSpectrum(canvas: HTMLCanvasElement, mag: Float32Array) {
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return;
+  }
+
+  const colors = readPalette();
   const w = canvas.width;
   const h = canvas.height;
   const padding = 20;
@@ -265,13 +338,10 @@ function drawSpectrum(canvas: HTMLCanvasElement, mag: Float32Array) {
   const n = mag.length;
 
   ctx.clearRect(0, 0, w, h);
-
-  // Background
-  ctx.fillStyle = '#161b22';
+  ctx.fillStyle = colors.canvasBg;
   ctx.fillRect(0, 0, w, h);
 
-  // Grid
-  ctx.strokeStyle = '#21262d';
+  ctx.strokeStyle = colors.grid;
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let i = 0; i <= 4; i++) {
@@ -281,7 +351,6 @@ function drawSpectrum(canvas: HTMLCanvasElement, mag: Float32Array) {
   }
   ctx.stroke();
 
-  // Find max
   const halfN = Math.floor(n / 2);
   let maxMag = 0;
   let peakBin = 0;
@@ -293,29 +362,24 @@ function drawSpectrum(canvas: HTMLCanvasElement, mag: Float32Array) {
   }
   maxMag = Math.max(maxMag, 0.01);
 
-  // Bars
   const barW = plotW / halfN;
   for (let i = 0; i < halfN; i++) {
-    const barH = (mag[i] / maxMag) * plotH;
+    const intensity = mag[i] / maxMag;
+    const barH = intensity * plotH;
     const x = padding + i * barW;
     const y = padding + plotH - barH;
 
-    const intensity = mag[i] / maxMag;
-    const r = Math.floor(118 * intensity + 48 * (1 - intensity));
-    const g = Math.floor(185 * intensity + 72 * (1 - intensity));
-    const b = Math.floor(0 * intensity + 120 * (1 - intensity));
-
-    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.85)`;
-    ctx.fillRect(x + 0.5, y, Math.max(barW - 1, 1), barH);
+    ctx.fillStyle = intensity > 0.72 ? colors.line : colors.accent;
+    ctx.globalAlpha = 0.38 + intensity * 0.52;
+    ctx.fillRect(x + 0.6, y, Math.max(barW - 1.3, 1), barH);
   }
 
-  // Labels
-  ctx.fillStyle = '#8b949e';
-  ctx.font = '11px JetBrains Mono, monospace';
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = colors.axis;
+  ctx.font = '11px Iosevka, JetBrains Mono, monospace';
   ctx.fillText(`bins = 0..${halfN - 1}`, padding, h - 4);
-  ctx.fillText(`peak = ${maxMag.toFixed(2)} @ bin ${peakBin}`, w - padding - 140, h - 4);
+  ctx.fillText(`peak = ${maxMag.toFixed(2)} @ ${peakBin}`, w - padding - 132, h - 4);
 
-  // Update stats
   stats.value = {
     samples: n,
     peakBin,
@@ -324,24 +388,38 @@ function drawSpectrum(canvas: HTMLCanvasElement, mag: Float32Array) {
   };
 }
 
-function runFFT() {
-  currentSignal = generateSignal();
-  currentSpectrum = fft(currentSignal);
-  const mag = magnitudeSpectrum(currentSpectrum);
+function redraw() {
+  if (!currentSignal.length) {
+    return;
+  }
+
+  const mag = currentSpectrum.length ? magnitudeSpectrum(currentSpectrum) : new Float32Array(0);
   nextTick(() => {
-    if (timeCanvas.value) drawSignal(timeCanvas.value, currentSignal);
-    if (freqCanvas.value) drawSpectrum(freqCanvas.value, mag);
+    if (timeCanvas.value) {
+      drawSignal(timeCanvas.value, currentSignal);
+    }
+    if (freqCanvas.value && mag.length) {
+      drawSpectrum(freqCanvas.value, mag);
+    }
   });
 }
 
+function runFFT() {
+  currentSignal = generateSignal();
+  currentSpectrum = fft(currentSignal);
+  redraw();
+}
+
 function runIFFT() {
-  if (currentSpectrum.length === 0) {
+  if (!currentSpectrum.length) {
     currentSignal = generateSignal();
     currentSpectrum = fft(currentSignal);
   }
   currentSignal = ifft(currentSpectrum);
   nextTick(() => {
-    if (timeCanvas.value) drawSignal(timeCanvas.value, currentSignal);
+    if (timeCanvas.value) {
+      drawSignal(timeCanvas.value, currentSignal);
+    }
   });
 }
 
@@ -353,6 +431,17 @@ function onPresetChange() {
 
 onMounted(() => {
   runFFT();
+  themeObserver = new MutationObserver(() => {
+    redraw();
+  });
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+});
+
+onBeforeUnmount(() => {
+  themeObserver?.disconnect();
 });
 
 watch(signalSize, () => {
@@ -362,32 +451,33 @@ watch(signalSize, () => {
 
 <style scoped>
 .fft-playground {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 12px;
-  padding: 1.5rem;
   margin: 1.5rem 0;
+  padding: 1.2rem;
+  border: 1px solid var(--fft-border);
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--fft-surface) 96%, transparent);
+  box-shadow: var(--fft-shadow-soft);
 }
 
 .pg-header h3 {
-  margin: 0 0 0.5rem;
-  color: #c9d1d9;
-  font-size: 1.25rem;
+  margin: 0 0 0.45rem;
+  color: var(--fft-text-1);
+  letter-spacing: -0.03em;
 }
 
 .pg-desc {
-  color: #8b949e;
   margin: 0 0 1rem;
-  font-size: 0.9rem;
+  color: var(--fft-text-2);
+  line-height: 1.65;
 }
 
 .pg-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #21262d;
+  border-bottom: 1px solid var(--fft-border);
 }
 
 .pg-row {
@@ -397,21 +487,20 @@ watch(signalSize, () => {
 }
 
 .pg-row label {
-  color: #8b949e;
-  font-size: 0.85rem;
-  font-weight: 500;
-  white-space: nowrap;
+  color: var(--fft-text-2);
+  font-size: 0.84rem;
+  font-weight: 600;
 }
 
 .pg-row select,
 .pg-row input {
-  background: #0d1117;
-  border: 1px solid #30363d;
-  border-radius: 6px;
-  color: #c9d1d9;
-  padding: 0.4rem 0.6rem;
-  font-size: 0.85rem;
-  font-family: 'JetBrains Mono', monospace;
+  border: 1px solid var(--fft-border-strong);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--fft-bg-soft) 82%, transparent);
+  color: var(--fft-text-1);
+  padding: 0.48rem 0.7rem;
+  font-size: 0.84rem;
+  font-family: 'Iosevka', 'JetBrains Mono', monospace;
 }
 
 .pg-row input {
@@ -421,7 +510,7 @@ watch(signalSize, () => {
 .pg-row select:focus,
 .pg-row input:focus {
   outline: none;
-  border-color: #76b900;
+  border-color: var(--fft-accent);
 }
 
 .pg-fullwidth {
@@ -439,73 +528,70 @@ watch(signalSize, () => {
 }
 
 .pg-btn {
-  border: none;
-  border-radius: 6px;
-  padding: 0.45rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  font-size: 0.84rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background-color 0.18s ease;
 }
 
-.pg-btn-primary {
-  background: linear-gradient(135deg, #76b900, #5a8c00);
-  color: #0d1117;
-}
-
-.pg-btn-primary:hover {
-  box-shadow: 0 4px 12px rgba(118, 185, 0, 0.3);
+.pg-btn:hover {
   transform: translateY(-1px);
 }
 
-.pg-btn-secondary {
-  background: #21262d;
-  color: #c9d1d9;
-  border: 1px solid #30363d;
+.pg-btn-primary {
+  border: 1px solid color-mix(in srgb, var(--fft-accent) 50%, var(--fft-border-strong));
+  background: color-mix(in srgb, var(--fft-accent) 14%, transparent);
+  color: var(--fft-text-1);
 }
 
-.pg-btn-secondary:hover {
-  border-color: #76b900;
-  color: #76b900;
+.pg-btn-secondary {
+  border: 1px solid var(--fft-border-strong);
+  background: color-mix(in srgb, var(--fft-bg-soft) 78%, transparent);
+  color: var(--fft-text-1);
 }
 
 .pg-canvases {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
 .pg-canvas-block h4 {
-  margin: 0 0 0.5rem;
-  color: #8b949e;
-  font-size: 0.8rem;
+  margin: 0 0 0.45rem;
+  color: var(--fft-text-3);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .pg-canvas-block canvas {
   width: 100%;
   height: auto;
-  border-radius: 8px;
-  border: 1px solid #30363d;
+  border-radius: 0.9rem;
+  border: 1px solid var(--fft-border);
 }
 
 .pg-stats {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.6rem;
   margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #21262d;
 }
 
 .pg-stat {
-  background: #21262d;
-  color: #8b949e;
-  padding: 0.35rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-family: 'JetBrains Mono', monospace;
-  border: 1px solid #30363d;
+  border: 1px solid var(--fft-border);
+  border-radius: 999px;
+  padding: 0.42rem 0.72rem;
+  background: color-mix(in srgb, var(--fft-bg-soft) 82%, transparent);
+  color: var(--fft-text-2);
+  font-size: 0.78rem;
+  font-family: 'Iosevka', 'JetBrains Mono', monospace;
 }
 
 @media (max-width: 768px) {

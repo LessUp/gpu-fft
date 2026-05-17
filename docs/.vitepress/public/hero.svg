@@ -1,108 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
-  <defs>
-    <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#76b900" stop-opacity="0.6"/>
-      <stop offset="50%" stop-color="#00c3ff" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="#76b900" stop-opacity="0.1"/>
-    </linearGradient>
-    <filter id="hglow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="8" result="b"/>
-      <feMerge>
-        <feMergeNode in="b"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#30363d" stroke-width="0.5"/>
-    </pattern>
-  </defs>
-
-  <!-- Background -->
-  <rect width="800" height="500" fill="#0d1117"/>
-  <rect width="800" height="500" fill="url(#grid)"/>
-
-  <!-- Central glow -->
-  <ellipse cx="400" cy="250" rx="300" ry="180" fill="url(#hg)" opacity="0.4" filter="url(#hglow)"/>
-
-  <!-- Butterfly operation visualization (abstract) -->
-  <g opacity="0.8">
-    <!-- Stage 1 -->
-    <line x1="100" y1="150" x2="250" y2="150" stroke="#76b900" stroke-width="1.5" opacity="0.6"/>
-    <line x1="100" y1="350" x2="250" y2="350" stroke="#76b900" stroke-width="1.5" opacity="0.6"/>
-    <line x1="100" y1="150" x2="250" y2="350" stroke="#00c3ff" stroke-width="1" opacity="0.4"/>
-    <line x1="100" y1="350" x2="250" y2="150" stroke="#00c3ff" stroke-width="1" opacity="0.4"/>
-
-    <!-- Stage 2 -->
-    <line x1="250" y1="150" x2="400" y2="150" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-    <line x1="250" y1="350" x2="400" y2="350" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-    <line x1="250" y1="150" x2="400" y2="250" stroke="#00c3ff" stroke-width="1" opacity="0.5"/>
-    <line x1="250" y1="350" x2="400" y2="250" stroke="#00c3ff" stroke-width="1" opacity="0.5"/>
-    <line x1="250" y1="200" x2="400" y2="200" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-    <line x1="250" y1="300" x2="400" y2="300" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-    <line x1="250" y1="200" x2="400" y2="250" stroke="#00c3ff" stroke-width="1" opacity="0.5"/>
-    <line x1="250" y1="300" x2="400" y2="250" stroke="#00c3ff" stroke-width="1" opacity="0.5"/>
-
-    <!-- Stage 3 (reverse) -->
-    <line x1="400" y1="150" x2="550" y2="150" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-    <line x1="400" y1="350" x2="550" y2="350" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-    <line x1="400" y1="200" x2="550" y2="200" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-    <line x1="400" y1="300" x2="550" y2="300" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-    <line x1="400" y1="250" x2="550" y2="250" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-    <line x1="400" y1="175" x2="550" y2="175" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-    <line x1="400" y1="325" x2="550" y2="325" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-    <line x1="400" y1="225" x2="550" y2="225" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-    <line x1="400" y1="275" x2="550" y2="275" stroke="#76b900" stroke-width="1.5" opacity="0.7"/>
-
-    <!-- Output spectrum -->
-    <line x1="550" y1="150" x2="700" y2="150" stroke="#76b900" stroke-width="2" opacity="0.9" filter="url(#hglow)"/>
-    <line x1="550" y1="350" x2="700" y2="350" stroke="#76b900" stroke-width="2" opacity="0.9" filter="url(#hglow)"/>
-    <line x1="550" y1="200" x2="700" y2="200" stroke="#76b900" stroke-width="2" opacity="0.9" filter="url(#hglow)"/>
-    <line x1="550" y1="300" x2="700" y2="300" stroke="#76b900" stroke-width="2" opacity="0.9" filter="url(#hglow)"/>
-    <line x1="550" y1="250" x2="700" y2="250" stroke="#76b900" stroke-width="3" opacity="1" filter="url(#hglow)"/>
-    <line x1="550" y1="175" x2="700" y2="175" stroke="#76b900" stroke-width="2" opacity="0.9" filter="url(#hglow)"/>
-    <line x1="550" y1="325" x2="700" y2="325" stroke="#76b900" stroke-width="2" opacity="0.9" filter="url(#hglow)"/>
-    <line x1="550" y1="225" x2="700" y2="225" stroke="#76b900" stroke-width="2" opacity="0.9" filter="url(#hglow)"/>
-    <line x1="550" y1="275" x2="700" y2="275" stroke="#76b900" stroke-width="2" opacity="0.9" filter="url(#hglow)"/>
-  </g>
-
-  <!-- Nodes -->
-  <g fill="#76b900" filter="url(#hglow)">
-    <circle cx="100" cy="150" r="5"/>
-    <circle cx="100" cy="350" r="5"/>
-    <circle cx="250" cy="150" r="5"/>
-    <circle cx="250" cy="350" r="5"/>
-    <circle cx="250" cy="200" r="4"/>
-    <circle cx="250" cy="300" r="4"/>
-    <circle cx="400" cy="150" r="5"/>
-    <circle cx="400" cy="350" r="5"/>
-    <circle cx="400" cy="200" r="4"/>
-    <circle cx="400" cy="300" r="4"/>
-    <circle cx="400" cy="250" r="6"/>
-    <circle cx="550" cy="150" r="4"/>
-    <circle cx="550" cy="350" r="4"/>
-    <circle cx="700" cy="150" r="5"/>
-    <circle cx="700" cy="350" r="5"/>
-  </g>
-
-  <!-- Cyan accent nodes -->
-  <g fill="#00c3ff" opacity="0.8">
-    <circle cx="250" cy="250" r="3"/>
-    <circle cx="400" cy="175" r="3"/>
-    <circle cx="400" cy="325" r="3"/>
-    <circle cx="400" cy="225" r="3"/>
-    <circle cx="400" cy="275" r="3"/>
-    <circle cx="550" cy="175" r="3"/>
-    <circle cx="550" cy="325" r="3"/>
-    <circle cx="550" cy="225" r="3"/>
-    <circle cx="550" cy="275" r="3"/>
-    <circle cx="700" cy="250" r="4"/>
-  </g>
-
-  <!-- Frequency spectrum bars on the right -->
-  <g opacity="0.6">
-    <rect x="720" y="280" width="12" height="70" rx="2" fill="#76b900" opacity="0.3"/>
-    <rect x="738" y="240" width="12" height="110" rx="2" fill="#76b900" opacity="0.5"/>
-    <rect x="756" y="180" width="12" height="170" rx="2" fill="#76b900" opacity="0.8" filter="url(#hglow)"/>
-    <rect x="774" y="260" width="12" height="90" rx="2" fill="#76b900" opacity="0.4"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" fill="none">
+  <rect width="1200" height="630" rx="24" fill="#f4f6ef"/>
+  <rect x="48" y="48" width="1104" height="534" rx="28" fill="#fbfcf8" stroke="#d6ddcf" stroke-width="2"/>
+  <path d="M120 188h130m0 0 55 94 72-94h150m-407 242h130m0 0 55-94 72 94h150" stroke="#137ea8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M210 188h315m-315 242h315" stroke="#5d8f00" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="250" cy="188" r="12" fill="#5d8f00"/>
+  <circle cx="250" cy="430" r="12" fill="#5d8f00"/>
+  <circle cx="377" cy="282" r="14" fill="#137ea8"/>
+  <circle cx="377" cy="336" r="14" fill="#137ea8"/>
+  <circle cx="528" cy="188" r="12" fill="#5d8f00"/>
+  <circle cx="528" cy="430" r="12" fill="#5d8f00"/>
+  <rect x="690" y="152" width="386" height="326" rx="28" fill="#eff4ea" stroke="#d6ddcf" stroke-width="2"/>
+  <text x="740" y="236" fill="#243041" font-family="Segoe UI, Arial, sans-serif" font-size="58" font-weight="700">
+    WebGPU FFT
+  </text>
+  <text x="740" y="292" fill="#5c6674" font-family="Segoe UI, Arial, sans-serif" font-size="28">
+    Technical whitepaper for a browser-native FFT core
+  </text>
+  <text x="740" y="352" fill="#243041" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600">
+    GPU-accelerated FFT core
+  </text>
+  <text x="740" y="392" fill="#243041" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600">
+    CPU-only analysis utilities
+  </text>
+  <text x="740" y="432" fill="#243041" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600">
+    Real-input API contracts
+  </text>
 </svg>

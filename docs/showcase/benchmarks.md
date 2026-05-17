@@ -1,19 +1,19 @@
 # Performance Benchmarks
 
-> All measurements are collected in your local environment. Run `npm run benchmark` to reproduce.
+> This page is evidence, not promise. Every number below comes from measured repository output, and GPU-specific claims stop where measurements stop.
 
-::: info Honest Benchmarking
-This library does not include speculative "expected speedup" claims. The charts below show **measured CPU results** from the current CI environment (WSL2, Node.js 22, no discrete GPU). When you run `npm run benchmark` on your own hardware with a WebGPU-capable browser, you will also see measured WebGPU results.
-:::
+<div class="guide-summary">
+  <strong>Current environment:</strong> the published sample below reflects a CPU-only CI run on WSL2 + Node.js 22. When you run the benchmark on hardware with WebGPU support, the script will add measured GPU results. It will not invent them for you.
+</div>
 
-## 1D FFT Performance
+## Sample CPU evidence
 
-<div id="benchmark-1d-chart" style="width:100%;height:400px;margin:1.5rem 0;"></div>
+<BenchmarkEvidence />
 
-### Raw Data
+## Raw data from the current reference run
 
 | Size | Mean (ms) | Median (ms) | Min (ms) | Max (ms) | Std Dev |
-|------|-----------|-------------|----------|----------|---------|
+| --- | --- | --- | --- | --- | --- |
 | 256 | 0.13 | 0.05 | 0.04 | 2.66 | 0.31 |
 | 512 | 0.16 | 0.13 | 0.11 | 0.58 | 0.07 |
 | 1024 | 0.36 | 0.28 | 0.24 | 3.96 | 0.39 |
@@ -22,115 +22,27 @@ This library does not include speculative "expected speedup" claims. The charts 
 | 8192 | 3.48 | 3.07 | 2.36 | 11.15 | 1.24 |
 | 16384 | 6.95 | 6.71 | 4.84 | 15.86 | 1.45 |
 
-*Environment: WSL2, Node.js v22.22.0, CPU-only (no WebGPU adapter detected).*
+## How to read this page correctly
 
-### What this means
+- These numbers show the **CPU path** only, because the CI environment had no WebGPU adapter.
+- The benchmark is designed to report **measured CPU results everywhere** and **measured WebGPU results only when available**.
+- Small-size variance is dominated by JavaScript runtime overhead, not just the FFT algorithm itself.
+- You should treat GPU crossover points as hardware-specific questions, not as repository-wide marketing constants.
 
-- CPU FFT performance scales roughly linearly with $N \log N$ — doubling the size increases runtime by slightly more than 2×.
-- The spike at small sizes (256–512) is dominated by JavaScript engine overhead rather than algorithmic work.
-- WebGPU measurements were not available in the CI environment. On a typical discrete GPU, WebGPU FFT is expected to be significantly faster for larger sizes (4096+), though the exact ratio depends on your GPU model, driver, and browser.
-
-## Reproduce Locally
+## Reproduce on your own hardware
 
 ```bash
 npm run benchmark
 ```
 
-Results include:
-- CPU FFT timing for every tested size
-- WebGPU FFT timing (only when a WebGPU adapter is available)
-- System information for transparency
+The benchmark output will include:
 
-<script setup>
-import { onMounted } from 'vue';
+1. CPU timing for every tested size
+2. WebGPU timing only when a WebGPU adapter is actually available
+3. Environment metadata so the results stay interpretable
 
-const cpuData = [
-  { size: 256, mean: 0.13 },
-  { size: 512, mean: 0.16 },
-  { size: 1024, mean: 0.36 },
-  { size: 2048, mean: 0.80 },
-  { size: 4096, mean: 1.45 },
-  { size: 8192, mean: 3.48 },
-  { size: 16384, mean: 6.95 },
-];
+## What this page refuses to do
 
-onMounted(async () => {
-  const echarts = await import('echarts');
-  const chartDom = document.getElementById('benchmark-1d-chart');
-  if (!chartDom) return;
-  
-  const chart = echarts.init(chartDom, 'dark', { renderer: 'canvas' });
-  
-  const option = {
-    backgroundColor: 'transparent',
-    tooltip: {
-      trigger: 'axis',
-      backgroundColor: '#161b22',
-      borderColor: '#30363d',
-      textStyle: { color: '#c9d1d9', fontFamily: 'JetBrains Mono, monospace' },
-      formatter: (params) => {
-        const p = params[0];
-        return `<span style="color:#76b900;font-weight:700">Size ${p.name}</span><br/>
-                Mean: <b>${p.value} ms</b>`;
-      }
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      top: '15%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      name: 'FFT Size',
-      nameTextStyle: { color: '#8b949e', fontFamily: 'Inter, sans-serif' },
-      data: cpuData.map(d => d.size.toString()),
-      axisLine: { lineStyle: { color: '#30363d' } },
-      axisLabel: { color: '#8b949e', fontFamily: 'JetBrains Mono, monospace' },
-    },
-    yAxis: {
-      type: 'value',
-      name: 'Mean Time (ms)',
-      nameTextStyle: { color: '#8b949e', fontFamily: 'Inter, sans-serif' },
-      axisLine: { lineStyle: { color: '#30363d' } },
-      axisLabel: { color: '#8b949e', fontFamily: 'JetBrains Mono, monospace' },
-      splitLine: { lineStyle: { color: '#21262d' } },
-    },
-    series: [{
-      name: 'CPU FFT',
-      type: 'bar',
-      data: cpuData.map(d => d.mean),
-      itemStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: '#8ecf00' },
-          { offset: 1, color: 'rgba(118, 185, 0, 0.3)' }
-        ]),
-        borderRadius: [6, 6, 0, 0],
-      },
-      barWidth: '45%',
-      emphasis: {
-        itemStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: '#a8e000' },
-            { offset: 1, color: 'rgba(140, 200, 0, 0.4)' }
-          ]),
-        }
-      }
-    }]
-  };
-  
-  chart.setOption(option);
-  
-  const resizeObserver = new ResizeObserver(() => chart.resize());
-  resizeObserver.observe(chartDom);
-});
-</script>
-
-<style scoped>
-#benchmark-1d-chart {
-  border: 1px solid #30363d;
-  border-radius: 10px;
-  background: #161b22;
-}
-</style>
+- It does not publish a fixed “expected speedup” ratio.
+- It does not extrapolate GPU numbers from a CPU-only environment.
+- It does not blur the line between a measured claim and an informed guess.

@@ -1,97 +1,60 @@
 # Architecture Overview
 
-The WebGPU FFT Library implements a focused FFT architecture: the core transform engine targets WebGPU, while application utilities such as spectrum analysis and image filtering remain CPU-based.
+> Read this page as a system note, not as marketing copy. It explains where the GPU path begins, where the CPU path remains authoritative, and why the current design stays deliberately narrow.
 
-## High-Level Architecture
+<div class="guide-summary">
+  <strong>Architectural thesis:</strong> keep the FFT core GPU-capable, keep the public contract explicit, and keep application-level helpers honest about still being CPU-only.
+</div>
 
-```mermaid
-flowchart TB
-    subgraph PublicAPI["Public API Layer"]
-        A1["createFFTEngine()"]
-        A2["cpuFFT() / cpuRFFT()"]
-        A3["createSpectrumAnalyzer()"]
-        A4["createImageFilter()"]
-    end
+<ArchitectureAtlas />
 
-    subgraph CoreEngine["Core FFT Engine"]
-        B1["FFTEngine"]
-        B2["GPUResourceManager"]
-        B3["Compute Pipelines"]
-    end
+## Capability boundary
 
-    subgraph GPUCompute["GPU Compute Layer (WGSL)"]
-        C1["Bit-Reversal Shader"]
-        C2["Butterfly Shader"]
-        C3["Scale Shader"]
-    end
+| Surface | Backend reality | Why it matters |
+| --- | --- | --- |
+| `createFFTEngine()` | WebGPU-backed FFT execution core | This is the primary acceleration path |
+| `cpuFFT()` / `cpuIFFT()` | CPU reference path | Enables universal fallback and utility reuse |
+| `rfft()` / `irfft()` | Shared contract across GPU and CPU paths | Makes real-input usage explicit |
+| `createSpectrumAnalyzer()` | CPU-only helper | Should never be described as GPU-native |
+| `createImageFilter()` | CPU-only helper | Uses CPU 2D FFT internally |
 
-    PublicAPI --> CoreEngine
-    CoreEngine --> GPUCompute
-```
+## Execution sequence
 
-## Key Design Decisions
+1. **Validate the contract**: size, shape, and real-input constraints are checked before work starts.
+2. **Select or reuse an execution plan**: the engine reuses prepared resources for previously-seen sizes instead of rebuilding everything every call.
+3. **Dispatch GPU passes**: the WebGPU path runs bit-reversal, butterfly, and scaling passes over WGSL shaders.
+4. **Return or reconstruct output**: complex or real-output contracts are restored from the transform result.
+5. **Keep utilities honest**: spectrum analysis and image filtering continue to compose CPU FFT building blocks.
 
-### 1. Cooley-Tukey Radix-2 DIT Algorithm
+## Design choices that carry most of the weight
 
-- O(N log N) complexity vs O(N²) for naive DFT
-- Regular memory access patterns suitable for GPU parallelization
-- Requires input size to be power of 2
+| Decision | Why it exists | Consequence |
+| --- | --- | --- |
+| Radix-2 Cooley-Tukey DIT | Best fit for predictable GPU memory access and maintainable code | Input sizes must remain powers of two |
+| Row-column decomposition for 2D FFT | Reuses 1D kernels instead of building a separate 2D butterfly system | Adds an explicit transpose-oriented mental model |
+| `workgroupSize = 256` | Keeps the shader surface stable during closeout | Tuning is hardware-dependent and intentionally not over-exposed |
+| Optional bank-conflict optimization | Leaves room for hardware-specific wins without changing the default contract | Default stays conservative until profiling justifies flipping it |
+| Shader source of truth in `src/shaders/sources.ts` | Avoids drift between implementation and reference copies | WGSL changes stay centralized |
 
-### 2. Dual GPU/CPU FFT Implementation
+## Codebase map
 
-- GPU path for maximum performance (WebGPU required)
-- CPU fallback for environments without WebGPU support
-- Application utilities can call the CPU path without implying GPU-native processing
+| Layer | Files | Responsibility |
+| --- | --- | --- |
+| Public API | `src/index.ts`, `src/types.ts` | Exports the supported contract |
+| Core engine | `src/core/fft-engine.ts`, `src/core/gpu-fft-backend.ts` | Validation, resource lifetime, plan reuse |
+| Shader truth | `src/shaders/sources.ts` | Canonical WGSL source strings |
+| CPU utilities | `src/utils/**`, `src/apps/**` | Fallback path plus CPU-only helpers |
+| Specifications | `openspec/specs/**` | Product, API, testing, and governance truth |
 
-### 3. Shared Memory with Bank Conflict Padding
+## Read these RFCs next
 
-- Optional padding can reduce bank conflicts during butterfly operations
-- ~3% memory overhead for 32 banks
-- Performance benefit varies by GPU architecture
+- [RFC 0001: WebGPU FFT Library Architecture](https://github.com/LessUp/gpu-fft/blob/master/openspec/specs/rfc/0001-webgpu-fft-library-architecture.md)
+- [RFC 0003: 2D FFT Transpose Strategy](https://github.com/LessUp/gpu-fft/blob/master/openspec/specs/rfc/0003-2d-fft-transpose-strategy.md)
+- [Public API alignment spec](https://github.com/LessUp/gpu-fft/blob/master/openspec/specs/public-api-alignment/spec.md)
 
-## Detailed RFCs
+## What this architecture intentionally does not do
 
-For complete technical design, see:
-
-- [RFC 0001: WebGPU FFT Library Architecture](https://github.com/LessUp/gpu-fft/blob/main/openspec/specs/rfc/0001-webgpu-fft-library-architecture.md)
-- [RFC 0002: Project Quality Enhancement](https://github.com/LessUp/gpu-fft/blob/main/openspec/specs/rfc/0002-project-quality-enhancement-architecture.md)
-
-## Project Structure
-
-```
-gpu-fft/
-├── openspec/
-│   ├── specs/              # Canonical repository specifications
-│   │   ├── product/        # Product requirements
-│   │   ├── rfc/            # Technical design documents
-│   │   ├── api/            # API specifications
-│   │   └── testing/        # Testing specifications
-│   └── changes/            # Proposal / design / task artifacts
-├── docs/                   # Documentation site source (VitePress)
-│   ├── setup/              # Setup and tooling guides
-│   ├── tutorials/          # User tutorials
-│   ├── architecture/       # Architecture documentation
-│   └── api/                # Curated API reference source pages
-├── src/                    # Source code
-│   ├── core/               # Core GPU engine
-│   ├── shaders/            # Canonical WGSL source strings
-│   ├── utils/              # CPU utilities
-│   ├── apps/               # Application-level APIs
-│   └── types.ts            # Type definitions
-├── tests/                  # Test suite
-├── examples/               # Code examples
-│   ├── node/               # TypeScript examples
-│   └── web/                # HTML/JS demos
-└── benchmarks/             # Performance benchmarks
-```
-
-## Specifications as Source of Truth
-
-All repository-level requirements are defined in `openspec/specs/`:
-
-| Spec Type | Location | Purpose |
-|-----------|----------|---------|
-| Product | `openspec/specs/product/` | What to build (requirements, user stories) |
-| RFC | `openspec/specs/rfc/` | How to build it (architecture, design decisions) |
-| API | `openspec/specs/api/` | Interface contracts (types, methods) |
-| Testing | `openspec/specs/testing/` | Verification strategy (properties, coverage) |
+- It does not claim GPU-native spectrum analysis.
+- It does not claim GPU-native image filtering.
+- It does not chase arbitrary-size FFT support in the current product slice.
+- It does not optimize for every GPU family at the cost of a larger maintenance surface.

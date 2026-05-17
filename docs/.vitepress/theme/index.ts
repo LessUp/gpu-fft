@@ -3,6 +3,7 @@ import DefaultTheme from 'vitepress/theme';
 import FFTPlayground from './components/FFTPlayground.vue';
 import ArchitectureAtlas from './components/ArchitectureAtlas.vue';
 import CapabilityMatrix from './components/CapabilityMatrix.vue';
+import BenchmarkEvidence from './components/BenchmarkEvidence.vue';
 import './styles/custom.css';
 
 export default {
@@ -11,5 +12,6 @@ export default {
     app.component('FFTPlayground', FFTPlayground);
     app.component('ArchitectureAtlas', ArchitectureAtlas);
     app.component('CapabilityMatrix', CapabilityMatrix);
+    app.component('BenchmarkEvidence', BenchmarkEvidence);
   },
 } satisfies Theme;

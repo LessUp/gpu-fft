@@ -1,6 +1,12 @@
 # Reference Implementations
 
-A comparative overview of FFT libraries across platforms, languages, and hardware accelerators.
+> Use this page to compare `gpu-fft` against the libraries it most naturally gets mentioned alongside. The point is not to “win” every row. The point is to understand the narrower, browser-native slice this project intentionally serves.
+
+## How to compare responsibly
+
+- Compare platform assumptions before comparing raw speed.
+- Separate “browser-native and lightweight” from “maximal platform-specific performance”.
+- Treat any performance judgment as target-hardware-specific unless you have matching benchmark evidence.
 
 ## Production FFT Libraries
 
@@ -132,7 +138,7 @@ FFT library for machine learning applications in JavaScript. Part of the ImageJS
 
 | Library | Platform | Algorithm | Arbitrary Size | Multi-dimensional |
 |---------|----------|-----------|----------------|-------------------|
-| **webgpu-fft** (this) | WebGPU/WASM | Radix-2 DIT | No (power-of-2 only) | Up to 2D |
+| **webgpu-fft** (this) | WebGPU + CPU JS | Radix-2 DIT | No (power-of-2 only) | Up to 2D |
 | FFTW3 | CPU | Adaptive | Yes | Yes (any dimension) |
 | cuFFT | NVIDIA GPU | Multiple | Yes | Yes (up to 3D) |
 | vkFFT | Cross-GPU | Multiple | Yes | Yes (up to 4D) |
@@ -174,26 +180,9 @@ FFT library for machine learning applications in JavaScript. Part of the ImageJS
 **Pros**: Supports any size
 **Cons**: ~2x more operations, more memory
 
-## Performance Characteristics
+## Performance comparison rule
 
-### GPU vs CPU
-
-| Factor | GPU Advantage | CPU Advantage |
-|--------|---------------|---------------|
-| **Setup overhead** | Higher (pipeline creation) | Lower |
-| **Per-element cost** | Lower (massive parallelism) | Higher |
-| **Small transforms** | Slower | Faster |
-| **Large transforms** | Significantly faster | Slower |
-| **Latency-sensitive** | May be slower | More predictable |
-
-### Crossover Point
-
-The GPU vs CPU crossover point varies by hardware. Typical ranges:
-- **Mobile GPUs**: >4096 elements
-- **Integrated GPUs**: >2048 elements  
-- **Discrete GPUs**: >1024 elements
-
-Run `npm run benchmark` on your target hardware to measure actual performance.
+Run `npm run benchmark` on your target hardware before drawing any GPU versus CPU conclusions. This repository intentionally avoids publishing static crossover numbers because they depend too heavily on browser, adapter, and workload shape.
 
 ---
 

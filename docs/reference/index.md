@@ -1,65 +1,50 @@
 # Reference Hub
 
-A curated collection of academic papers, technical specifications, reference implementations, and learning resources that inform the design and implementation of this library.
+> This hub answers a different question from the rest of the site: not “how do I use the library?”, but “where does this project sit in the larger FFT, DSP, and GPU-compute landscape?”
 
-## Quick Navigation
+<div class="guide-summary">
+  <strong>Use this section when:</strong> you want to cross-check architectural choices against papers, understand how larger libraries differ, or build an interview-ready mental map of the ecosystem.
+</div>
+
+## Quick navigation
 
 <div class="reference-grid">
-<div class="reference-card">
-<div class="reference-card-title">📚 [Academic Papers](/reference/papers)</div>
-<div class="reference-card-desc">
-Foundational FFT research, GPU computing papers, and DSP textbooks. From Cooley-Tukey (1965) to modern GPU FFT surveys.
-</div>
-</div>
-
-<div class="reference-card">
-<div class="reference-card-title">⚡ [Reference Implementations](/reference/implementations)</div>
-<div class="reference-card-desc">
-FFT libraries across platforms: FFTW3, cuFFT, vkFFT, Kiss FFT, TensorFlow.js, and more. Comparative analysis of algorithms and performance.
-</div>
-</div>
-
-<div class="reference-card">
-<div class="reference-card-title">🎓 [Learning Resources](/reference/learning)</div>
-<div class="reference-card-desc">
-Interactive visualizations, video courses, WebGPU tutorials, and DSP textbooks for deeper understanding.
-</div>
-</div>
+  <div class="reference-card">
+    <div class="reference-card-title">[Academic Papers](/reference/papers)</div>
+    <div class="reference-card-desc">
+      Foundational FFT papers, GPU implementation research, and DSP references that anchor the project.
+    </div>
+  </div>
+  <div class="reference-card">
+    <div class="reference-card-title">[Reference Implementations](/reference/implementations)</div>
+    <div class="reference-card-desc">
+      Compare the project against FFTW, cuFFT, VkFFT, TensorFlow.js, and other practical baselines.
+    </div>
+  </div>
+  <div class="reference-card">
+    <div class="reference-card-title">[Learning Resources](/reference/learning)</div>
+    <div class="reference-card-desc">
+      Tutorials, videos, WebGPU learning material, and textbook-style resources for deeper study.
+    </div>
+  </div>
 </div>
 
-## Technical Specifications
+## What this hub is for
 
-| Spec | Link | Relevance |
-|------|------|-----------|
-| **WebGPU W3C Spec** | [w3.org/TR/webgpu](https://www.w3.org/TR/webgpu/) | The GPU API this library targets |
-| **WGSL Spec** | [w3.org/TR/WGSL](https://www.w3.org/TR/WGSL/) | Shading language for compute kernels |
-| **IEEE 754-2019** | [ieee.org](https://standards.ieee.org/standard/754-2019.html) | Floating-point behavior in shaders |
-| **WebGPU Extensions** | [webgpu.dev](https://webgpu.dev/) | Extension registry and compatibility |
+1. **Algorithm lineage:** why radix-2 remains central, and what alternatives would cost.
+2. **Implementation context:** how a browser-first WebGPU FFT differs from platform-specific giants.
+3. **Research credibility:** which papers and standards the docs point to when they make claims.
 
-## WebGPU Ecosystem
+## Technical specifications worth keeping nearby
 
-| Resource | Link | Purpose |
-|----------|------|---------|
-| **WebGPU Report** | [webgpureport.org](https://webgpureport.org/) | Check browser feature support |
-| **WebGPU Samples** | [webgpu.github.io](https://webgpu.github.io/webgpu-samples/) | Official code examples |
-| **Dawn** | [dawn.googlesource.com](https://dawn.googlesource.com/dawn) | Chrome's WebGPU implementation |
-| **wgpu-native** | [wgpu.rs](https://wgpu.rs/) | Rust WebGPU implementation |
+| Spec | Link | Why it matters here |
+| --- | --- | --- |
+| WebGPU spec | [w3.org/TR/webgpu](https://www.w3.org/TR/webgpu/) | Defines the compute API this project targets |
+| WGSL spec | [w3.org/TR/WGSL](https://www.w3.org/TR/WGSL/) | Governs the shader language used by the FFT core |
+| IEEE 754-2019 | [ieee.org](https://standards.ieee.org/standard/754-2019.html) | Frames floating-point behavior across JavaScript and shaders |
 
-## Why These References Matter
+## Read this section alongside
 
-This library is built on decades of research and engineering:
-
-1. **Algorithmic Foundation**: The Cooley-Tukey radix-2 algorithm (1965) remains the basis for our GPU implementation
-2. **GPU Optimization**: Techniques from vkFFT, cuFFT, and GPU Gems inform our shader design
-3. **Numerical Stability**: IEEE 754 considerations guide our floating-point handling
-4. **Window Functions**: Harris's 1978 paper is the definitive reference for our window implementations
-
----
-
-## Contributing References
-
-Found a relevant paper or resource? Contributions are welcome! Please ensure:
-
-1. The resource is publicly accessible (open access or official documentation)
-2. Include a brief description of its relevance to FFT or GPU computing
-3. Follow the citation format used in [Academic Papers](/reference/papers)
+- [Architecture Overview](/architecture/overview)
+- [Benchmarks](/showcase/benchmarks)
+- [Architecture Decisions](/showcase/decisions)

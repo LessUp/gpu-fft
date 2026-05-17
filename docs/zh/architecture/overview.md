@@ -1,97 +1,60 @@
-# 架构概览
+# 架构总览
 
-WebGPU FFT 库实现了一个聚焦的 FFT 架构：核心变换引擎面向 WebGPU，而频谱分析和图像滤波等应用工具仍以 CPU 为基础。
+> 这页按“系统笔记”来写，而不是按宣传文案来写。重点是把 GPU 路径从哪里开始、CPU 路径仍然在哪些地方是权威实现、以及为什么当前设计刻意保持收敛，讲清楚。
 
-## 高层架构
+<div class="guide-summary">
+  <strong>架构主张：</strong>让 FFT 核心具备 GPU 能力，让公开契约清楚可检验，同时让应用级 helper 诚实地停留在 CPU-only 边界内。
+</div>
 
-```mermaid
-flowchart TB
-    subgraph 公共API["公共 API 层"]
-        A1["createFFTEngine()"]
-        A2["cpuFFT() / cpuRFFT()"]
-        A3["createSpectrumAnalyzer()"]
-        A4["createImageFilter()"]
-    end
+<ArchitectureAtlas locale="zh" />
 
-    subgraph 核心引擎["核心 FFT 引擎"]
-        B1["FFTEngine"]
-        B2["GPUResourceManager"]
-        B3["计算管线"]
-    end
+## 能力边界
 
-    subgraph GPU计算["GPU 计算层 (WGSL)"]
-        C1["位反转着色器"]
-        C2["蝶形运算着色器"]
-        C3["缩放着色器"]
-    end
+| 表面 | 后端现实 | 为什么重要 |
+| --- | --- | --- |
+| `createFFTEngine()` | WebGPU 驱动的 FFT 执行核心 | 这是主要加速路径 |
+| `cpuFFT()` / `cpuIFFT()` | CPU 参考实现 | 负责通用回退和 utility 复用 |
+| `rfft()` / `irfft()` | GPU / CPU 共享的 real-input 契约 | 让实值路径边界显式化 |
+| `createSpectrumAnalyzer()` | CPU-only helper | 不能被描述成 GPU-native |
+| `createImageFilter()` | CPU-only helper | 内部仍基于 CPU 2D FFT |
 
-    公共API --> 核心引擎
-    核心引擎 --> GPU计算
-```
+## 执行顺序
 
-## 关键设计决策
+1. **先校验契约**：尺寸、形状和 real-input 约束都在执行前检查。
+2. **选择或复用 execution plan**：已见过的尺寸会复用准备好的资源，而不是每次重建。
+3. **分发 GPU pass**：WebGPU 路径执行位反转、蝶形和缩放等 WGSL pass。
+4. **重建输出契约**：根据复数或实值 API 把结果整理回调用者预期格式。
+5. **保持工具边界诚实**：频谱分析和图像滤波继续复用 CPU FFT 构件。
 
-### 1. Cooley-Tukey Radix-2 DIT 算法
+## 真正决定架构形状的几个选择
 
-- 复杂度 $O(N \log N)$，对比朴素 DFT 的 $O(N^2)$
-- 规整的内存访问模式适合 GPU 并行化
-- 要求输入尺寸为 2 的幂
+| 决策 | 为什么存在 | 带来的后果 |
+| --- | --- | --- |
+| Radix-2 Cooley-Tukey DIT | 最适合规整 GPU 内存访问与可维护代码 | 输入尺寸必须保持为 2 的幂 |
+| 2D FFT 采用行列分解 | 复用 1D kernel，而不是额外建立 2D 蝶形体系 | 心智模型里会多出显式转置步骤 |
+| `workgroupSize = 256` | closeout 阶段保持 shader 表面稳定 | 更激进调优依赖具体硬件 profile |
+| bank-conflict 优化默认关闭 | 给硬件特定优化留空间，但不改变默认契约 | 性能优化需要实测再开启 |
+| `src/shaders/sources.ts` 是 shader 真源 | 避免实现和参考副本漂移 | WGSL 变更保持集中 |
 
-### 2. GPU / CPU 双 FFT 实现
+## 代码地图
 
-- GPU 路径追求最大性能（需要 WebGPU）
-- CPU 回退保证无 WebGPU 环境也能运行
-- 应用工具调用 CPU 路径，不暗示 GPU 原生处理
+| 层级 | 文件 | 职责 |
+| --- | --- | --- |
+| 公开 API | `src/index.ts`, `src/types.ts` | 暴露支持的契约 |
+| 核心引擎 | `src/core/fft-engine.ts`, `src/core/gpu-fft-backend.ts` | 校验、资源生命周期、plan 复用 |
+| Shader 真源 | `src/shaders/sources.ts` | Canonical WGSL source strings |
+| CPU 工具层 | `src/utils/**`, `src/apps/**` | 回退路径与 CPU-only helper |
+| 规范真源 | `openspec/specs/**` | 产品、API、测试与治理真源 |
 
-### 3. 共享内存 Bank Conflict Padding
+## 建议顺着读的 RFC
 
-- 可选的 padding 可减少蝶形运算期间的 bank conflict
-- 32 bank 场景下约 3% 的内存开销
-- 性能收益因 GPU 架构而异
+- [RFC 0001：WebGPU FFT Library Architecture](https://github.com/LessUp/gpu-fft/blob/master/openspec/specs/rfc/0001-webgpu-fft-library-architecture.md)
+- [RFC 0003：2D FFT Transpose Strategy](https://github.com/LessUp/gpu-fft/blob/master/openspec/specs/rfc/0003-2d-fft-transpose-strategy.md)
+- [Public API alignment spec](https://github.com/LessUp/gpu-fft/blob/master/openspec/specs/public-api-alignment/spec.md)
 
-## 详细 RFC
+## 这套架构刻意不做什么
 
-完整技术设计请参见：
-
-- [RFC 0001：WebGPU FFT 库架构](https://github.com/LessUp/gpu-fft/blob/main/openspec/specs/rfc/0001-webgpu-fft-library-architecture.md)
-- [RFC 0002：项目质量提升](https://github.com/LessUp/gpu-fft/blob/main/openspec/specs/rfc/0002-project-quality-enhancement-architecture.md)
-
-## 项目结构
-
-```
-gpu-fft/
-├── openspec/
-│   ├── specs/              # 仓库级规范真源
-│   │   ├── product/        # 产品需求
-│   │   ├── rfc/            # 技术设计文档
-│   │   ├── api/            # API 规范
-│   │   └── testing/        # 测试策略
-│   └── changes/            # 提案 / 设计 / 任务产物
-├── docs/                   # 文档站点源码 (VitePress)
-│   ├── setup/              # 配置与工具指南
-│   ├── tutorials/          # 用户教程
-│   ├── architecture/       # 架构文档
-│   └── api/                # API 参考源页面
-├── src/                    # 源代码
-│   ├── core/               # 核心 GPU 引擎
-│   ├── shaders/            # WGSL 着色器源码真源
-│   ├── utils/              # CPU 工具函数
-│   ├── apps/               # 应用级 API
-│   └── types.ts            # 类型定义
-├── tests/                  # 测试套件
-├── examples/               # 代码示例
-│   ├── node/               # TypeScript 示例
-│   └── web/                # HTML/JS 演示
-└── benchmarks/             # 性能基准
-```
-
-## 规范作为真源
-
-所有仓库级需求定义于 `openspec/specs/`：
-
-| 规范类型 | 位置 | 用途 |
-|----------|------|------|
-| 产品 | `openspec/specs/product/` | 构建什么（需求、用户故事） |
-| RFC | `openspec/specs/rfc/` | 如何构建（架构、设计决策） |
-| API | `openspec/specs/api/` | 接口契约（类型、方法） |
-| 测试 | `openspec/specs/testing/` | 验证策略（属性、覆盖率） |
+- 不把频谱分析描述成 GPU-native。
+- 不把图像滤波描述成 GPU-native。
+- 不在当前产品切片里承诺任意长度 FFT。
+- 不为了覆盖所有 GPU 家族而把维护表面做大。

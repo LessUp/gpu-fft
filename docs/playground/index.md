@@ -1,26 +1,27 @@
 # FFT Playground
 
-::: warning Browser Requirements
-The GPU path requires a WebGPU-capable browser (Chrome 113+, Edge 113+, Firefox 128+). The playground below runs entirely in your browser using a lightweight CPU FFT implementation for demonstration.
+::: warning Browser requirements
+This explorer is a teaching surface, not the production WebGPU engine. It runs a compact CPU FFT implementation in the browser so that the visualization remains available even when WebGPU is not.
 :::
 
 <FFTPlayground />
 
-## What you are seeing
+## What the explorer teaches
 
-The playground uses a simplified **Cooley-Tukey Radix-2 DIT** implementation running in JavaScript (not WebGPU). This lets you explore FFT behavior without requiring GPU hardware:
+- **Time-domain intuition**: how a raw input signal looks before transformation
+- **Spectrum intuition**: where energy appears once the signal is transformed
+- **Preset comparison**: why sine, square, impulse, and noise signals produce very different spectral signatures
 
-- **Time Domain** (left): The input signal before transformation
-- **Magnitude Spectrum** (right): The frequency-domain result — each bar represents the strength of a frequency bin
+## What it does not claim
 
-Try different signals to build intuition:
-- **Sine Wave**: Should show a single sharp peak at the corresponding frequency bin
-- **Square Wave**: Shows odd harmonics (fundamental + 3rd, 5th, 7th...)
-- **Impulse**: Flat spectrum (all frequencies have equal energy)
-- **Noise**: Broad, low-amplitude spectrum without clear peaks
+- It is not a benchmark of the GPU execution core
+- It does not represent shader compilation, pipeline reuse, or GPU memory behavior
+- It is not a hidden implementation of `createSpectrumAnalyzer()`
 
-## Next steps
+## Recommended reading after this page
 
-- [Quick Start](/setup/quick-start) — integrate the real library into your project
-- [1D FFT Tutorial](/tutorials/1d-fft) — understand the API and output format
-- [Architecture](/architecture/overview) — learn how the GPU engine works
+| If you want | Next page |
+| --- | --- |
+| The real library surface | [Quick Start](/setup/quick-start) |
+| The GPU versus CPU boundary | [Architecture Overview](/architecture/overview) |
+| A more tutorial-style explanation | [Introduction](/tutorials/introduction) |

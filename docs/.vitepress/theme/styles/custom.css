@@ -18,6 +18,14 @@
   --fft-canvas-bg: oklch(0.97 0.008 95);
   --fft-chart-grid: oklch(0.88 0.01 95);
   --fft-chart-text: var(--fft-text-2);
+  --fft-canvas-bg-raster: #f3f5ee;
+  --fft-grid-raster: #d5d9cd;
+  --fft-muted-raster: #6b7280;
+  --fft-text-raster: #243041;
+  --fft-accent-raster: #5d8f00;
+  --fft-cyan-raster: #137ea8;
+  --fft-border-raster: #c6ccbf;
+  --fft-surface-raster: #f8f9f5;
   --vp-layout-max-width: 1480px;
   --vp-c-brand-1: var(--fft-accent-strong);
   --vp-c-brand-2: var(--fft-accent);
@@ -61,6 +69,14 @@
   --fft-canvas-bg: oklch(0.22 0.014 252);
   --fft-chart-grid: oklch(0.32 0.015 252);
   --fft-chart-text: var(--fft-text-2);
+  --fft-canvas-bg-raster: #20262d;
+  --fft-grid-raster: #333b45;
+  --fft-muted-raster: #8d96a1;
+  --fft-text-raster: #edf1f7;
+  --fft-accent-raster: #83c327;
+  --fft-cyan-raster: #5eb2d4;
+  --fft-border-raster: #3c4650;
+  --fft-surface-raster: #262d35;
 }
 
 html {

@@ -12,9 +12,9 @@
 
 ## 3. Content and asset reconstruction
 
-- [ ] 3.1 Rebuild the English and Chinese homepages plus the guided hub pages under `docs/en/**` and `docs/zh/**`
-- [ ] 3.2 Rewrite the highest-value shared technical pages in `docs/architecture/**`, `docs/showcase/**`, `docs/reference/**`, `docs/setup/quick-start.md`, and `docs/playground/index.md`
-- [ ] 3.3 Replace or fix theme-sensitive SVG and visual assets so they remain readable in both light and dark mode
+- [x] 3.1 Rebuild the English and Chinese homepages plus the guided hub pages under `docs/en/**` and `docs/zh/**`
+- [x] 3.2 Rewrite the highest-value shared technical pages in `docs/architecture/**`, `docs/showcase/**`, `docs/reference/**`, `docs/setup/quick-start.md`, and `docs/playground/index.md`
+- [x] 3.3 Replace or fix theme-sensitive SVG and visual assets so they remain readable in both light and dark mode
 
 ## 4. Verification and finish
 
